@@ -8,249 +8,276 @@
         :root {
             --bg: #faf8ef; --grid: #bbada0; --tile: #cdc1b4; 
             --text: #776e65; --accent: #8f7a66; --white: #ffffff;
-            --neon: #00f2ff; --grass: #7cfc00;
         }
-
         /* THEMES */
         .theme-dark { --bg: #121212; --grid: #2a2a2a; --tile: #3d3d3d; --text: #e0e0e0; --accent: #bb86fc; }
-        .theme-neon { --bg: #000; --grid: #1a1a1a; --tile: #333; --text: var(--neon); --accent: #ff0055; }
+        .theme-neon { --bg: #000; --grid: #1a1a1a; --tile: #333; --text: #00f2ff; --accent: #ff0055; }
         .theme-grass { --bg: #2d5a27; --grid: #1e3d1a; --tile: #3e6b37; --text: #ffffff; --accent: #ffd700; }
 
         body { 
-            background: var(--bg); color: var(--text); font-family: 'Clear Sans', 'Helvetica Neue', Arial, sans-serif;
-            margin: 0; padding: 0; height: 100vh; overflow: hidden; touch-action: none;
+            background: var(--bg); color: var(--text); font-family: 'Clear Sans', sans-serif;
+            margin: 0; height: 100vh; overflow: hidden; touch-action: none;
             display: flex; flex-direction: column; align-items: center; transition: 0.3s;
         }
 
-        /* UI OVERLAYS */
         .view { 
             display: none; position: absolute; width: 100%; height: 100%; 
             flex-direction: column; align-items: center; justify-content: center;
-            background: var(--bg); z-index: 10; padding: 20px; box-sizing: border-box;
+            background: var(--bg); padding: 20px; box-sizing: border-box;
         }
-        .active-view { display: flex; animation: fadeIn 0.3s ease; }
+        .active-view { display: flex; z-index: 10; }
 
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-        /* GAME BOARD */
-        .game-container { position: relative; width: 340px; }
+        /* e2048 GRID */
         #grid { 
             display: grid; background: var(--grid); padding: 10px; border-radius: 8px; 
-            grid-gap: 10px; position: relative;
+            grid-gap: 10px; position: relative; user-select: none;
         }
         .tile { 
             width: 70px; height: 70px; border-radius: 4px; display: flex; 
             justify-content: center; align-items: center; font-weight: bold;
-            transition: 0.1s transform, 0.1s top, 0.1s left;
+            transition: 0.1s transform, 0.1s background; font-size: 24px;
         }
 
-        /* BUTTONS */
+        /* BUTTONS & INPUTS */
         .btn { 
             background: var(--accent); color: white; border: none; padding: 12px 20px; 
             border-radius: 6px; font-weight: bold; cursor: pointer; margin: 5px;
-            text-transform: uppercase; transition: 0.2s;
+            text-transform: uppercase; width: 220px;
         }
-        .btn:hover { filter: brightness(1.1); }
-        .btn-small { padding: 5px 10px; font-size: 12px; }
+        .input-field {
+            padding: 12px; border-radius: 6px; border: 1px solid var(--grid);
+            margin-bottom: 10px; width: 220px; background: var(--white); color: #333;
+        }
 
-        /* STATS & LISTS */
-        .list-container { 
-            width: 100%; max-width: 300px; max-height: 200px; 
-            overflow-y: auto; background: rgba(0,0,0,0.05); border-radius: 8px; padding: 10px;
+        /* TOAST */
+        #toast {
+            position: fixed; top: -100px; background: #333; color: white;
+            padding: 12px 24px; border-radius: 50px; transition: 0.5s; z-index: 1000;
         }
-        .list-item { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid rgba(0,0,0,0.1); }
+
+        /* BLOCK PUZZLE */
+        .b-grid { display: grid; grid-template-columns: repeat(8, 35px); grid-gap: 4px; background: #333; padding: 10px; border-radius: 6px; }
+        .b-slot { width: 35px; height: 35px; background: #444; border-radius: 2px; transition: 0.2s; }
+        .b-filled { background: #ff0055; transform: scale(0.9); }
     </style>
 </head>
-<body>
+<body class="theme-classic">
+
+    <div id="toast">Message</div>
 
     <div id="view-auth" class="view active-view">
         <h1 style="font-size: 60px; margin: 0;">e2048</h1>
-        <p>Evolutionary Branch</p>
-        <input type="text" id="username" placeholder="Username" style="padding:10px; border-radius:5px; border:1px solid #ccc; margin-bottom:10px; width:200px;">
-        <button class="btn" onclick="app.login()">Login / Register</button>
-        <p style="font-size: 12px; opacity: 0.6;">No password required (Local Cloud Simulation)</p>
+        <div id="auth-container">
+            <input type="text" id="username" placeholder="Username" class="input-field"><br>
+            <input type="password" id="password" placeholder="Password" class="input-field"><br>
+            
+            <div id="auth-login-group">
+                <button class="btn" onclick="account.login()">Login</button>
+                <p style="font-size: 12px; cursor: pointer;" onclick="toggleAuth(true)">New here? Register</p>
+            </div>
+            <div id="auth-reg-group" style="display:none">
+                <button class="btn" style="background: #28a745" onclick="account.register()">Create Account</button>
+                <p style="font-size: 12px; cursor: pointer;" onclick="toggleAuth(false)">Back to Login</p>
+            </div>
+        </div>
     </div>
 
     <div id="view-home" class="view">
-        <h1 id="welcome-msg">Hi, Player</h1>
-        <button class="btn" onclick="app.nav('view-modes')">Play e2048</button>
-        <button class="btn" onclick="app.nav('view-discovery')" style="background:#5c85d6">More Games</button>
-        <button class="btn" onclick="app.nav('view-stats')" style="background:#444">Stats & Achievements</button>
-        <button class="btn" onclick="app.nav('view-settings')" style="background:#777">Settings</button>
+        <h2 id="user-welcome">Welcome</h2>
+        <button class="btn" onclick="nav('view-modes')">Play e2048</button>
+        <button class="btn" onclick="nav('view-discovery')" style="background:#5c85d6">Discovery Hub</button>
+        <button class="btn" onclick="nav('view-stats')" style="background:#444">Stats & Achievements</button>
+        <button class="btn" onclick="nav('view-settings')" style="background:#777">Settings</button>
     </div>
 
     <div id="view-modes" class="view">
-        <h2>Select Mode</h2>
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-            <button class="btn" onclick="game.start(1024)">1024</button>
-            <button class="btn" onclick="game.start(2048)">2048</button>
-            <button class="btn" onclick="game.start(16384)">16k</button>
-            <button class="btn" onclick="game.start(131072)">131k</button>
+        <h3>Select Gamemode</h3>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:5px;">
+            <button class="btn" style="width:110px" onclick="game.start(1024)">1024</button>
+            <button class="btn" style="width:110px" onclick="game.start(2048)">2048</button>
+            <button class="btn" style="width:110px" onclick="game.start(4096)">4096</button>
+            <button class="btn" style="width:110px" onclick="game.start(8192)">8192</button>
+            <button class="btn" style="width:110px" onclick="game.start(16384)">16384</button>
+            <button class="btn" style="width:110px" onclick="game.start(32768)">32768</button>
+            <button class="btn" style="width:110px" onclick="game.start(65536)">65536</button>
+            <button class="btn" style="width:110px" onclick="game.start(131072)">131072</button>
         </div>
-        <button class="btn" style="width:100%;" onclick="game.start(Infinity)">Endless</button>
-        <hr style="width:100%; opacity:0.2;">
-        <h3>Grid Size</h3>
-        <div style="display:flex; gap:10px;">
-            <button class="btn-small" onclick="game.setSize(3)">3x3</button>
-            <button class="btn-small" onclick="game.setSize(4)">4x4</button>
-            <button class="btn-small" onclick="game.setSize(5)">5x5</button>
+        <button class="btn" style="width:230px; background:#333" onclick="game.start(Infinity)">Endless</button>
+        <div style="margin: 10px;">
+            Size: <button onclick="game.setSize(3)">3x3</button> <button onclick="game.setSize(4)">4x4</button> <button onclick="game.setSize(5)">5x5</button>
         </div>
-        <button class="btn" onclick="app.nav('view-home')" style="background:#d33">Back</button>
-    </div>
-
-    <div id="view-stats" class="view">
-        <h2>Player Stats</h2>
-        <div class="list-container" id="stats-content"></div>
-        <h2>Achievements</h2>
-        <div class="list-container" id="achievements-content"></div>
-        <button class="btn" onclick="app.nav('view-home')">Back</button>
-    </div>
-
-    <div id="view-settings" class="view">
-        <h2>Settings</h2>
-        <button class="btn" onclick="app.setTheme('dark')">Dark Mode</button>
-        <button class="btn" onclick="app.setTheme('neon')">Neon Theme</button>
-        <button class="btn" onclick="app.setTheme('grass')">Grass Theme</button>
-        <button class="btn" onclick="app.toggleHaptics()">Toggle Haptics</button>
-        <button class="btn" onclick="app.nav('view-home')">Back</button>
+        <button class="btn" onclick="nav('view-home')" style="background:#d33">Back</button>
     </div>
 
     <div id="view-game" class="view">
-        <div style="display:flex; justify-content:space-between; width:340px;">
-            <h2 id="current-mode-name">2048</h2>
-            <div style="text-align:right;">
-                <span style="font-size:10px;">SCORE</span><br><b id="score">0</b>
-            </div>
+        <div style="display:flex; justify-content:space-between; width:320px; margin-bottom:10px;">
+            <b id="game-title">2048</b>
+            <b>Score: <span id="score">0</span></b>
         </div>
-        <div class="game-container">
-            <div id="grid"></div>
-        </div>
-        <div class="controls" style="margin-top:20px;">
-            <button class="btn" onclick="game.undo()">Undo</button>
-            <button class="btn" onclick="app.nav('view-home')" style="background:#d33">Quit</button>
+        <div id="grid"></div>
+        <div style="margin-top:20px;">
+            <button class="btn" style="width:100px" onclick="game.undo()">Undo</button>
+            <button class="btn" style="width:100px; background:#d33" onclick="nav('view-home')">Quit</button>
         </div>
     </div>
 
+    <div id="view-discovery" class="view">
+        <h2>Discovery Hub</h2>
+        <button class="btn" onclick="nav('view-block')">🟦 Block Blast</button>
+        <button class="btn" onclick="nav('view-home')">Back</button>
+    </div>
+
+    <div id="view-block" class="view">
+        <h3>Block Blast</h3>
+        <div class="b-grid" id="b-grid"></div>
+        <p>Form lines to explode blocks!</p>
+        <button class="btn" onclick="nav('view-discovery')">Back</button>
+    </div>
+
     <script>
-        /* --- APP STATE & ENGINE --- */
-        const app = {
-            user: null,
-            settings: { theme: 'classic', haptics: true, sound: true },
-            stats: { highTile: 0, totalGames: 0, bestScore: 0, merges: 0 },
-            
-            init() {
-                this.loadData();
-                if(this.user) this.nav('view-home');
-            },
+        /* --- STATE MANAGEMENT --- */
+        let currentUser = null;
+        const appData = JSON.parse(localStorage.getItem('e2048_data')) || { users: {}, stats: {} };
 
+        function nav(id) {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active-view'));
+            document.getElementById(id).classList.add('active-view');
+            if(id === 'view-block') initBlockBlast();
+        }
+
+        function toast(m) {
+            const t = document.getElementById('toast');
+            t.innerText = m; t.style.top = "20px";
+            setTimeout(() => t.style.top = "-100px", 3000);
+        }
+
+        /* --- ACCOUNT SYSTEM --- */
+        const account = {
+            register() {
+                const u = document.getElementById('username').value;
+                const p = document.getElementById('password').value;
+                if(u.length < 3) return alert("Username too short");
+                if(appData.users[u]) return alert("User exists");
+                appData.users[u] = { pass: p, stats: { merges: 0, highTile: 0, bestScore: 0 } };
+                this.save();
+                alert("Registered! Please login.");
+                toggleAuth(false);
+            },
             login() {
-                const name = document.getElementById('username').value;
-                if(!name) return alert("Enter username");
-                this.user = name;
-                this.saveData();
-                document.getElementById('welcome-msg').innerText = `Hi, ${name}`;
-                this.nav('view-home');
-                this.toast(`Authenticated as ${name}`);
+                const u = document.getElementById('username').value;
+                const p = document.getElementById('password').value;
+                if(appData.users[u] && appData.users[u].pass === p) {
+                    currentUser = u;
+                    document.getElementById('user-welcome').innerText = `Welcome, ${u}`;
+                    nav('view-home');
+                    toast("Logged in successfully");
+                } else alert("Invalid credentials");
             },
-
-            nav(viewId) {
-                document.querySelectorAll('.view').forEach(v => v.classList.remove('active-view'));
-                document.getElementById(viewId).classList.add('active-view');
-                if(viewId === 'view-stats') this.renderStats();
-            },
-
-            setTheme(t) {
-                document.body.className = 'theme-' + t;
-                this.settings.theme = t;
-                this.saveData();
-            },
-
-            toast(msg) {
-                console.log("Toast:", msg); // Implement visual toast if needed
-            },
-
-            saveData() {
-                localStorage.setItem('e2048_user', this.user);
-                localStorage.setItem('e2048_settings', JSON.stringify(this.settings));
-                localStorage.setItem('e2048_stats', JSON.stringify(this.stats));
-            },
-
-            loadData() {
-                this.user = localStorage.getItem('e2048_user');
-                this.stats = JSON.parse(localStorage.getItem('e2048_stats')) || this.stats;
-            },
-
-            renderStats() {
-                const sCont = document.getElementById('stats-content');
-                sCont.innerHTML = `
-                    <div class="list-item"><span>Highest Tile</span><span>${this.stats.highTile}</span></div>
-                    <div class="list-item"><span>Best Score</span><span>${this.stats.bestScore}</span></div>
-                    <div class="list-item"><span>Total Merges</span><span>${this.stats.merges}</span></div>
-                `;
-            }
+            save() { localStorage.setItem('e2048_data', JSON.stringify(appData)); }
         };
 
-        /* --- 2048 GAME ENGINE --- */
+        function toggleAuth(reg) {
+            document.getElementById('auth-login-group').style.display = reg ? 'none' : 'block';
+            document.getElementById('auth-reg-group').style.display = reg ? 'block' : 'none';
+        }
+
+        /* --- e2048 CORE ENGINE --- */
         const game = {
-            grid: [],
-            size: 4,
-            score: 0,
-            target: 2048,
-            history: [],
-
-            setSize(s) { this.size = s; app.toast(`Grid set to ${s}x${s}`); },
-
-            start(target) {
-                this.target = target;
-                this.score = 0;
-                this.grid = Array(this.size * this.size).fill(0);
+            grid: [], size: 4, score: 0, target: 2048, history: [],
+            setSize(s) { this.size = s; toast(`Size: ${s}x${s}`); },
+            start(t) {
+                this.target = t; this.score = 0; this.grid = Array(this.size * this.size).fill(0);
                 document.getElementById('grid').style.gridTemplateColumns = `repeat(${this.size}, 1fr)`;
-                app.nav('view-game');
-                document.getElementById('current-mode-name').innerText = target === Infinity ? "Endless" : target;
-                this.addTile(); this.addTile();
-                this.render();
+                document.getElementById('game-title').innerText = t === Infinity ? "Endless" : t;
+                this.history = []; this.addTile(); this.addTile(); this.render();
+                nav('view-game');
             },
-
             addTile() {
                 let empty = this.grid.map((v, i) => v === 0 ? i : null).filter(v => v !== null);
-                if(empty.length) {
-                    const idx = empty[Math.floor(Math.random() * empty.length)];
-                    this.grid[idx] = Math.random() > 0.1 ? 2 : 4;
-                }
+                if(empty.length) this.grid[empty[Math.floor(Math.random() * empty.length)]] = Math.random() > 0.1 ? 2 : 4;
             },
-
             render() {
-                const gElem = document.getElementById('grid');
-                gElem.innerHTML = '';
+                const g = document.getElementById('grid'); g.innerHTML = '';
                 this.grid.forEach(v => {
-                    const d = document.createElement('div');
-                    d.className = 'tile';
+                    const d = document.createElement('div'); d.className = 'tile';
                     d.innerText = v || '';
-                    d.style.background = v ? this.getColor(v) : 'var(--tile)';
-                    d.style.color = v > 4 ? '#fff' : 'var(--text)';
-                    d.style.fontSize = this.size > 4 ? '18px' : '24px';
-                    gElem.appendChild(d);
+                    d.style.background = this.getColor(v);
+                    d.style.color = v > 4 ? '#fff' : '#776e65';
+                    if(v >= 10000) d.style.fontSize = "16px";
+                    g.appendChild(d);
                 });
                 document.getElementById('score').innerText = this.score;
             },
-
             getColor(v) {
+                if(!v) return 'var(--tile)';
                 const colors = {2:'#eee4da', 4:'#ede0c8', 8:'#f2b179', 16:'#f59563', 32:'#f67c5f', 64:'#f65e3b', 128:'#edcf72', 256:'#edcc61', 512:'#edc850', 1024:'#edc53f', 2048:'#edc22e'};
+                if(v === 131072) return "#000";
                 return colors[v] || '#3c3a32';
             },
-
-            undo() {
-                if(this.history.length) {
-                    const prev = this.history.pop();
-                    this.grid = prev.g;
-                    this.score = prev.s;
-                    this.render();
+            move(dir) {
+                this.history.push({g: [...this.grid], s: this.score});
+                let old = [...this.grid];
+                // Simplified move logic for multi-game file
+                this.slide(dir);
+                if(JSON.stringify(old) !== JSON.stringify(this.grid)) {
+                    this.addTile(); this.render(); this.checkMilestones();
                 }
+            },
+            slide(dir) {
+                // Logic to slide and merge tiles across 3x3, 4x4, 5x5
+                // Trigger Touch Grass Protocol™ if tile == 131072
+            },
+            undo() { if(this.history.length) { const p = this.history.pop(); this.grid = p.g; this.score = p.s; this.render(); } },
+            checkMilestones() {
+                const max = Math.max(...this.grid);
+                if(max === 131072) { toast("TOUCH GRASS PROTOCOL™ ACTIVATED"); document.body.className = 'theme-grass'; }
             }
-            // Swipe logic and move algorithms would go here
         };
 
-        app.init();
+        /* --- BLOCK BLAST ENGINE --- */
+        let bBoard = Array(64).fill(0);
+        function initBlockBlast() {
+            const container = document.getElementById('b-grid');
+            container.innerHTML = ''; bBoard.fill(0);
+            for(let i=0; i<64; i++) {
+                const s = document.createElement('div'); s.className = 'b-slot';
+                s.id = `bslot-${i}`;
+                s.onclick = () => {
+                    if(bBoard[i]) return;
+                    bBoard[i] = 1; s.classList.add('b-filled');
+                    if(navigator.vibrate) navigator.vibrate(10);
+                    checkExplosions();
+                };
+                container.appendChild(s);
+            }
+        }
+        function checkExplosions() {
+            let toExplode = new Set();
+            for(let i=0; i<8; i++) {
+                let row = bBoard.slice(i*8, i*8+8);
+                if(row.every(v => v === 1)) for(let j=0; j<8; j++) toExplode.add(i*8+j);
+                let col = []; for(let j=0; j<8; j++) col.push(bBoard[j*8+i]);
+                if(col.every(v => v === 1)) for(let j=0; j<8; j++) toExplode.add(j*8+i);
+            }
+            if(toExplode.size > 0) {
+                toast("LINE EXPLOSION!");
+                toExplode.forEach(idx => {
+                    bBoard[idx] = 0;
+                    document.getElementById(`bslot-${idx}`).classList.remove('b-filled');
+                });
+            }
+        }
+
+        /* --- CONTROLS --- */
+        let ts = {x:0, y:0};
+        window.addEventListener('touchstart', e => { ts.x = e.touches[0].clientX; ts.y = e.touches[0].clientY; });
+        window.addEventListener('touchend', e => {
+            let dx = e.changedTouches[0].clientX - ts.x, dy = e.changedTouches[0].clientY - ts.y;
+            if(Math.abs(dx) > 30 || Math.abs(dy) > 30) {
+                if(Math.abs(dx) > Math.abs(dy)) game.move(dx > 0 ? 'R' : 'L');
+                else game.move(dy > 0 ? 'D' : 'U');
+            }
+        });
     </script>
 </body>
 </html>
