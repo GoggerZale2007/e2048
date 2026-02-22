@@ -2,316 +2,318 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>e2048</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>e2048 - The Infinite Extension</title>
     <style>
+        /* --- CORE VARIABLES & THEMES --- */
         :root {
-            --bg: #faf8ef; --grid: #bbada0; --slot: #cdc1b4;
-            --text: #776e65; --accent: #8f7a66;
-            --bb-bg: #211a1e; --bb-grid: #3d2b32; --bb-slot: #2d1e24;
+            --bg: #faf8ef; --grid: #bbada0; --empty: rgba(238, 228, 218, 0.35);
+            --text-dark: #776e65; --text-light: #f9f6f2;
+            --accent: #8f7a66; --accent-hover: #9f8b77;
+            --bb-bg: #121212; --bb-grid: #242424; --bb-slot: #323232; --bb-block: #3b82f6;
         }
-        body { margin: 0; font-family: 'Clear Sans', sans-serif; background: var(--bg); overflow: hidden; touch-action: none; }
-        
-        /* VIEWS */
-        .view { display: none; position: absolute; width: 100vw; height: 100vh; flex-direction: column; align-items: center; justify-content: center; background: inherit; }
-        .active { display: flex; animation: fadeIn 0.3s ease; }
+        .theme-dark { --bg: #121212; --grid: #2a2a2a; --text-dark: #e0e0e0; --accent: #bb86fc; }
+        .theme-neon { --bg: #000000; --grid: #1a1a1a; --text-dark: #00f2ff; --accent: #ff0055; }
+        .theme-grass { --bg: #2d5a27; --grid: #1e3d1a; --text-dark: #ffffff; --accent: #ffd700; }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { margin: 0; font-family: "Clear Sans", "Helvetica Neue", Arial, sans-serif; background: var(--bg); color: var(--text-dark); height: 100vh; overflow: hidden; display: flex; flex-direction: column; align-items: center; transition: background 0.3s, color 0.3s; }
+
+        /* --- UI FRAMEWORK --- */
+        .view { display: none; position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; flex-direction: column; align-items: center; justify-content: center; background: inherit; z-index: 10; padding: 20px; overflow-y: auto; }
+        .active-view { display: flex; animation: fadeIn 0.3s ease; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* UI ELEMENTS */
-        .btn { background: var(--accent); color: white; border: none; padding: 15px 25px; border-radius: 8px; font-weight: bold; cursor: pointer; margin: 10px; width: 220px; transition: 0.2s; }
-        .btn:active { transform: scale(0.95); }
-        .input-field { padding: 12px; border-radius: 8px; border: 2px solid var(--grid); margin-bottom: 10px; width: 200px; }
+        .btn { background: var(--accent); color: white; border: none; padding: 14px 24px; border-radius: 6px; font-weight: bold; font-size: 16px; cursor: pointer; margin: 6px; text-transform: uppercase; width: 260px; transition: transform 0.1s, filter 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .btn:active { transform: translateY(2px); box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .btn:hover { filter: brightness(1.1); }
+        .btn-small { width: auto; padding: 10px 15px; font-size: 14px; margin: 4px; }
+        
+        .input-field { padding: 14px; border-radius: 6px; border: 2px solid var(--grid); margin-bottom: 12px; width: 260px; font-size: 16px; background: rgba(255,255,255,0.9); color: #333; outline: none; transition: border-color 0.2s; }
+        .input-field:focus { border-color: var(--accent); }
 
-        /* e2048 BOARD */
-        .game-area { position: relative; width: 340px; height: 340px; background: var(--grid); border-radius: 8px; padding: 10px; }
-        .grid-layer { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; width: 100%; height: 100%; }
-        .grid-cell { background: rgba(238, 228, 218, 0.35); border-radius: 4px; }
-        .tile-layer { position: absolute; top: 10px; left: 10px; width: 320px; height: 320px; pointer-events: none; }
-        .tile { 
-            position: absolute; width: 72px; height: 72px; border-radius: 4px; display: flex; align-items: center; justify-content: center; 
-            font-weight: bold; font-size: 24px; transition: transform 0.1s ease-in-out; animation: pop 0.2s ease-out;
+        .header { width: 100%; max-width: 400px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .title { font-size: 50px; font-weight: bold; margin: 0; line-height: 1; }
+        .score-container { display: flex; gap: 8px; }
+        .score-box { background: var(--grid); padding: 6px 20px; border-radius: 4px; color: white; text-align: center; min-width: 65px; display: flex; flex-direction: column; justify-content: center; }
+        .score-label { font-size: 11px; font-weight: bold; letter-spacing: 1px; color: rgba(255,255,255,0.7); }
+        .score-val { font-size: 22px; font-weight: bold; }
+
+        /* --- TOAST & PARTICLES --- */
+        #toast { position: fixed; top: -100px; left: 50%; transform: translateX(-50%); background: #333; color: white; padding: 12px 24px; border-radius: 30px; font-weight: bold; transition: top 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55); z-index: 9999; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+        .particle { position: fixed; width: 8px; height: 8px; border-radius: 2px; pointer-events: none; z-index: 2000; }
+
+        /* --- 2048 ENGINE --- */
+        .board-wrapper { position: relative; background: var(--grid); padding: 12px; border-radius: 8px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+        .grid-bg { display: grid; gap: 12px; }
+        .grid-cell { background: var(--empty); border-radius: 4px; width: 100%; height: 100%; }
+        .tile-layer { position: absolute; top: 12px; left: 12px; bottom: 12px; right: 12px; pointer-events: none; }
+        
+        .tile {
+            position: absolute; border-radius: 4px; display: flex; justify-content: center; align-items: center;
+            font-weight: bold; transition: transform 120ms ease-in-out; z-index: 10;
         }
-        @keyframes pop { 0% { transform: scale(0); } 100% { transform: scale(1); } }
+        .tile-new { animation: appear 150ms ease-out forwards; }
+        .tile-merged { z-index: 20; animation: pulse 200ms ease-in-out forwards; }
 
-        /* BLOCK BLAST BOARD */
-        .bb-grid { display: grid; grid-template-columns: repeat(8, 40px); gap: 4px; background: var(--bb-grid); padding: 8px; border-radius: 8px; }
-        .bb-slot { width: 40px; height: 40px; background: var(--bb-slot); border-radius: 4px; }
-        .bb-filled { background: #ff3e6d; box-shadow: inset 0 0 10px rgba(0,0,0,0.3); }
-        .bb-ghost { background: rgba(255, 62, 109, 0.3); }
-        .tray { display: flex; gap: 20px; margin-top: 30px; height: 120px; align-items: center; }
-        .draggable-shape { display: grid; gap: 2px; cursor: grab; }
-        .dragging { position: fixed; pointer-events: none; z-index: 1000; transform: scale(1.5); }
+        @keyframes appear { 0% { opacity: 0; transform: scale(0); } 100% { opacity: 1; transform: scale(1); } }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.15); } 100% { transform: scale(1); } }
 
-        /* PARTICLES */
-        .particle { position: fixed; width: 6px; height: 6px; pointer-events: none; border-radius: 2px; z-index: 2000; }
-        #toast { position: fixed; top: -50px; left: 50%; transform: translateX(-50%); background: #333; color: #fff; padding: 10px 20px; border-radius: 20px; transition: 0.5s; z-index: 3000; }
+        /* Authentic 2048 Colors */
+        .t2{background:#eee4da;color:#776e65;font-size:36px} .t4{background:#ede0c8;color:#776e65;font-size:36px}
+        .t8{background:#f2b179;color:#f9f6f2;font-size:36px} .t16{background:#f59563;color:#f9f6f2;font-size:32px}
+        .t32{background:#f67c5f;color:#f9f6f2;font-size:32px} .t64{background:#f65e3b;color:#f9f6f2;font-size:32px}
+        .t128{background:#edcf72;color:#f9f6f2;font-size:28px;box-shadow:0 0 10px rgba(237,207,114,0.4)}
+        .t256{background:#edcc61;color:#f9f6f2;font-size:28px;box-shadow:0 0 15px rgba(237,204,97,0.5)}
+        .t512{background:#edc850;color:#f9f6f2;font-size:28px;box-shadow:0 0 20px rgba(237,200,80,0.6)}
+        .t1024{background:#edc53f;color:#f9f6f2;font-size:24px;box-shadow:0 0 25px rgba(237,197,63,0.7)}
+        .t2048{background:#edc22e;color:#f9f6f2;font-size:24px;box-shadow:0 0 30px rgba(237,194,46,0.8)}
+        .t4096{background:#3e3933;color:#f9f6f2;font-size:24px} .t8192{background:#3e3933;color:#f9f6f2;font-size:24px}
+        .t16384{background:#3e3933;color:#f9f6f2;font-size:20px} .t32768{background:#3e3933;color:#f9f6f2;font-size:20px}
+        .t65536{background:#3e3933;color:#f9f6f2;font-size:20px} .t131072{background:#000;color:#00f2ff;font-size:18px;text-shadow:0 0 10px #00f2ff;box-shadow:0 0 30px #00f2ff}
+
+        /* --- BLOCK BLAST ENGINE --- */
+        .bb-wrapper { width: 100%; max-width: 400px; display: flex; flex-direction: column; align-items: center; }
+        .bb-grid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 4px; background: var(--bb-grid); padding: 8px; border-radius: 8px; width: 100%; aspect-ratio: 1; box-sizing: border-box; }
+        .bb-slot { background: var(--bb-slot); border-radius: 4px; width: 100%; height: 100%; transition: background 0.2s; }
+        .bb-filled { background: var(--bb-block); box-shadow: inset 0 0 10px rgba(0,0,0,0.3); }
+        .bb-ghost { background: rgba(59, 130, 246, 0.3); }
+        
+        .tray { display: flex; justify-content: space-around; align-items: center; width: 100%; height: 120px; margin-top: 20px; }
+        .shape-container { display: grid; gap: 2px; cursor: grab; padding: 10px; touch-action: none; transition: transform 0.2s; }
+        .shape-container:active { cursor: grabbing; }
+        .shape-block { background: var(--bb-block); border-radius: 2px; }
+        .dragging { position: fixed; z-index: 1000; pointer-events: none; transform: scale(1.5); opacity: 0.9; }
+
+        /* Overlays */
+        .game-over-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(250, 248, 239, 0.8); z-index: 100; display: none; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(3px); }
+        .game-over-overlay h2 { font-size: 40px; color: #776e65; margin-bottom: 20px; }
+
     </style>
 </head>
 <body>
 
-    <div id="toast"></div>
+    <div id="toast">Notification</div>
 
-    <div id="view-auth" class="view active">
-        <h1 style="font-size: 50px;">e2048</h1>
-        <input type="text" id="auth-u" placeholder="Username" class="input-field">
-        <input type="password" id="auth-p" placeholder="Password" class="input-field">
-        <button class="btn" onclick="sys.auth()">LOGIN / REGISTER</button>
+    <div id="view-auth" class="view active-view">
+        <h1 class="title" style="font-size: 70px; margin-bottom: 30px; letter-spacing: -2px;">e2048</h1>
+        <div style="background: rgba(0,0,0,0.05); padding: 30px; border-radius: 12px; display: flex; flex-direction: column; align-items: center;">
+            <input type="text" id="auth-user" placeholder="Enter Username" class="input-field" autocomplete="off">
+            <input type="password" id="auth-pass" placeholder="Enter Password" class="input-field">
+            <div id="auth-primary-cmds" style="display: flex; flex-direction: column; align-items: center;">
+                <button class="btn" onclick="sys.login()">Login</button>
+                <button class="btn" onclick="sys.toggleAuthMode()" style="background: #a39587;">Create New Account</button>
+            </div>
+            <div id="auth-secondary-cmds" style="display: none; flex-direction: column; align-items: center;">
+                <button class="btn" onclick="sys.register()" style="background: #4caf50;">Register Account</button>
+                <button class="btn" onclick="sys.toggleAuthMode()" style="background: #a39587;">Back to Login</button>
+            </div>
+        </div>
     </div>
 
     <div id="view-home" class="view">
-        <h2 id="welcome-text">Hi, User</h2>
-        <button class="btn" onclick="sys.nav('view-modes')">e2048 CHOOSE MODE</button>
-        <button class="btn" onclick="sys.nav('view-bb')" style="background:#ff3e6d">BLOCK BLAST</button>
-        <button class="btn" onclick="sys.nav('view-stats')" style="background:#555">STATS</button>
-        <button class="btn" onclick="location.reload()" style="background:#d33">LOGOUT</button>
+        <h2 id="home-greeting" style="font-size: 32px; margin-bottom: 40px;">Welcome</h2>
+        <button class="btn" onclick="sys.nav('view-modes')">Play e2048</button>
+        <button class="btn" onclick="sys.nav('view-bb')" style="background: #3b82f6; box-shadow: 0 4px 0 #2563eb;">Block Blast</button>
+        <button class="btn" onclick="sys.nav('view-stats')" style="background: #64748b;">Lifetime Stats</button>
+        <button class="btn" onclick="sys.nav('view-settings')" style="background: #94a3b8;">Settings</button>
+        <button class="btn" onclick="sys.logout()" style="background: #ef4444; margin-top: 40px;">Logout</button>
     </div>
 
     <div id="view-modes" class="view">
-        <h2>Select Milestone</h2>
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:5px;">
-            <button class="btn" style="width:130px" onclick="game.init(1024)">1024</button>
-            <button class="btn" style="width:130px" onclick="game.init(2048)">2048</button>
-            <button class="btn" style="width:130px" onclick="game.init(4096)">4096</button>
-            <button class="btn" style="width:130px" onclick="game.init(8192)">8192</button>
-            <button class="btn" style="width:130px" onclick="game.init(16384)">16384</button>
-            <button class="btn" style="width:130px" onclick="game.init(32768)">32768</button>
-            <button class="btn" style="width:130px" onclick="game.init(65536)">65536</button>
-            <button class="btn" style="width:130px" onclick="game.init(131072)">131072</button>
+        <div class="header" style="justify-content: center;"><h1 class="title" style="font-size:36px;">Select Challenge</h1></div>
+        
+        <div style="background: rgba(0,0,0,0.05); padding: 20px; border-radius: 12px; margin-bottom: 20px; text-align: center;">
+            <h3 style="margin-top: 0;">Grid Size</h3>
+            <button class="btn btn-small" onclick="game.setSize(3)">3x3</button>
+            <button class="btn btn-small" onclick="game.setSize(4)">4x4</button>
+            <button class="btn btn-small" onclick="game.setSize(5)">5x5</button>
+            <div style="font-size: 12px; opacity: 0.7; margin-top: 10px;">Current: <span id="current-grid-size">4x4</span></div>
         </div>
-        <button class="btn" style="width:270px; background:#000" onclick="game.init(Infinity)">ENDLESS</button>
-        <button class="btn" onclick="sys.nav('view-home')" style="background:#d33">BACK</button>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; max-width: 320px;">
+            <button class="btn" style="width: 100%;" onclick="game.start(1024)">1024</button>
+            <button class="btn" style="width: 100%;" onclick="game.start(2048)">2048</button>
+            <button class="btn" style="width: 100%;" onclick="game.start(4096)">4096</button>
+            <button class="btn" style="width: 100%;" onclick="game.start(8192)">8192</button>
+            <button class="btn" style="width: 100%;" onclick="game.start(16384)">16384</button>
+            <button class="btn" style="width: 100%;" onclick="game.start(32768)">32768</button>
+            <button class="btn" style="width: 100%;" onclick="game.start(65536)">65536</button>
+            <button class="btn" style="width: 100%;" onclick="game.start(131072)">131072</button>
+        </div>
+        <button class="btn" style="background: #333; margin-top: 10px;" onclick="game.start(Infinity)">Endless Mode</button>
+        <button class="btn" style="background: #ef4444; margin-top: 30px;" onclick="sys.nav('view-home')">Back to Hub</button>
     </div>
 
     <div id="view-game" class="view">
-        <div style="display:flex; justify-content:space-between; width:340px; margin-bottom:10px;">
-            <b id="target-label">2048</b>
-            <b>Score: <span id="score">0</span></b>
+        <div class="header">
+            <div>
+                <h1 class="title">2048</h1>
+                <div style="font-weight: bold; margin-top: 5px; opacity: 0.8;">Target: <span id="game-target">2048</span></div>
+            </div>
+            <div class="score-container">
+                <div class="score-box"><span class="score-label">SCORE</span><span id="score" class="score-val">0</span></div>
+                <div class="score-box"><span class="score-label">BEST</span><span id="best" class="score-val">0</span></div>
+            </div>
         </div>
-        <div class="game-area">
-            <div class="grid-layer" id="bg-grid"></div>
+
+        <div class="board-wrapper" id="board-wrapper">
+            <div class="grid-bg" id="grid-bg"></div>
             <div class="tile-layer" id="tile-layer"></div>
+            
+            <div class="game-over-overlay" id="game-over-screen">
+                <h2>Game Over!</h2>
+                <button class="btn" onclick="game.start(game.target)">Try Again</button>
+                <button class="btn" style="background: #a39587;" onclick="sys.nav('view-modes')">Change Mode</button>
+            </div>
         </div>
-        <button class="btn" onclick="sys.nav('view-home')" style="margin-top:20px;">QUIT</button>
+
+        <div style="display: flex; gap: 10px; margin-top: 30px; width: 100%; max-width: 400px;">
+            <button class="btn" style="flex: 1;" onclick="game.undo()">Undo</button>
+            <button class="btn" style="flex: 1; background: #ef4444;" onclick="sys.nav('view-home')">Quit</button>
+        </div>
     </div>
 
-    <div id="view-bb" class="view" style="background:var(--bb-bg)">
-        <div style="display:flex; justify-content:space-between; width:340px; color:white; margin-bottom:20px;">
-            <b>BLOCK BLAST</b>
-            <b>PTS: <span id="bb-score">0</span></b>
+    <div id="view-bb" class="view" style="background: var(--bb-bg); color: white;">
+        <div class="header">
+            <h1 class="title" style="font-size: 32px; color: white;">Block Blast</h1>
+            <div class="score-box" style="background: #333;"><span class="score-label">SCORE</span><span id="bb-score" class="score-val">0</span></div>
         </div>
-        <div class="bb-grid" id="bb-grid"></div>
-        <div class="tray" id="bb-tray"></div>
-        <button class="btn" onclick="sys.nav('view-home')" style="margin-top:20px;">BACK</button>
+
+        <div class="bb-wrapper">
+            <div class="bb-grid" id="bb-grid"></div>
+            <div class="tray" id="bb-tray"></div>
+        </div>
+
+        <div class="game-over-overlay" id="bb-game-over" style="background: rgba(18,18,18,0.9);">
+            <h2 style="color: white;">Out of Moves!</h2>
+            <button class="btn" style="background: #3b82f6;" onclick="bb.start()">Play Again</button>
+            <button class="btn" style="background: #ef4444;" onclick="sys.nav('view-home')">Quit</button>
+        </div>
+
+        <button class="btn" style="background: #475569; margin-top: 30px;" onclick="sys.nav('view-home')">Menu</button>
+    </div>
+
+    <div id="view-stats" class="view">
+        <h1 class="title" style="margin-bottom: 30px;">Lifetime Stats</h1>
+        <div style="background: rgba(0,0,0,0.05); padding: 30px; border-radius: 12px; width: 100%; max-width: 320px; font-size: 18px; line-height: 2;">
+            <div style="display: flex; justify-content: space-between;"><b>Highest Tile:</b> <span id="stat-high">0</span></div>
+            <div style="display: flex; justify-content: space-between;"><b>Total Merges:</b> <span id="stat-merges">0</span></div>
+            <div style="display: flex; justify-content: space-between;"><b>Total Score:</b> <span id="stat-score">0</span></div>
+        </div>
+        <button class="btn" style="margin-top: 30px;" onclick="sys.nav('view-home')">Back</button>
+    </div>
+
+    <div id="view-settings" class="view">
+        <h1 class="title" style="margin-bottom: 30px;">Settings</h1>
+        <button class="btn" onclick="sys.setTheme('classic')">Classic Theme</button>
+        <button class="btn" onclick="sys.setTheme('dark')" style="background: #333;">Dark Mode</button>
+        <button class="btn" onclick="sys.setTheme('neon')" style="background: #000; color: #00f2ff; border: 1px solid #00f2ff;">Cyber Neon</button>
+        <button class="btn" onclick="sys.setTheme('grass')" style="background: #2d5a27;">Touch Grass Theme</button>
+        <hr style="width: 260px; border: 1px solid rgba(0,0,0,0.1); margin: 20px 0;">
+        <button class="btn" onclick="sys.toggleHaptics()" style="background: #64748b;" id="btn-haptics">Haptics: ON</button>
+        <button class="btn" style="margin-top: 30px; background: #ef4444;" onclick="sys.nav('view-home')">Back</button>
     </div>
 
     <script>
-        /* --- SYSTEM & AUTH --- */
+        /* ==========================================
+           SYSTEM, AUTH & UTILS
+           ========================================== */
         const sys = {
-            user: null,
-            data: JSON.parse(localStorage.getItem('e2048_master')) || {},
-            nav(id) {
-                document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-                document.getElementById(id).classList.add('active');
-                if(id === 'view-bb') bb.start();
-            },
-            auth() {
-                const u = document.getElementById('auth-u').value;
-                const p = document.getElementById('auth-p').value;
-                if(!u || !p) return alert("Missing info");
-                if(this.data[u] && this.data[u].pass !== p) return alert("Wrong password");
-                if(!this.data[u]) this.data[u] = { pass: p, high: 0, merges: 0 };
-                this.user = u;
-                localStorage.setItem('e2048_master', JSON.stringify(this.data));
-                document.getElementById('welcome-text').innerText = `Hi, ${u}`;
-                this.nav('view-home');
-            },
-            toast(msg) {
-                const t = document.getElementById('toast');
-                t.innerText = msg; t.style.top = "20px";
-                setTimeout(() => t.style.top = "-50px", 3000);
-            },
-            particles(x, y, color) {
-                for(let i=0; i<10; i++) {
-                    const p = document.createElement('div');
-                    p.className = 'particle';
-                    p.style.left = x + 'px'; p.style.top = y + 'px'; p.style.background = color;
-                    document.body.appendChild(p);
-                    const angle = Math.random() * Math.PI * 2;
-                    const dist = Math.random() * 50 + 20;
-                    p.animate([{transform:'translate(0,0)'}, {transform:`translate(${Math.cos(angle)*dist}px, ${Math.sin(angle)*dist}px)`, opacity:0}], 500).onfinish = () => p.remove();
-                }
-            }
-        };
+            db: JSON.parse(localStorage.getItem('e2048_master_db')) || { users: {} },
+            currentUser: null,
+            haptics: true,
+            theme: 'classic',
 
-        /* --- e2048 CORE ENGINE --- */
-        const game = {
-            grid: [], score: 0, target: 2048,
-            init(t) {
-                this.target = t; this.score = 0;
-                document.getElementById('target-label').innerText = t === Infinity ? "ENDLESS" : t;
-                document.getElementById('bg-grid').innerHTML = '<div class="grid-cell"></div>'.repeat(16);
-                this.grid = Array(16).fill(0);
-                document.getElementById('tile-layer').innerHTML = '';
-                this.add(); this.add(); this.render();
-                sys.nav('view-game');
+            save() { localStorage.setItem('e2048_master_db', JSON.stringify(this.db)); },
+            
+            nav(viewId) {
+                document.querySelectorAll('.view').forEach(v => v.classList.remove('active-view'));
+                document.getElementById(viewId).classList.add('active-view');
+                if(viewId === 'view-stats') this.renderStats();
             },
-            add() {
-                let empty = this.grid.map((v,i) => v===0?i:null).filter(v=>v!==null);
-                if(empty.length) this.grid[empty[Math.floor(Math.random()*empty.length)]] = Math.random()>0.1?2:4;
-            },
-            render() {
-                const layer = document.getElementById('tile-layer');
-                layer.innerHTML = '';
-                this.grid.forEach((v, i) => {
-                    if(v === 0) return;
-                    const t = document.createElement('div');
-                    t.className = `tile t${v}`;
-                    t.innerText = v;
-                    t.style.left = (i % 4) * 82 + 'px';
-                    t.style.top = Math.floor(i / 4) * 82 + 'px';
-                    t.style.background = this.color(v);
-                    layer.appendChild(t);
-                    if(v === this.target) sys.toast("MILESTONE REACHED!");
-                });
-                document.getElementById('score').innerText = this.score;
-            },
-            color(v) {
-                const c = {2:'#eee4da',4:'#ede0c8',8:'#f2b179',16:'#f59563',32:'#f67c5f',64:'#f65e3b',128:'#edcf72',256:'#edcc61',512:'#edc850',1024:'#edc53f',2048:'#edc22e'};
-                return c[v] || '#3c3a32';
-            }
-        };
 
-        /* --- BLOCK BLAST ENGINE (REAL DRAG) --- */
-        const bb = {
-            board: Array(64).fill(0), score: 0,
-            shapes: [
-                [[1,1],[1,1]], // Square
-                [[1,1,1,1]], // Line 4
-                [[1,1,1],[0,1,0]], // T
-                [[1,1,0],[0,1,1]], // Z
-                [[1,0],[1,0],[1,1]] // L
-            ],
-            start() {
-                const g = document.getElementById('bb-grid');
-                g.innerHTML = ''; this.board.fill(0); this.score = 0;
-                for(let i=0; i<64; i++) {
-                    const s = document.createElement('div'); s.className = 'bb-slot'; s.id = `bb-${i}`; g.appendChild(s);
-                }
-                this.spawn();
+            toast(msg, duration = 2500) {
+                const el = document.getElementById('toast');
+                el.innerText = msg;
+                el.style.top = "30px";
+                setTimeout(() => el.style.top = "-100px", duration);
             },
-            spawn() {
-                const t = document.getElementById('bb-tray'); t.innerHTML = '';
-                for(let i=0; i<3; i++) {
-                    const shape = this.shapes[Math.floor(Math.random()*this.shapes.length)];
-                    const d = document.createElement('div'); d.className = 'draggable-shape';
-                    d.style.gridTemplateColumns = `repeat(${shape[0].length}, 20px)`;
-                    shape.flat().forEach(v => {
-                        const b = document.createElement('div');
-                        b.style.width = '20px'; b.style.height = '20px';
-                        if(v) b.style.background = '#ff3e6d';
-                        d.appendChild(b);
-                    });
-                    this.bindDrag(d, shape);
-                    t.appendChild(d);
-                }
-            },
-            bindDrag(el, shape) {
-                el.onmousedown = (e) => this.dragStart(e, el, shape);
-                el.ontouchstart = (e) => this.dragStart(e.touches[0], el, shape);
-            },
-            dragStart(e, el, shape) {
-                const clone = el.cloneNode(true);
-                clone.classList.add('dragging');
-                document.body.appendChild(clone);
-                
-                const move = (ev) => {
-                    const ex = ev.touches ? ev.touches[0].clientX : ev.clientX;
-                    const ey = ev.touches ? ev.touches[0].clientY : ev.clientY;
-                    clone.style.left = ex - 40 + 'px';
-                    clone.style.top = ey - 40 + 'px';
-                };
-                
-                const stop = (ev) => {
-                    const ex = ev.changedTouches ? ev.changedTouches[0].clientX : ev.clientX;
-                    const ey = ev.changedTouches ? ev.changedTouches[0].clientY : ev.clientY;
-                    this.tryDrop(ex, ey, shape, el);
-                    clone.remove();
-                    document.removeEventListener('mousemove', move);
-                    document.removeEventListener('mouseup', stop);
-                    document.removeEventListener('touchmove', move);
-                    document.removeEventListener('touchend', stop);
-                };
 
-                document.addEventListener('mousemove', move);
-                document.addEventListener('mouseup', stop);
-                document.addEventListener('touchmove', move);
-                document.addEventListener('touchend', stop);
+            vibrate(pattern) {
+                if (this.haptics && navigator.vibrate) navigator.vibrate(pattern);
             },
-            tryDrop(x, y, shape, original) {
-                const rect = document.getElementById('bb-grid').getBoundingClientRect();
-                if(x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) return;
-                
-                const col = Math.floor((x - rect.left) / 44);
-                const row = Math.floor((y - rect.top) / 44);
-                
-                if(this.canPlace(shape, row, col)) {
-                    this.place(shape, row, col);
-                    original.style.visibility = 'hidden';
-                    original.style.pointerEvents = 'none';
-                    if([...document.querySelectorAll('.draggable-shape')].every(s => s.style.visibility === 'hidden')) this.spawn();
-                }
-            },
-            canPlace(shape, r, c) {
-                if(r + shape.length > 8 || c + shape[0].length > 8) return false;
-                for(let i=0; i<shape.length; i++) {
-                    for(let j=0; j<shape[i].length; j++) {
-                        if(shape[i][j] && this.board[(r+i)*8 + (c+j)]) return false;
-                    }
-                }
-                return true;
-            },
-            place(shape, r, c) {
-                for(let i=0; i<shape.length; i++) {
-                    for(let j=0; j<shape[i].length; j++) {
-                        if(shape[i][j]) {
-                            const idx = (r+i)*8 + (c+j);
-                            this.board[idx] = 1;
-                            document.getElementById(`bb-${idx}`).classList.add('bb-filled');
-                        }
-                    }
-                }
-                this.check();
-            },
-            check() {
-                let rC = [], cC = [];
-                for(let i=0; i<8; i++) {
-                    if(this.board.slice(i*8, i*8+8).every(v=>v)) rC.push(i);
-                    let col = []; for(let j=0; j<8; j++) col.push(this.board[j*8+i]);
-                    if(col.every(v=>v)) cC.push(i);
-                }
-                rC.forEach(r => { 
-                    for(let c=0; c<8; c++) this.explode(r*8+c);
-                });
-                cC.forEach(c => {
-                    for(let r=0; r<8; r++) this.explode(r*8+c);
-                });
-                this.score += (rC.length + cC.length) * 100;
-                document.getElementById('bb-score').innerText = this.score;
-            },
-            explode(idx) {
-                this.board[idx] = 0;
-                const el = document.getElementById(`bb-${idx}`);
-                const rect = el.getBoundingClientRect();
-                sys.particles(rect.left + 20, rect.top + 20, '#ff3e6d');
-                el.classList.remove('bb-filled');
-            }
-        };
 
-        /* INPUTS */
-        window.addEventListener('keydown', e => {
-            if(!document.getElementById('view-game').classList.contains('active')) return;
-            // 2048 move logic (Simplified for space, but hooks into game.move)
-        });
-    </script>
-</body>
-</html>
+            toggleAuthMode() {
+                const isLogin = document.getElementById('auth-primary-cmds').style.display !== 'none';
+                document.getElementById('auth-primary-cmds').style.display = isLogin ? 'none' : 'flex';
+                document.getElementById('auth-secondary-cmds').style.display = isLogin ? 'flex' : 'none';
+            },
+
+            register() {
+                const u = document.getElementById('auth-user').value.trim();
+                const p = document.getElementById('auth-pass').value.trim();
+                if (u.length < 3) return alert("Username must be at least 3 characters.");
+                if (this.db.users[u]) return alert("Username already exists!");
+                
+                this.db.users[u] = { pass: p, stats: { high: 0, merges: 0, score: 0 }, theme: 'classic' };
+                this.save();
+                this.toast("Account created! Please login.");
+                this.toggleAuthMode();
+            },
+
+            login() {
+                const u = document.getElementById('auth-user').value.trim();
+                const p = document.getElementById('auth-pass').value.trim();
+                if (!u || !p) return;
+                
+                const userRec = this.db.users[u];
+                if (userRec && userRec.pass === p) {
+                    this.currentUser = u;
+                    document.getElementById('home-greeting').innerText = `Welcome back, ${u}`;
+                    this.setTheme(userRec.theme || 'classic');
+                    this.nav('view-home');
+                    this.toast("Authentication Successful");
+                } else {
+                    alert("Invalid Username or Password.");
+                }
+            },
+
+            logout() {
+                this.currentUser = null;
+                document.getElementById('auth-user').value = '';
+                document.getElementById('auth-pass').value = '';
+                this.setTheme('classic');
+                this.nav('view-auth');
+            },
+
+            setTheme(t) {
+                this.theme = t;
+                document.body.className = t === 'classic' ? '' : `theme-${t}`;
+                if (this.currentUser) {
+                    this.db.users[this.currentUser].theme = t;
+                    this.save();
+                }
+            },
+
+            toggleHaptics() {
+                this.haptics = !this.haptics;
+                document.getElementById('btn-haptics').innerText = `Haptics: ${this.haptics ? 'ON' : 'OFF'}`;
+                this.vibrate(50);
+            },
+
+            renderStats() {
+                if(!this.currentUser) return;
+                const s = this.db.users[this.currentUser].stats;
+                document.getElementById('stat-high').innerText = s.high;
+                document.getElementById('stat-merges').innerText = s.merges;
+                document.getElementById('stat-score').innerText = s.score;
+            },
+
+            updateStats(mergeVal, scoreAdd) {
+                if(!this.currentUser) return;
+                const s = this.db.users[this.currentUser].stats;
+                if (mergeVal > s.high) s.high = mergeVal;
+                if (mergeVal > 0) s.merges++;
+                if (scoreAdd > 0) s.score += scoreAdd;
+             
