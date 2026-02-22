@@ -3,77 +3,121 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>e2048 | Extended Master</title>
+    <title>e2048 (2048 extended)</title>
     <style>
-        :root { --bg: #faf8ef; --grid-bg: #bbada0; --tile-empty: #cdc1b4; --text-dark: #776e65; }
-        body { background: var(--bg); font-family: 'Arial', sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; overflow: hidden; touch-action: none; }
+        :root { 
+            --bg: #faf8ef; --grid-bg: #bbada0; --tile-empty: #cdc1b4; 
+            --text-dark: #776e65; --accent: #8f7a66;
+        }
         
-        /* UI Components */
-        .header { width: 320px; display: flex; justify-content: space-between; margin-bottom: 10px; }
-        .score-container { display: flex; gap: 5px; }
-        .score-box { background: #bbada0; color: white; padding: 5px 15px; border-radius: 5px; text-align: center; min-width: 60px; }
-        .score-label { font-size: 10px; text-transform: uppercase; display: block; }
-        .score-value { font-size: 18px; font-weight: bold; }
-        
-        .pause-btn { background: #8f7a66; border: none; border-radius: 5px; color: white; width: 40px; height: 40px; cursor: pointer; font-weight: bold; font-size: 18px; }
+        body { 
+            background: var(--bg); font-family: 'Clear Sans', sans-serif; 
+            display: flex; align-items: center; justify-content: center; 
+            height: 100vh; margin: 0; overflow: hidden; touch-action: none;
+        }
 
-        /* Grid & Tiles */
-        #grid { display: grid; grid-template-columns: repeat(4, 1fr); grid-gap: 8px; background: var(--grid-bg); padding: 8px; border-radius: 6px; width: 320px; height: 320px; position: relative; }
-        .tile { width: 74px; height: 74px; background: var(--tile-empty); border-radius: 4px; display: flex; justify-content: center; align-items: center; font-size: 24px; font-weight: bold; transition: transform 0.1s; }
-        
-        /* Animations */
-        .pop { animation: popAnim 0.2s ease; }
-        @keyframes popAnim { 0% { transform: scale(0); } 100% { transform: scale(1); } }
+        /* Smooth Screen Transitions */
+        .screen { 
+            display: none; flex-direction: column; align-items: center; 
+            width: 100%; max-width: 400px; opacity: 0; transition: opacity 0.4s ease;
+        }
+        .active { display: flex; opacity: 1; }
 
-        /* Overlay Screens */
-        .overlay { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(250, 248, 239, 0.8); z-index: 10; flex-direction: column; align-items: center; justify-content: center; border-radius: 6px; }
-        .screen { display: none; flex-direction: column; align-items: center; width: 320px; }
-        .active { display: flex; }
-        
-        h1 { font-size: 48px; color: var(--text-dark); margin: 0; }
-        button { background: #8f7a66; border: none; border-radius: 5px; color: white; padding: 15px; font-size: 18px; font-weight: bold; margin: 10px 0; width: 200px; cursor: pointer; }
+        /* The Grid */
+        #grid { 
+            display: grid; grid-template-columns: repeat(4, 1fr); grid-gap: 10px; 
+            background: var(--grid-bg); padding: 10px; border-radius: 8px; 
+            width: 300px; height: 300px; position: relative;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+        }
+
+        /* Animated Tiles */
+        .tile { 
+            width: 100%; height: 100%; border-radius: 4px; display: flex; 
+            justify-content: center; align-items: center; font-size: 24px; 
+            font-weight: bold; transition: transform 0.15s ease-in-out, background 0.2s;
+        }
+
+        /* Special Effects */
+        .pop { animation: pop 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .merge { animation: merge 0.15s ease-out; box-shadow: 0 0 15px rgba(255,255,255,0.5); }
+
+        @keyframes pop { 0% { transform: scale(0); } 100% { transform: scale(1); } }
+        @keyframes merge { 0% { transform: scale(1); } 50% { transform: scale(1.15); } 100% { transform: scale(1); } }
+
+        /* UI Styling */
+        .header { width: 320px; display: flex; justify-content: space-between; margin-bottom: 15px; }
+        .stat-box { background: #bbada0; color: white; padding: 5px 15px; border-radius: 5px; text-align: center; }
+        button { 
+            background: var(--accent); border: none; border-radius: 5px; color: white; 
+            padding: 12px; font-weight: bold; cursor: pointer; transition: filter 0.2s;
+        }
+        button:active { filter: brightness(0.8); }
+
+        .overlay { 
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(238, 228, 218, 0.73); z-index: 100; 
+            display: none; flex-direction: column; align-items: center; justify-content: center;
+            border-radius: 8px; backdrop-filter: blur(2px);
+        }
     </style>
 </head>
 <body>
 
     <div id="menu-screen" class="screen active">
-        <h1>e2048</h1>
-        <button onclick="initAudio(); showScreen('mode-screen')">New Game</button>
+        <h1 style="font-size: 60px; color: var(--text-dark); margin: 0;">e2048</h1>
+        <button style="width: 200px; margin-top: 20px;" onclick="initAudio(); showScreen('mode-screen')">PLAY</button>
+        <button style="width: 200px; margin-top: 10px; background: #5c85d6;" onclick="showScreen('discovery-screen')">MORE GAMES</button>
     </div>
 
     <div id="mode-screen" class="screen">
-        <h2>Choose Mode</h2>
-        <button onclick="startGame(1024)">1024 (Easy)</button>
-        <button onclick="startGame(2048)">2048 (Normal)</button>
-        <button onclick="startGame(Infinity)">Endless</button>
+        <h2 style="color: var(--text-dark);">Select Mode</h2>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <button onclick="startGame(1024)">1024</button>
+            <button onclick="startGame(2048)">2048</button>
+            <button onclick="startGame(4096)">4096</button>
+            <button onclick="startGame(8192)">8192</button>
+        </div>
+        <button style="width: 100%; margin-top: 15px; background: #333;" onclick="startGame(Infinity)">ENDLESS</button>
     </div>
 
     <div id="game-screen" class="screen">
         <div class="header">
-            <button class="pause-btn" onclick="togglePause()">||</button>
-            <div class="score-container">
-                <div class="score-box"><span class="score-label">Score</span><span id="score" class="score-value">0</span></div>
-                <div class="score-box"><span class="score-label">Best</span><span id="best" class="score-value">0</span></div>
-            </div>
+            <button onclick="togglePause()" style="width: 45px;">||</button>
+            <div class="stat-box">Score<br><span id="score">0</span></div>
+            <div class="stat-box">Best<br><span id="best">0</span></div>
         </div>
         <div id="grid">
             <div id="pause-overlay" class="overlay">
                 <h2>PAUSED</h2>
-                <button onclick="togglePause()">Resume</button>
-                <button style="background:#d33;" onclick="location.reload()">Quit</button>
+                <button onclick="togglePause()">RESUME</button>
+            </div>
+            <div id="over-overlay" class="overlay">
+                <h2>GAME OVER</h2>
+                <button onclick="startGame(target)">RETRY</button>
             </div>
         </div>
     </div>
 
+    <div id="discovery-screen" class="screen">
+        <h2>Discovery Hub</h2>
+        <button onclick="alert('Block Puzzle Coming Soon!')">🟦 Block Puzzle</button>
+        <button onclick="alert('Chess Coming Soon!')">♟️ Chess</button>
+        <button onclick="alert('Balloon Coming Soon!')">🎈 Hot Balloon</button>
+        <button style="background:#555;" onclick="showScreen('menu-screen')">Back</button>
+    </div>
+
     <script>
         let grid = [], score = 0, best = localStorage.getItem('e2048-best') || 0;
-        let paused = false, audioCtx = null, tS = {x:0, y:0};
+        let target = 2048, paused = false, audioCtx = null, tS = {x:0, y:0};
 
         document.getElementById('best').innerText = best;
 
         function showScreen(id) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
+            const target = document.getElementById(id);
+            target.classList.add('active');
+            setTimeout(() => target.style.opacity = 1, 10);
         }
 
         function togglePause() {
@@ -89,13 +133,13 @@
             o.connect(g); g.connect(audioCtx.destination);
             o.frequency.setValueAtTime(f1, audioCtx.currentTime);
             o.frequency.exponentialRampToValueAtTime(f2, audioCtx.currentTime + 0.1);
-            g.gain.setValueAtTime(0.1, audioCtx.currentTime);
-            g.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+            g.gain.setValueAtTime(0.05, audioCtx.currentTime);
             o.start(); o.stop(audioCtx.currentTime + 0.1);
         }
 
-        function startGame() {
-            score = 0; grid = Array(16).fill(0);
+        function startGame(limit) {
+            target = limit; score = 0; grid = Array(16).fill(0);
+            document.getElementById('over-overlay').style.display = 'none';
             addTile(); addTile(); render();
             showScreen('game-screen');
         }
@@ -109,30 +153,36 @@
             }
         }
 
-        function render(newIdx = -1) {
+        function render(newIdx = -1, mergedIdx = []) {
             const container = document.getElementById('grid');
-            const overlay = document.getElementById('pause-overlay');
+            const overlays = container.querySelectorAll('.overlay');
             container.innerHTML = '';
-            container.appendChild(overlay); // Keep overlay in DOM
+            overlays.forEach(o => container.appendChild(o));
+
             grid.forEach((v, i) => {
                 const d = document.createElement('div');
-                d.className = 'tile' + (i === newIdx ? ' pop' : '');
+                d.className = 'tile';
+                if (i === newIdx) d.classList.add('pop');
+                if (mergedIdx.includes(i)) d.classList.add('merge');
+                
                 d.innerText = v || '';
-                d.style.background = v ? `hsl(${45 - Math.log2(v)*5}, 80%, 60%)` : 'var(--tile-empty)';
-                d.style.color = v > 4 ? 'white' : 'var(--text-dark)';
+                d.style.background = getTileColor(v);
+                d.style.color = v > 4 ? '#f9f6f2' : '#776e65';
                 container.appendChild(d);
             });
             document.getElementById('score').innerText = score;
-            if(score > best) {
-                best = score;
-                localStorage.setItem('e2048-best', best);
-                document.getElementById('best').innerText = best;
-            }
+        }
+
+        function getTileColor(v) {
+            if (!v) return 'var(--tile-empty)';
+            if (v > 2048) return `hsl(${280 - (Math.log2(v) * 10)}, 60%, 50%)`;
+            const colors = {2:'#eee4da', 4:'#ede0c8', 8:'#f2b179', 16:'#f59563', 32:'#f67c5f', 64:'#f65e3b', 128:'#edcf72', 256:'#edcc61', 512:'#edc850', 1024:'#edc53f', 2048:'#edc22e'};
+            return colors[v];
         }
 
         function move(dir) {
             if(paused) return;
-            let oldGrid = [...grid], merged = false;
+            let oldGrid = [...grid], mergedIdx = [];
             for (let i = 0; i < 4; i++) {
                 let line = [];
                 for (let j = 0; j < 4; j++) {
@@ -140,11 +190,13 @@
                     else line.push(grid[j * 4 + i]);
                 }
                 if (dir === 'R' || dir === 'D') line.reverse();
+                
                 let res = line.filter(v => v);
                 for (let j = 0; j < res.length - 1; j++) {
                     if (res[j] === res[j+1]) {
                         res[j] *= 2; score += res[j];
-                        res.splice(j+1, 1); merged = true;
+                        res.splice(j+1, 1);
+                        playSound(400, 600);
                     }
                 }
                 while (res.length < 4) res.push(0);
@@ -155,11 +207,13 @@
                 }
             }
             if (JSON.stringify(oldGrid) !== JSON.stringify(grid)) {
-                merged ? playSound(400, 600) : playSound(200, 100);
+                if (score > best) { best = score; localStorage.setItem('e2048-best', best); document.getElementById('best').innerText = best; }
+                playSound(200, 150);
                 render(addTile());
             }
         }
 
+        // Swipe Gestures
         window.addEventListener('touchstart', e => { tS.x = e.touches[0].clientX; tS.y = e.touches[0].clientY; });
         window.addEventListener('touchend', e => {
             let dx = e.changedTouches[0].clientX - tS.x, dy = e.changedTouches[0].clientY - tS.y;
