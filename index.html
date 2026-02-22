@@ -5,37 +5,53 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>e2048 & Block Puzzle Platinum</title>
     <style>
+        /* =========================================================
+           I. CSS VARIABLES & THEMES
+           ========================================================= */
         :root {
             --bg-2048: #faf8ef; --text-2048: #776e65; --board-2048: #bbada0; 
             --cell-2048: rgba(238, 228, 218, 0.35); --score-bg: #bbada0;
             --bp-bg: #a0745b; --bp-board: #674332; --bp-cell: #573727; 
             --bp-green: #71b965; --bp-beige: #dac6a3;
         }
+
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; user-select: none; }
-        body { margin: 0; padding: 0; height: 100vh; width: 100vw; overflow: hidden; font-family: "Clear Sans", Arial, sans-serif; background: var(--bg-2048); color: var(--text-2048); transition: background 0.3s; }
+        body { margin: 0; padding: 0; height: 100vh; width: 100vw; overflow: hidden; font-family: "Clear Sans", "Helvetica Neue", Arial, sans-serif; background: var(--bg-2048); color: var(--text-2048); transition: background 0.3s; }
+
+        /* =========================================================
+           II. UI FRAMEWORK
+           ========================================================= */
         .view { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; flex-direction: column; align-items: center; background: inherit; z-index: 10; overflow-y: auto; padding: 20px 0; }
         .active-view { display: flex; animation: fadeIn 0.3s ease-out; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        .btn { background: #8f7a66; color: #f9f6f2; border: none; padding: 12px 24px; border-radius: 3px; font-weight: bold; font-size: 16px; cursor: pointer; text-transform: uppercase; margin: 5px; box-shadow: 0 4px 0 rgba(0,0,0,0.1); }
+
+        .btn { background: #8f7a66; color: #f9f6f2; border: none; padding: 12px 24px; border-radius: 3px; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.1s; text-transform: uppercase; margin: 5px; box-shadow: 0 4px 0 rgba(0,0,0,0.1); }
         .btn:active { transform: translateY(2px); box-shadow: none; }
         .input-field { padding: 14px; border-radius: 5px; border: 2px solid #bbada0; width: 280px; font-size: 16px; margin-bottom: 12px; }
-        
-        /* 2048 UI */
+
+        /* --- 2048 Authentic UI Components --- */
         .top-header { width: 340px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         .score-container { display: flex; gap: 8px; }
         .score-box { background: #bbada0; padding: 5px 15px; border-radius: 3px; color: white; text-align: center; min-width: 60px; position: relative; }
         .score-label { display: block; font-size: 11px; font-weight: bold; color: #eee4da; margin-bottom: -2px; }
         .score-val { font-size: 20px; font-weight: bold; }
+
         .game-wrapper { position: relative; width: 340px; height: 340px; background: var(--board-2048); border-radius: 6px; padding: 10px; touch-action: none; }
         .grid-bg { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; width: 100%; height: 100%; }
         .grid-cell { background: var(--cell-2048); border-radius: 3px; }
         .tile-layer { position: absolute; top: 10px; left: 10px; pointer-events: none; width: 320px; height: 320px; }
-        .tile { position: absolute; width: 72.5px; height: 72.5px; border-radius: 3px; display: flex; justify-content: center; align-items: center; font-weight: bold; font-size: 32px; transition: transform 100ms ease-in-out; z-index: 10; pointer-events: auto; }
+
+        .tile { 
+            position: absolute; width: 72.5px; height: 72.5px; border-radius: 3px; display: flex; 
+            justify-content: center; align-items: center; font-weight: bold; font-size: 32px; 
+            transition: transform 100ms ease-in-out; z-index: 10; pointer-events: auto;
+        }
         .t-new { animation: appear 150ms ease-out forwards; }
         .t-merged { z-index: 20; animation: pop 180ms ease-in-out forwards; }
         @keyframes appear { 0% { opacity: 0; transform: scale(0); } 100% { opacity: 1; transform: scale(1); } }
         @keyframes pop { 0% { transform: scale(1); } 50% { transform: scale(1.15); } 100% { transform: scale(1); } }
 
+        /* 2048 Extended Tile Color Scheme */
         .t2{background:#eee4da;color:#776e65} .t4{background:#ede0c8;color:#776e65}
         .t8{background:#f2b179;color:#f9f6f2} .t16{background:#f59563;color:#f9f6f2}
         .t32{background:#f67c5f;color:#f9f6f2} .t64{background:#f65e3b;color:#f9f6f2}
@@ -44,7 +60,7 @@
         .t2048{background:#edc22e;color:#f9f6f2;font-size:24px} .t4096{background:#3c3a32;color:#f9f6f2}
         .t131072{background:#000;color:#00f2ff;text-shadow:0 0 8px #00f2ff;}
 
-        /* Block Puzzle UI */
+        /* --- Block Puzzle UI (Authentic Wood) --- */
         .bp-score-large { font-size: 70px; font-weight: bold; color: white; margin-top: 10px; letter-spacing: -2px; }
         .bp-grid-wrapper { background: var(--bp-board); padding: 8px; border-radius: 4px; box-shadow: 0 10px 20px rgba(0,0,0,0.3); touch-action: none; }
         .bp-grid { display: grid; grid-template-columns: repeat(8, 40px); gap: 2px; }
@@ -57,17 +73,23 @@
         .mini-block { width: 20px; height: 20px; border-radius: 2px; }
         .dragging { position: fixed; z-index: 1000; pointer-events: none; transform: scale(1.8); }
 
-        .overlay { position: absolute; top:0; left:0; width:100%; height:100%; background:rgba(250,248,239,0.8); z-index:100; display:none; flex-direction:column; align-items:center; justify-content:center; }
-        .particle { position: fixed; width: 8px; height: 8px; pointer-events: none; z-index: 2000; }
+        /* --- Overlays & Tutorial --- */
+        .overlay { position: absolute; top:0; left:0; width:100%; height:100%; background:rgba(250,248,239,0.85); z-index:100; display:none; flex-direction:column; align-items:center; justify-content:center; }
+        .tutorial-box { background: #5a524b; color: white; padding: 15px; border-radius: 8px; width: 340px; margin-top: 15px; position: relative; font-size: 14px; }
+        .particle { position: fixed; width: 8px; height: 8px; pointer-events: none; z-index: 2000; border-radius: 50%; }
+        #toast { position: fixed; top: -100px; left: 50%; transform: translateX(-50%); background: #333; color: white; padding: 12px 24px; border-radius: 30px; transition: 0.4s; z-index: 9999; font-weight: bold; }
+        
+        .achievement-badge { background: #edc22e; color: white; padding: 6px 12px; border-radius: 20px; font-weight: bold; font-size: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
     </style>
 </head>
 <body>
-    <div id="toast" style="position:fixed; top:-50px; left:50%; transform:translateX(-50%); background:#333; color:white; padding:10px 20px; border-radius:20px; transition:0.4s; z-index:9999;">Notification</div>
+
+    <div id="toast">Notification</div>
 
     <div id="view-auth" class="view active-view" style="justify-content: center;">
         <h1 style="font-size: 80px; margin: 0 0 40px 0;">e2048</h1>
         <div style="background: rgba(0,0,0,0.05); padding: 30px; border-radius: 12px; display: flex; flex-direction: column; align-items: center;">
-            <input type="text" id="reg-u" placeholder="Username" class="input-field">
+            <input type="text" id="reg-u" placeholder="Username" class="input-field" autocomplete="off">
             <input type="password" id="reg-p" placeholder="Password" class="input-field">
             <div id="auth-buttons" style="display: flex; flex-direction: column; width: 100%;">
                 <button class="btn" onclick="auth.login()">Login</button>
@@ -78,11 +100,11 @@
     </div>
 
     <div id="view-home" class="view">
-        <h2 id="welcome-msg" style="font-size: 32px; margin-bottom: 40px;">Welcome</h2>
-        <button class="btn" onclick="sys.nav('view-modes')">2048 Modes</button>
-        <button class="btn" onclick="sys.nav('view-bp')" style="background:#674332">Block Puzzle</button>
-        <button class="btn" onclick="sys.nav('view-stats')" style="background:#555">My Stats</button>
-        <button class="btn" onclick="auth.logout()" style="background:#d33; margin-top: 40px;">Logout</button>
+        <h2 id="welcome-msg" style="font-size: 32px; margin-bottom: 40px;">Welcome back</h2>
+        <button class="btn" style="width: 260px;" onclick="sys.nav('view-modes')">2048 Standard</button>
+        <button class="btn" style="width: 260px; background:#674332" onclick="sys.nav('view-bp')">Block Puzzle</button>
+        <button class="btn" style="width: 260px; background:#555" onclick="sys.nav('view-stats')">Player Profile</button>
+        <button class="btn" style="width: 260px; background:#d33; margin-top: 40px;" onclick="auth.logout()">Logout</button>
     </div>
 
     <div id="view-modes" class="view">
@@ -94,7 +116,11 @@
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 20px;">
             <button class="btn" onclick="game2048.init(1024)">1024</button>
             <button class="btn" onclick="game2048.init(2048)">2048</button>
+            <button class="btn" onclick="game2048.init(4096)">4096</button>
+            <button class="btn" onclick="game2048.init(8192)">8192</button>
             <button class="btn" onclick="game2048.init(16384)">16384</button>
+            <button class="btn" onclick="game2048.init(32768)">32768</button>
+            <button class="btn" onclick="game2048.init(65536)">65536</button>
             <button class="btn" onclick="game2048.init(131072)">131072</button>
         </div>
         <button class="btn" style="width: 320px; background: #f65e3b;" onclick="game2048.init(Infinity, 60)">1 Min Blitz</button>
@@ -109,11 +135,13 @@
                 <div class="score-box"><span class="score-label">BEST</span><span class="score-val" id="best-2048">0</span></div>
             </div>
         </div>
+
         <div class="score-row" id="timer-row" style="display:none; margin-bottom: 10px; width:340px;">
             <div class="score-box" style="background:#f65e3b; width: 100%;">
-                <span class="score-label" style="color:white">TIME LEFT</span><b id="timer-val" style="font-size:20px">0:00</b>
+                <span class="score-label" style="color:white">TIME LEFT</span><b id="timer-val" style="font-size:20px; color:white;">0:00</b>
             </div>
         </div>
+
         <div class="game-wrapper" id="board-2048">
             <div class="grid-bg">
                 <div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div>
@@ -122,12 +150,19 @@
                 <div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div>
             </div>
             <div class="tile-layer" id="tile-layer"></div>
+            
             <div class="overlay" id="over-2048">
-                <h2 id="over-msg" style="color:#776e65">Game Over!</h2>
+                <h2 id="over-msg" style="color:#776e65; font-size: 36px; margin-bottom: 20px;">Game Over!</h2>
                 <button class="btn" onclick="game2048.init(game2048.target, game2048.initTime)">Try Again</button>
                 <button class="btn" style="background:#555" onclick="sys.nav('view-modes')">Menu</button>
             </div>
         </div>
+
+        <div class="tutorial-box" id="tutorial-tip">
+            <b style="display:block; font-size:16px; margin-bottom:4px;">WELCOME TO 2048</b>
+            Swipe in any direction to move tiles. Matching tiles join into one!
+        </div>
+
         <div style="display: flex; gap: 15px; margin-top: 20px;">
             <button class="btn" style="width: 80px; background:#bbada0" onclick="game2048.undo()">↩</button>
             <button class="btn" id="btn-del" style="width: 80px; background:#bbada0" onclick="game2048.usePowerup('del')">✖</button>
@@ -140,32 +175,69 @@
             <button class="btn" style="background:none; box-shadow:none; font-size: 24px;" onclick="sys.nav('view-home')">✕</button>
         </div>
         <div class="bp-score-large" id="score-bp">0</div>
+        
         <div class="bp-grid-wrapper">
             <div class="bp-grid" id="bp-grid"></div>
         </div>
+
         <div class="tray" id="tray"></div>
+
         <div class="overlay" id="over-bp" style="background: rgba(103, 67, 50, 0.9);">
-            <h2 style="color:white">Out of Moves</h2>
+            <h2 style="color:white; font-size: 36px; margin-bottom: 20px;">Out of Moves</h2>
             <button class="btn" style="background:#71b965" onclick="gameBP.init()">Retry</button>
+            <button class="btn" style="background:#555" onclick="sys.nav('view-home')">Menu</button>
         </div>
     </div>
 
     <div id="view-stats" class="view">
-        <h1 style="margin-bottom: 40px;">Lifetime Stats</h1>
-        <div id="stat-content" style="background:white; padding: 30px; border-radius: 8px; width: 320px; font-size: 20px; line-height: 2;">
+        <h1 style="margin-bottom: 20px;">Player Profile</h1>
+        
+        <div id="stat-content" style="background:white; padding: 20px; border-radius: 8px; width: 320px; font-size: 18px; line-height: 1.8; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
             <b>Highest Tile:</b> <span id="stat-tile">0</span><br>
             <b>Total Merges:</b> <span id="stat-merges">0</span><br>
             <b>All-time Pts:</b> <span id="stat-points">0</span>
         </div>
-        <button class="btn" style="margin-top: 40px;" onclick="sys.nav('view-home')">Back</button>
+
+        <h2 style="color: #776e65; margin-bottom: 10px;">Achievements</h2>
+        <div id="achievements-list" style="display: flex; flex-wrap: wrap; gap: 10px; width: 320px; justify-content: center; min-height: 50px;">
+            </div>
+
+        <div style="display: flex; gap: 10px; margin-top: 30px;">
+            <button class="btn" style="background:#555" id="btn-sound" onclick="sys.toggleSound()">Sound: ON</button>
+            <button class="btn" style="background:#ef4444" onclick="sys.nav('view-home')">Back</button>
+        </div>
     </div>
 
     <script>
-        /* =========================================================
-           CORE SYSTEM
-           ========================================================= */
+        /* --- AUDIO SYNTHESIZER ENGINE --- */
+        const sfx = {
+            ctx: null,
+            play(freq, type, dur, vol) {
+                if (!sys.soundOn) return;
+                try {
+                    if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                    if (this.ctx.state === 'suspended') this.ctx.resume();
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = type;
+                    osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+                    gain.gain.setValueAtTime(vol, this.ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + dur);
+                    osc.connect(gain); gain.connect(this.ctx.destination);
+                    osc.start(); osc.stop(this.ctx.currentTime + dur);
+                } catch(e) {}
+            },
+            slide() { this.play(150, 'sine', 0.1, 0.05); },
+            merge() { this.play(400, 'sine', 0.15, 0.1); },
+            highMerge() { this.play(800, 'triangle', 0.3, 0.1); },
+            wood() { this.play(200, 'square', 0.05, 0.05); },
+            blast() { this.play(100, 'sawtooth', 0.3, 0.15); },
+            achieve() { this.play(600, 'sine', 0.1, 0.1); setTimeout(()=>this.play(800, 'sine', 0.3, 0.1), 100); }
+        };
+
+        /* --- CORE SYSTEM & ACHIEVEMENTS --- */
         const sys = {
-            db: { users: {} }, user: null,
+            db: { users: {} }, user: null, soundOn: true,
             init() {
                 try {
                     const saved = localStorage.getItem('e2048_plat_db');
@@ -191,35 +263,64 @@
                 t.innerText = m; t.style.top = "20px";
                 setTimeout(() => t.style.top = "-50px", 2500);
             },
+            toggleSound() {
+                this.soundOn = !this.soundOn;
+                document.getElementById('btn-sound').innerText = `Sound: ${this.soundOn ? 'ON' : 'OFF'}`;
+                if(this.soundOn) sfx.merge();
+            },
             renderStats() {
                 if(!this.user || !this.db.users[this.user]) return;
                 const u = this.db.users[this.user];
                 document.getElementById('stat-tile').innerText = u.highTile || 0;
                 document.getElementById('stat-merges').innerText = u.totalMerges || 0;
                 document.getElementById('stat-points').innerText = u.totalPoints || 0;
+
+                const list = document.getElementById('achievements-list');
+                list.innerHTML = '';
+                const badges = u.achievements || [];
+                if (badges.length === 0) list.innerHTML = '<span style="opacity:0.5; font-size: 14px;">No achievements yet. Keep playing!</span>';
+                badges.forEach(b => {
+                    const el = document.createElement('div');
+                    el.className = 'achievement-badge';
+                    el.innerText = '🏆 ' + b;
+                    list.appendChild(el);
+                });
+            },
+            checkAchievement(name) {
+                if(!this.user) return;
+                const u = this.db.users[this.user];
+                if(!u.achievements) u.achievements = [];
+                if(!u.achievements.includes(name)) {
+                    u.achievements.push(name);
+                    this.save();
+                    this.toast("Achievement Unlocked: " + name);
+                    sfx.achieve();
+                }
             },
             updateStats(val, score) {
                 if(!this.user || !this.db.users[this.user]) return;
                 const u = this.db.users[this.user];
                 u.totalMerges++; u.totalPoints += score;
-                if(val > u.highTile) u.highTile = val;
+                if(val > (u.highTile || 0)) u.highTile = val;
                 this.save();
+
+                if (val === 512) this.checkAchievement("Getting Warm (512)");
+                if (val === 1024) this.checkAchievement("Almost There (1024)");
+                if (val === 2048) this.checkAchievement("2048 Master!");
+                if (val === 131072) this.checkAchievement("Touch Grass");
             },
             particles(x, y, color) {
-                for(let i=0; i<8; i++) {
+                for(let i=0; i<12; i++) {
                     const p = document.createElement('div');
                     p.className = 'particle'; p.style.background = color;
                     p.style.left = x + 'px'; p.style.top = y + 'px';
                     document.body.appendChild(p);
-                    const ang = Math.random() * Math.PI * 2, dist = 30 + Math.random() * 40;
-                    p.animate([{transform:'translate(0,0)'}, {transform:`translate(${Math.cos(ang)*dist}px, ${Math.sin(ang)*dist}px)`, opacity:0}], 500).onfinish = () => p.remove();
+                    const ang = Math.random() * Math.PI * 2, dist = 30 + Math.random() * 50;
+                    p.animate([{transform:'translate(0,0) scale(1)', opacity:1}, {transform:`translate(${Math.cos(ang)*dist}px, ${Math.sin(ang)*dist}px) scale(0)`, opacity:0}], 600).onfinish = () => p.remove();
                 }
             },
             bindEvents() {
-                // Global touch prevention to stop iOS bounce
                 document.body.addEventListener('touchmove', e => { if(!e.target.closest('.view')) e.preventDefault(); }, { passive: false });
-                
-                // 2048 Keyboard
                 window.addEventListener('keydown', e => {
                     if(document.getElementById('view-2048').classList.contains('active-view')) {
                         if(e.key==='ArrowUp'||e.key==='w') game2048.move('U');
@@ -228,28 +329,21 @@
                         if(e.key==='ArrowRight'||e.key==='d') game2048.move('R');
                     }
                 });
-
-                // 2048 Swipe
                 let tx, ty;
                 const b = document.getElementById('board-2048');
                 b.addEventListener('touchstart', e => { tx = e.touches[0].clientX; ty = e.touches[0].clientY; }, {passive: false});
                 b.addEventListener('touchend', e => {
                     if(!document.getElementById('view-2048').classList.contains('active-view')) return;
                     let dx = e.changedTouches[0].clientX - tx, dy = e.changedTouches[0].clientY - ty;
-                    if(Math.abs(dx) > 30 || Math.abs(dy) > 30) {
-                        if(Math.abs(dx) > Math.abs(dy)) game2048.move(dx > 0 ? 'R' : 'L');
-                        else game2048.move(dy > 0 ? 'D' : 'U');
-                    }
+                    if(Math.abs(dx) > 30 || Math.abs(dy) > 30) game2048.move(Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 'R' : 'L') : (dy > 0 ? 'D' : 'U'));
                 });
             }
         };
 
-        /* =========================================================
-           AUTHENTICATION
-           ========================================================= */
+        /* --- AUTHENTICATION --- */
         const auth = {
             guest() {
-                if (!sys.db.users['Guest']) sys.db.users['Guest'] = { pass: '', highTile: 0, totalMerges: 0, totalPoints: 0, best2048: 0, bestBP: 0 };
+                if (!sys.db.users['Guest']) sys.db.users['Guest'] = { pass: '', highTile: 0, totalMerges: 0, totalPoints: 0, best2048: 0, bestBP: 0, achievements: [] };
                 this.complete('Guest');
             },
             register() {
@@ -257,7 +351,7 @@
                 const p = document.getElementById('reg-p').value.trim();
                 if (u.length < 3 || p.length < 3) return alert("Too short");
                 if (sys.db.users[u]) return alert("Username taken");
-                sys.db.users[u] = { pass: p, highTile: 0, totalMerges: 0, totalPoints: 0, best2048: 0, bestBP: 0 };
+                sys.db.users[u] = { pass: p, highTile: 0, totalMerges: 0, totalPoints: 0, best2048: 0, bestBP: 0, achievements: [] };
                 sys.save(); this.complete(u);
             },
             login() {
@@ -270,14 +364,16 @@
                 sys.user = u;
                 sessionStorage.setItem('e2048_session', u);
                 document.getElementById('welcome-msg').innerText = "Hi, " + u;
+                
+                // Initialize Audio Context on first interaction
+                if(sfx.ctx === null) sfx.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                
                 sys.nav('view-home');
             },
             logout() { sessionStorage.clear(); location.reload(); }
         };
 
-        /* =========================================================
-           2048 ENGINE
-           ========================================================= */
+        /* --- 2048 ENGINE --- */
         const game2048 = {
             grid: [], score: 0, target: 2048, history: [], idCounter: 0,
             timer: null, timeLeft: 0, isTimer: false, initTime: 0, powerup: null,
@@ -291,11 +387,8 @@
                 document.getElementById('display-target').innerText = t === Infinity ? "ENDLESS" : t;
                 document.getElementById('over-2048').style.display = 'none';
                 document.getElementById('timer-row').style.display = this.isTimer ? 'flex' : 'none';
-                document.getElementById('btn-del').style.background = '#bbada0';
                 
-                if(sys.user && sys.db.users[sys.user]) {
-                    document.getElementById('best-2048').innerText = sys.db.users[sys.user].best2048 || 0;
-                }
+                if(sys.user && sys.db.users[sys.user]) document.getElementById('best-2048').innerText = sys.db.users[sys.user].best2048 || 0;
                 
                 if (this.isTimer) this.startTimer();
                 this.spawn(); this.spawn(); this.render();
@@ -326,9 +419,7 @@
                 const currentIds = new Set(this.grid.filter(t => t).map(t => t.id));
 
                 Array.from(layer.children).forEach(node => {
-                    if (!currentIds.has(parseInt(node.dataset.id))) {
-                        node.style.zIndex = 5; setTimeout(() => node.remove(), 100);
-                    }
+                    if (!currentIds.has(parseInt(node.dataset.id))) { node.style.zIndex = 5; setTimeout(() => node.remove(), 100); }
                 });
 
                 this.grid.forEach((tile, idx) => {
@@ -372,7 +463,7 @@
             move(dir) {
                 if (this.powerup) return;
                 this.saveState();
-                let moved = false;
+                let moved = false; let mergedThisTurn = false; let highMerge = false;
                 const getRow = (i, d) => {
                     let r = [];
                     for(let j=0; j<4; j++) {
@@ -392,7 +483,11 @@
                             tiles[j] = { id: this.idCounter++, val: tiles[j].val * 2, isNew: false, isMerged: true };
                             this.score += tiles[j].val;
                             sys.updateStats(tiles[j].val, tiles[j].val);
+                            
+                            mergedThisTurn = true;
+                            if(tiles[j].val >= 128) highMerge = true;
                             if (tiles[j].val === this.target) sys.toast("MILESTONE REACHED!");
+                            
                             tiles.splice(j+1, 1); moved = true;
                         }
                     }
@@ -403,7 +498,11 @@
                         }
                     }
                 }
-                if (moved) { this.spawn(); this.render(); if(this.checkOver()) this.gameOver(); }
+                if (moved) { 
+                    this.spawn(); this.render(); 
+                    if(highMerge) sfx.highMerge(); else if(mergedThisTurn) sfx.merge(); else sfx.slide();
+                    if(this.checkOver()) this.gameOver(); 
+                }
                 else this.history.pop();
             },
 
@@ -428,19 +527,18 @@
             usePowerup(type) {
                 this.powerup = this.powerup === type ? null : type;
                 document.getElementById('btn-del').style.background = this.powerup ? '#a49688' : '#bbada0';
-                if(this.powerup) sys.toast("Tap a tile to delete it");
+                if(this.powerup) document.getElementById('tutorial-tip').innerHTML = `<b>DELETE ACTIVE</b><br>Tap a tile to remove it.`;
+                else document.getElementById('tutorial-tip').innerHTML = `<b>WELCOME TO 2048</b><br>Swipe in any direction to move tiles.`;
             },
 
             handleTileClick(idx) {
                 if (this.powerup === 'del' && this.grid[idx]) {
-                    this.saveState(); this.grid[idx] = null; this.usePowerup('del'); this.render();
+                    this.saveState(); this.grid[idx] = null; this.usePowerup('del'); this.render(); sfx.blast();
                 }
             }
         };
 
-        /* =========================================================
-           BLOCK PUZZLE ENGINE (Module: GameBP)
-           ========================================================= */
+        /* --- BLOCK PUZZLE ENGINE --- */
         const gameBP = {
             board: Array(64).fill(0), score: 0,
             shapes: [
@@ -515,6 +613,8 @@
                     if(this.canPlace(matrix, pos.r, pos.c)) {
                         for(let i=0; i<matrix.length; i++) for(let j=0; j<matrix[0].length; j++) 
                             if(matrix[i][j]) { this.board[(pos.r+i)*8+(pos.c+j)] = 1; document.getElementById(`bp-c-${(pos.r+i)*8+(pos.c+j)}`).className = `bp-slot ${cls}`; }
+                        
+                        sfx.wood();
                         this.score += 10; this.checkLines();
                         el.style.visibility = 'hidden'; el.dataset.used = 'true';
                         if(Array.from(document.getElementById('tray').children).every(n => n.dataset.used)) this.spawn();
@@ -543,10 +643,16 @@
                     if (col.every(v => v)) cols.push(i);
                 }
                 if (rows.length || cols.length) {
-                    this.score += (rows.length + cols.length) * 100;
+                    sfx.blast();
                     const clears = new Set();
                     rows.forEach(r => { for(let c=0; c<8; c++) clears.add(r*8+c); });
                     cols.forEach(c => { for(let r=0; r<8; r++) clears.add(r*8+c); });
+                    
+                    const combo = rows.length + cols.length;
+                    if(combo >= 2) sys.checkAchievement(`Combo x${combo}`);
+                    if(combo >= 4) sys.checkAchievement("Tetris Master");
+                    
+                    this.score += combo * 100 * combo; 
                     
                     clears.forEach(idx => {
                         this.board[idx] = 0;
