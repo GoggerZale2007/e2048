@@ -3,97 +3,99 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>e2048</title>
+    <title>e2048 | Extended Master</title>
     <style>
         :root { --bg: #faf8ef; --grid-bg: #bbada0; --tile-empty: #cdc1b4; --text-dark: #776e65; }
-        body { background: var(--bg); font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; overflow: hidden; touch-action: none; }
+        body { background: var(--bg); font-family: 'Arial', sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; overflow: hidden; touch-action: none; }
         
-        /* Screens */
-        .screen { display: none; flex-direction: column; align-items: center; width: 90%; max-width: 400px; transition: opacity 0.3s; }
-        .active { display: flex; }
+        /* UI Components */
+        .header { width: 320px; display: flex; justify-content: space-between; margin-bottom: 10px; }
+        .score-container { display: flex; gap: 5px; }
+        .score-box { background: #bbada0; color: white; padding: 5px 15px; border-radius: 5px; text-align: center; min-width: 60px; }
+        .score-label { font-size: 10px; text-transform: uppercase; display: block; }
+        .score-value { font-size: 18px; font-weight: bold; }
+        
+        .pause-btn { background: #8f7a66; border: none; border-radius: 5px; color: white; width: 40px; height: 40px; cursor: pointer; font-weight: bold; font-size: 18px; }
 
+        /* Grid & Tiles */
+        #grid { display: grid; grid-template-columns: repeat(4, 1fr); grid-gap: 8px; background: var(--grid-bg); padding: 8px; border-radius: 6px; width: 320px; height: 320px; position: relative; }
+        .tile { width: 74px; height: 74px; background: var(--tile-empty); border-radius: 4px; display: flex; justify-content: center; align-items: center; font-size: 24px; font-weight: bold; transition: transform 0.1s; }
+        
         /* Animations */
-        @keyframes pop {
-            0% { transform: scale(0); }
-            80% { transform: scale(1.1); }
-            100% { transform: scale(1); }
-        }
-        @keyframes merge {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.2); }
-            100% { transform: scale(1); }
-        }
+        .pop { animation: popAnim 0.2s ease; }
+        @keyframes popAnim { 0% { transform: scale(0); } 100% { transform: scale(1); } }
 
-        .tile { 
-            width: 75px; height: 75px; border-radius: 4px; display: flex; 
-            justify-content: center; align-items: center; font-size: 24px; 
-            font-weight: bold; position: relative; transition: all 0.1s ease-in-out;
-        }
-        .tile-new { animation: pop 0.2s ease; }
-        .tile-merged { animation: merge 0.15s ease; }
-
-        #grid { display: grid; grid-template-columns: repeat(4, 1fr); grid-gap: 8px; background: var(--grid-bg); padding: 8px; border-radius: 6px; width: 320px; height: 320px; }
-        button { background: #8f7a66; border: none; border-radius: 5px; color: white; padding: 15px; font-size: 18px; font-weight: bold; margin: 5px; width: 100%; cursor: pointer; }
-        #score-box { background: #bbada0; color: white; padding: 10px; border-radius: 5px; margin-bottom: 10px; width: 100%; text-align: center; font-weight: bold; }
+        /* Overlay Screens */
+        .overlay { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(250, 248, 239, 0.8); z-index: 10; flex-direction: column; align-items: center; justify-content: center; border-radius: 6px; }
+        .screen { display: none; flex-direction: column; align-items: center; width: 320px; }
+        .active { display: flex; }
+        
+        h1 { font-size: 48px; color: var(--text-dark); margin: 0; }
+        button { background: #8f7a66; border: none; border-radius: 5px; color: white; padding: 15px; font-size: 18px; font-weight: bold; margin: 10px 0; width: 200px; cursor: pointer; }
     </style>
 </head>
 <body>
 
     <div id="menu-screen" class="screen active">
         <h1>e2048</h1>
-        <button onclick="initAudio(); showScreen('mode-screen')">Start Game</button>
+        <button onclick="initAudio(); showScreen('mode-screen')">New Game</button>
+    </div>
+
+    <div id="mode-screen" class="screen">
+        <h2>Choose Mode</h2>
+        <button onclick="startGame(1024)">1024 (Easy)</button>
+        <button onclick="startGame(2048)">2048 (Normal)</button>
+        <button onclick="startGame(Infinity)">Endless</button>
     </div>
 
     <div id="game-screen" class="screen">
-        <div id="score-box">Score: <span id="score">0</span></div>
-        <div id="grid"></div>
-        <button style="margin-top:20px; background:#d33;" onclick="showScreen('menu-screen')">Quit</button>
+        <div class="header">
+            <button class="pause-btn" onclick="togglePause()">||</button>
+            <div class="score-container">
+                <div class="score-box"><span class="score-label">Score</span><span id="score" class="score-value">0</span></div>
+                <div class="score-box"><span class="score-label">Best</span><span id="best" class="score-value">0</span></div>
+            </div>
+        </div>
+        <div id="grid">
+            <div id="pause-overlay" class="overlay">
+                <h2>PAUSED</h2>
+                <button onclick="togglePause()">Resume</button>
+                <button style="background:#d33;" onclick="location.reload()">Quit</button>
+            </div>
+        </div>
     </div>
 
     <script>
-        let grid = [];
-        let score = 0;
-        let lastGrid = [];
-        let audioCtx = null;
+        let grid = [], score = 0, best = localStorage.getItem('e2048-best') || 0;
+        let paused = false, audioCtx = null, tS = {x:0, y:0};
 
-        // --- SOUND ENGINE ---
-        function initAudio() {
-            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        }
+        document.getElementById('best').innerText = best;
 
-        function playSound(type) {
-            if (!audioCtx) return;
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-
-            if (type === 'move') {
-                osc.type = 'triangle';
-                osc.frequency.setValueAtTime(200, audioCtx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.1);
-                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
-            } else if (type === 'merge') {
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(400, audioCtx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(600, audioCtx.currentTime + 0.1);
-                gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
-            }
-            osc.start();
-            osc.stop(audioCtx.currentTime + 0.1);
-        }
-
-        // --- GAME LOGIC ---
         function showScreen(id) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById(id).classList.add('active');
         }
 
+        function togglePause() {
+            paused = !paused;
+            document.getElementById('pause-overlay').style.display = paused ? 'flex' : 'none';
+        }
+
+        function initAudio() { if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+
+        function playSound(f1, f2) {
+            if(!audioCtx) return;
+            let o = audioCtx.createOscillator(), g = audioCtx.createGain();
+            o.connect(g); g.connect(audioCtx.destination);
+            o.frequency.setValueAtTime(f1, audioCtx.currentTime);
+            o.frequency.exponentialRampToValueAtTime(f2, audioCtx.currentTime + 0.1);
+            g.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            g.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+            o.start(); o.stop(audioCtx.currentTime + 0.1);
+        }
+
         function startGame() {
-            score = 0;
-            grid = Array(16).fill(0);
+            score = 0; grid = Array(16).fill(0);
             addTile(); addTile(); render();
             showScreen('game-screen');
         }
@@ -103,32 +105,34 @@
             if (empty.length) {
                 let idx = empty[Math.floor(Math.random() * empty.length)];
                 grid[idx] = Math.random() > 0.1 ? 2 : 4;
-                return idx; // Return for animation tracking
+                return idx;
             }
         }
 
-        function render(newIdx = -1, mergedIndices = []) {
+        function render(newIdx = -1) {
             const container = document.getElementById('grid');
+            const overlay = document.getElementById('pause-overlay');
             container.innerHTML = '';
+            container.appendChild(overlay); // Keep overlay in DOM
             grid.forEach((v, i) => {
                 const d = document.createElement('div');
-                d.className = 'tile';
-                if (i === newIdx) d.classList.add('tile-new');
-                if (mergedIndices.includes(i)) d.classList.add('tile-merged');
-                
+                d.className = 'tile' + (i === newIdx ? ' pop' : '');
                 d.innerText = v || '';
                 d.style.background = v ? `hsl(${45 - Math.log2(v)*5}, 80%, 60%)` : 'var(--tile-empty)';
                 d.style.color = v > 4 ? 'white' : 'var(--text-dark)';
                 container.appendChild(d);
             });
             document.getElementById('score').innerText = score;
+            if(score > best) {
+                best = score;
+                localStorage.setItem('e2048-best', best);
+                document.getElementById('best').innerText = best;
+            }
         }
 
         function move(dir) {
-            let oldGrid = [...grid];
-            let hasMerged = false;
-            let mergedThisTurn = [];
-
+            if(paused) return;
+            let oldGrid = [...grid], merged = false;
             for (let i = 0; i < 4; i++) {
                 let line = [];
                 for (let j = 0; j < 4; j++) {
@@ -136,46 +140,34 @@
                     else line.push(grid[j * 4 + i]);
                 }
                 if (dir === 'R' || dir === 'D') line.reverse();
-                
-                // Slide & Merge
                 let res = line.filter(v => v);
                 for (let j = 0; j < res.length - 1; j++) {
                     if (res[j] === res[j+1]) {
                         res[j] *= 2; score += res[j];
-                        res.splice(j+1, 1);
-                        hasMerged = true;
+                        res.splice(j+1, 1); merged = true;
                     }
                 }
                 while (res.length < 4) res.push(0);
-
                 if (dir === 'R' || dir === 'D') res.reverse();
                 for (let j = 0; j < 4; j++) {
                     if (dir === 'L' || dir === 'R') grid[i * 4 + j] = res[j];
                     else grid[j * 4 + i] = res[j];
                 }
             }
-
             if (JSON.stringify(oldGrid) !== JSON.stringify(grid)) {
-                if (hasMerged) playSound('merge');
-                else playSound('move');
-                let newIdx = addTile();
-                render(newIdx);
+                merged ? playSound(400, 600) : playSound(200, 100);
+                render(addTile());
             }
         }
 
-        // Swipe Handling
-        let tS = {x: 0, y: 0};
-        window.addEventListener('touchstart', e => { tS.x = e.touches[0].clientX; tS.y = e.touches[0].clientY; }, {passive: false});
+        window.addEventListener('touchstart', e => { tS.x = e.touches[0].clientX; tS.y = e.touches[0].clientY; });
         window.addEventListener('touchend', e => {
-            let dx = e.changedTouches[0].clientX - tS.x;
-            let dy = e.changedTouches[0].clientY - tS.y;
+            let dx = e.changedTouches[0].clientX - tS.x, dy = e.changedTouches[0].clientY - tS.y;
             if (Math.abs(dx) > 30 || Math.abs(dy) > 30) {
                 if (Math.abs(dx) > Math.abs(dy)) move(dx > 0 ? 'R' : 'L');
                 else move(dy > 0 ? 'D' : 'U');
             }
-        }, {passive: false});
-
-        startGame();
+        });
     </script>
 </body>
 </html>
