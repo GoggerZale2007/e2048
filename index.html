@@ -3,55 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>e2048 Platinum Edition</title>
+    <title>e2048 & Block Puzzle Platinum</title>
     <style>
-        /* =========================================================
-           I. CSS VARIABLES & THEMES
-           ========================================================= */
         :root {
             --bg-2048: #faf8ef; --text-2048: #776e65; --board-2048: #bbada0; 
             --cell-2048: rgba(238, 228, 218, 0.35); --score-bg: #bbada0;
             --bp-bg: #a0745b; --bp-board: #674332; --bp-cell: #573727; 
             --bp-green: #71b965; --bp-beige: #dac6a3;
         }
-
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; user-select: none; }
-        body { margin: 0; padding: 0; height: 100vh; width: 100vw; overflow: hidden; font-family: "Clear Sans", "Helvetica Neue", Arial, sans-serif; background: var(--bg-2048); color: var(--text-2048); transition: background 0.3s; }
-
-        /* =========================================================
-           II. UI FRAMEWORK
-           ========================================================= */
+        body { margin: 0; padding: 0; height: 100vh; width: 100vw; overflow: hidden; font-family: "Clear Sans", Arial, sans-serif; background: var(--bg-2048); color: var(--text-2048); transition: background 0.3s; }
         .view { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; flex-direction: column; align-items: center; background: inherit; z-index: 10; overflow-y: auto; padding: 20px 0; }
         .active-view { display: flex; animation: fadeIn 0.3s ease-out; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-        .btn { background: #8f7a66; color: #f9f6f2; border: none; padding: 12px 24px; border-radius: 3px; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.1s; text-transform: uppercase; margin: 5px; box-shadow: 0 4px 0 rgba(0,0,0,0.1); }
+        .btn { background: #8f7a66; color: #f9f6f2; border: none; padding: 12px 24px; border-radius: 3px; font-weight: bold; font-size: 16px; cursor: pointer; text-transform: uppercase; margin: 5px; box-shadow: 0 4px 0 rgba(0,0,0,0.1); }
         .btn:active { transform: translateY(2px); box-shadow: none; }
         .input-field { padding: 14px; border-radius: 5px; border: 2px solid #bbada0; width: 280px; font-size: 16px; margin-bottom: 12px; }
-
-        /* --- 2048 Authentic UI Components --- */
+        
+        /* 2048 UI */
         .top-header { width: 340px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         .score-container { display: flex; gap: 8px; }
         .score-box { background: #bbada0; padding: 5px 15px; border-radius: 3px; color: white; text-align: center; min-width: 60px; position: relative; }
         .score-label { display: block; font-size: 11px; font-weight: bold; color: #eee4da; margin-bottom: -2px; }
         .score-val { font-size: 20px; font-weight: bold; }
-
         .game-wrapper { position: relative; width: 340px; height: 340px; background: var(--board-2048); border-radius: 6px; padding: 10px; touch-action: none; }
         .grid-bg { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; width: 100%; height: 100%; }
         .grid-cell { background: var(--cell-2048); border-radius: 3px; }
         .tile-layer { position: absolute; top: 10px; left: 10px; pointer-events: none; width: 320px; height: 320px; }
-
-        .tile { 
-            position: absolute; width: 72.5px; height: 72.5px; border-radius: 3px; display: flex; 
-            justify-content: center; align-items: center; font-weight: bold; font-size: 32px; 
-            transition: transform 100ms ease-in-out; z-index: 10;
-        }
+        .tile { position: absolute; width: 72.5px; height: 72.5px; border-radius: 3px; display: flex; justify-content: center; align-items: center; font-weight: bold; font-size: 32px; transition: transform 100ms ease-in-out; z-index: 10; pointer-events: auto; }
         .t-new { animation: appear 150ms ease-out forwards; }
         .t-merged { z-index: 20; animation: pop 180ms ease-in-out forwards; }
         @keyframes appear { 0% { opacity: 0; transform: scale(0); } 100% { opacity: 1; transform: scale(1); } }
         @keyframes pop { 0% { transform: scale(1); } 50% { transform: scale(1.15); } 100% { transform: scale(1); } }
 
-        /* 2048 Extended Tile Color Scheme */
         .t2{background:#eee4da;color:#776e65} .t4{background:#ede0c8;color:#776e65}
         .t8{background:#f2b179;color:#f9f6f2} .t16{background:#f59563;color:#f9f6f2}
         .t32{background:#f67c5f;color:#f9f6f2} .t64{background:#f65e3b;color:#f9f6f2}
@@ -60,9 +44,9 @@
         .t2048{background:#edc22e;color:#f9f6f2;font-size:24px} .t4096{background:#3c3a32;color:#f9f6f2}
         .t131072{background:#000;color:#00f2ff;text-shadow:0 0 8px #00f2ff;}
 
-        /* --- Block Puzzle UI (Authentic Wood) --- */
+        /* Block Puzzle UI */
         .bp-score-large { font-size: 70px; font-weight: bold; color: white; margin-top: 10px; letter-spacing: -2px; }
-        .bp-grid-wrapper { background: var(--bp-board); padding: 8px; border-radius: 4px; box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
+        .bp-grid-wrapper { background: var(--bp-board); padding: 8px; border-radius: 4px; box-shadow: 0 10px 20px rgba(0,0,0,0.3); touch-action: none; }
         .bp-grid { display: grid; grid-template-columns: repeat(8, 40px); gap: 2px; }
         .bp-slot { width: 40px; height: 40px; background: var(--bp-cell); border-radius: 2px; }
         .bp-filled-green { background: var(--bp-green); box-shadow: inset 3px 3px 0 rgba(255,255,255,0.3), inset -3px -3px 0 rgba(0,0,0,0.2); }
@@ -73,14 +57,11 @@
         .mini-block { width: 20px; height: 20px; border-radius: 2px; }
         .dragging { position: fixed; z-index: 1000; pointer-events: none; transform: scale(1.8); }
 
-        /* --- Overlays & Tutorial --- */
         .overlay { position: absolute; top:0; left:0; width:100%; height:100%; background:rgba(250,248,239,0.8); z-index:100; display:none; flex-direction:column; align-items:center; justify-content:center; }
-        .tutorial-box { background: #5a524b; color: white; padding: 15px; border-radius: 8px; width: 340px; margin-top: 15px; position: relative; }
         .particle { position: fixed; width: 8px; height: 8px; pointer-events: none; z-index: 2000; }
     </style>
 </head>
 <body>
-
     <div id="toast" style="position:fixed; top:-50px; left:50%; transform:translateX(-50%); background:#333; color:white; padding:10px 20px; border-radius:20px; transition:0.4s; z-index:9999;">Notification</div>
 
     <div id="view-auth" class="view active-view" style="justify-content: center;">
@@ -92,31 +73,28 @@
                 <button class="btn" onclick="auth.login()">Login</button>
                 <button class="btn" style="background:#71b965" onclick="auth.register()">Create Account</button>
             </div>
+            <button class="btn" style="background:transparent; color:#776e65; box-shadow:none; margin-top:10px;" onclick="auth.guest()">Play as Guest</button>
         </div>
     </div>
 
     <div id="view-home" class="view">
-        <h2 id="welcome-msg" style="font-size: 32px; margin-bottom: 40px;">Welcome back</h2>
-        <button class="btn" onclick="sys.nav('view-modes')">2048 Standard</button>
+        <h2 id="welcome-msg" style="font-size: 32px; margin-bottom: 40px;">Welcome</h2>
+        <button class="btn" onclick="sys.nav('view-modes')">2048 Modes</button>
         <button class="btn" onclick="sys.nav('view-bp')" style="background:#674332">Block Puzzle</button>
-        <button class="btn" onclick="sys.nav('view-stats')" style="background:#555">Global Stats</button>
+        <button class="btn" onclick="sys.nav('view-stats')" style="background:#555">My Stats</button>
         <button class="btn" onclick="auth.logout()" style="background:#d33; margin-top: 40px;">Logout</button>
     </div>
 
     <div id="view-modes" class="view">
         <div class="top-header">
             <button class="btn" style="padding: 5px 15px;" onclick="sys.nav('view-home')">Back</button>
-            <h1 style="font-size: 24px;">Game Modes</h1>
+            <h1 style="font-size: 24px; margin:0;">Game Modes</h1>
             <div style="width: 50px;"></div>
         </div>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 20px;">
             <button class="btn" onclick="game2048.init(1024)">1024</button>
             <button class="btn" onclick="game2048.init(2048)">2048</button>
-            <button class="btn" onclick="game2048.init(4096)">4096</button>
-            <button class="btn" onclick="game2048.init(8192)">8192</button>
             <button class="btn" onclick="game2048.init(16384)">16384</button>
-            <button class="btn" onclick="game2048.init(32768)">32768</button>
-            <button class="btn" onclick="game2048.init(65536)">65536</button>
             <button class="btn" onclick="game2048.init(131072)">131072</button>
         </div>
         <button class="btn" style="width: 320px; background: #f65e3b;" onclick="game2048.init(Infinity, 60)">1 Min Blitz</button>
@@ -131,13 +109,11 @@
                 <div class="score-box"><span class="score-label">BEST</span><span class="score-val" id="best-2048">0</span></div>
             </div>
         </div>
-
-        <div class="score-row" id="timer-row" style="display:none; margin-bottom: 10px;">
-            <div class="score-pill" style="background:#f65e3b; color:white; width: 100%;">
-                <span>TIME LEFT: </span><b id="timer-val">0:00</b>
+        <div class="score-row" id="timer-row" style="display:none; margin-bottom: 10px; width:340px;">
+            <div class="score-box" style="background:#f65e3b; width: 100%;">
+                <span class="score-label" style="color:white">TIME LEFT</span><b id="timer-val" style="font-size:20px">0:00</b>
             </div>
         </div>
-
         <div class="game-wrapper" id="board-2048">
             <div class="grid-bg">
                 <div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div>
@@ -147,21 +123,14 @@
             </div>
             <div class="tile-layer" id="tile-layer"></div>
             <div class="overlay" id="over-2048">
-                <h2 id="over-msg">Game Over!</h2>
-                <button class="btn" onclick="game2048.init(game2048.target)">Try Again</button>
+                <h2 id="over-msg" style="color:#776e65">Game Over!</h2>
+                <button class="btn" onclick="game2048.init(game2048.target, game2048.initTime)">Try Again</button>
                 <button class="btn" style="background:#555" onclick="sys.nav('view-modes')">Menu</button>
             </div>
         </div>
-
-        <div class="tutorial-box" id="tutorial-tip">
-            <b>WELCOME TO 2048</b>
-            Swipe in any direction to move tiles. Matching tiles join into one!
-        </div>
-
         <div style="display: flex; gap: 15px; margin-top: 20px;">
             <button class="btn" style="width: 80px; background:#bbada0" onclick="game2048.undo()">↩</button>
-            <button class="btn" style="width: 80px; background:#bbada0" onclick="game2048.usePowerup('del')">✖</button>
-            <button class="btn" style="width: 80px; background:#bbada0" onclick="game2048.usePowerup('swap')">⇅</button>
+            <button class="btn" id="btn-del" style="width: 80px; background:#bbada0" onclick="game2048.usePowerup('del')">✖</button>
         </div>
     </div>
 
@@ -171,13 +140,10 @@
             <button class="btn" style="background:none; box-shadow:none; font-size: 24px;" onclick="sys.nav('view-home')">✕</button>
         </div>
         <div class="bp-score-large" id="score-bp">0</div>
-        
         <div class="bp-grid-wrapper">
             <div class="bp-grid" id="bp-grid"></div>
         </div>
-
         <div class="tray" id="tray"></div>
-
         <div class="overlay" id="over-bp" style="background: rgba(103, 67, 50, 0.9);">
             <h2 style="color:white">Out of Moves</h2>
             <button class="btn" style="background:#71b965" onclick="gameBP.init()">Retry</button>
@@ -185,7 +151,7 @@
     </div>
 
     <div id="view-stats" class="view">
-        <h1 style="margin-bottom: 40px;">Evolution Stats</h1>
+        <h1 style="margin-bottom: 40px;">Lifetime Stats</h1>
         <div id="stat-content" style="background:white; padding: 30px; border-radius: 8px; width: 320px; font-size: 20px; line-height: 2;">
             <b>Highest Tile:</b> <span id="stat-tile">0</span><br>
             <b>Total Merges:</b> <span id="stat-merges">0</span><br>
@@ -196,24 +162,28 @@
 
     <script>
         /* =========================================================
-           CORE SYSTEM (Module: Sys)
+           CORE SYSTEM
            ========================================================= */
         const sys = {
             db: { users: {} }, user: null,
             init() {
                 try {
-                    const saved = localStorage.getItem('e2048_platinum_db');
+                    const saved = localStorage.getItem('e2048_plat_db');
                     if (saved) this.db = JSON.parse(saved);
-                } catch(e) { console.error("DB Error"); }
+                } catch(e) { console.warn("Resetting corrupted DB"); }
+                
+                if(!this.db.users) this.db.users = {};
                 const sess = sessionStorage.getItem('e2048_session');
                 if (sess && this.db.users[sess]) auth.complete(sess);
+                
+                this.bindEvents();
             },
-            save() { localStorage.setItem('e2048_platinum_db', JSON.stringify(this.db)); },
+            save() { localStorage.setItem('e2048_plat_db', JSON.stringify(this.db)); },
             nav(id) {
                 document.querySelectorAll('.view').forEach(v => v.classList.remove('active-view'));
                 document.getElementById(id).classList.add('active-view');
-                if (id === 'view-2048') document.body.style.background = 'var(--bg-2048)';
-                if (id === 'view-bp') { document.body.style.background = 'var(--bp-bg)'; gameBP.init(); }
+                document.body.style.background = id === 'view-bp' ? 'var(--bp-bg)' : 'var(--bg-2048)';
+                if (id === 'view-bp') gameBP.init();
                 if (id === 'view-stats') this.renderStats();
             },
             toast(m) {
@@ -222,10 +192,18 @@
                 setTimeout(() => t.style.top = "-50px", 2500);
             },
             renderStats() {
+                if(!this.user || !this.db.users[this.user]) return;
                 const u = this.db.users[this.user];
                 document.getElementById('stat-tile').innerText = u.highTile || 0;
                 document.getElementById('stat-merges').innerText = u.totalMerges || 0;
                 document.getElementById('stat-points').innerText = u.totalPoints || 0;
+            },
+            updateStats(val, score) {
+                if(!this.user || !this.db.users[this.user]) return;
+                const u = this.db.users[this.user];
+                u.totalMerges++; u.totalPoints += score;
+                if(val > u.highTile) u.highTile = val;
+                this.save();
             },
             particles(x, y, color) {
                 for(let i=0; i<8; i++) {
@@ -233,37 +211,60 @@
                     p.className = 'particle'; p.style.background = color;
                     p.style.left = x + 'px'; p.style.top = y + 'px';
                     document.body.appendChild(p);
-                    const ang = Math.random() * Math.PI * 2;
-                    const dist = 30 + Math.random() * 40;
+                    const ang = Math.random() * Math.PI * 2, dist = 30 + Math.random() * 40;
                     p.animate([{transform:'translate(0,0)'}, {transform:`translate(${Math.cos(ang)*dist}px, ${Math.sin(ang)*dist}px)`, opacity:0}], 500).onfinish = () => p.remove();
                 }
+            },
+            bindEvents() {
+                // Global touch prevention to stop iOS bounce
+                document.body.addEventListener('touchmove', e => { if(!e.target.closest('.view')) e.preventDefault(); }, { passive: false });
+                
+                // 2048 Keyboard
+                window.addEventListener('keydown', e => {
+                    if(document.getElementById('view-2048').classList.contains('active-view')) {
+                        if(e.key==='ArrowUp'||e.key==='w') game2048.move('U');
+                        if(e.key==='ArrowDown'||e.key==='s') game2048.move('D');
+                        if(e.key==='ArrowLeft'||e.key==='a') game2048.move('L');
+                        if(e.key==='ArrowRight'||e.key==='d') game2048.move('R');
+                    }
+                });
+
+                // 2048 Swipe
+                let tx, ty;
+                const b = document.getElementById('board-2048');
+                b.addEventListener('touchstart', e => { tx = e.touches[0].clientX; ty = e.touches[0].clientY; }, {passive: false});
+                b.addEventListener('touchend', e => {
+                    if(!document.getElementById('view-2048').classList.contains('active-view')) return;
+                    let dx = e.changedTouches[0].clientX - tx, dy = e.changedTouches[0].clientY - ty;
+                    if(Math.abs(dx) > 30 || Math.abs(dy) > 30) {
+                        if(Math.abs(dx) > Math.abs(dy)) game2048.move(dx > 0 ? 'R' : 'L');
+                        else game2048.move(dy > 0 ? 'D' : 'U');
+                    }
+                });
             }
         };
 
         /* =========================================================
-           AUTHENTICATION (Module: Auth)
+           AUTHENTICATION
            ========================================================= */
         const auth = {
-            toggleAuth() {
-                const l = document.getElementById('auth-login-ui');
-                const r = document.getElementById('auth-reg-ui');
-                l.style.display = l.style.display === 'none' ? 'flex' : 'none';
-                r.style.display = r.style.display === 'none' ? 'flex' : 'none';
+            guest() {
+                if (!sys.db.users['Guest']) sys.db.users['Guest'] = { pass: '', highTile: 0, totalMerges: 0, totalPoints: 0, best2048: 0, bestBP: 0 };
+                this.complete('Guest');
             },
             register() {
                 const u = document.getElementById('reg-u').value.trim();
                 const p = document.getElementById('reg-p').value.trim();
                 if (u.length < 3 || p.length < 3) return alert("Too short");
-                if (sys.db.users[u]) return alert("Taken");
+                if (sys.db.users[u]) return alert("Username taken");
                 sys.db.users[u] = { pass: p, highTile: 0, totalMerges: 0, totalPoints: 0, best2048: 0, bestBP: 0 };
-                sys.save();
-                this.complete(u);
+                sys.save(); this.complete(u);
             },
             login() {
                 const u = document.getElementById('reg-u').value.trim();
                 const p = document.getElementById('reg-p').value.trim();
                 if (sys.db.users[u] && sys.db.users[u].pass === p) this.complete(u);
-                else alert("Invalid");
+                else alert("Invalid login");
             },
             complete(u) {
                 sys.user = u;
@@ -275,23 +276,26 @@
         };
 
         /* =========================================================
-           2048 EXTENDED ENGINE (Module: Game2048)
+           2048 ENGINE
            ========================================================= */
         const game2048 = {
             grid: [], score: 0, target: 2048, history: [], idCounter: 0,
-            timer: null, timeLeft: 0, isTimer: false,
-            powerup: null, // 'del' or 'swap'
+            timer: null, timeLeft: 0, isTimer: false, initTime: 0, powerup: null,
 
             init(t, sec = 0) {
                 clearInterval(this.timer);
                 this.target = t; this.score = 0; this.idCounter = 0; this.history = [];
                 this.grid = Array(16).fill(null);
-                this.isTimer = sec > 0; this.timeLeft = sec;
+                this.isTimer = sec > 0; this.timeLeft = sec; this.initTime = sec; this.powerup = null;
                 
                 document.getElementById('display-target').innerText = t === Infinity ? "ENDLESS" : t;
                 document.getElementById('over-2048').style.display = 'none';
                 document.getElementById('timer-row').style.display = this.isTimer ? 'flex' : 'none';
-                document.getElementById('best-2048').innerText = sys.db.users[sys.user].best2048 || 0;
+                document.getElementById('btn-del').style.background = '#bbada0';
+                
+                if(sys.user && sys.db.users[sys.user]) {
+                    document.getElementById('best-2048').innerText = sys.db.users[sys.user].best2048 || 0;
+                }
                 
                 if (this.isTimer) this.startTimer();
                 this.spawn(); this.spawn(); this.render();
@@ -301,8 +305,7 @@
             startTimer() {
                 const tick = () => {
                     this.timeLeft--;
-                    const m = Math.floor(this.timeLeft / 60);
-                    const s = this.timeLeft % 60;
+                    const m = Math.floor(this.timeLeft / 60), s = this.timeLeft % 60;
                     document.getElementById('timer-val').innerText = `${m}:${s < 10 ? '0' : ''}${s}`;
                     if (this.timeLeft <= 0) { clearInterval(this.timer); this.gameOver("Time's Up!"); }
                 };
@@ -331,13 +334,12 @@
                 this.grid.forEach((tile, idx) => {
                     if (!tile) return;
                     let node = document.querySelector(`.tile[data-id='${tile.id}']`);
-                    const x = (idx % 4) * 82.5; 
-                    const y = Math.floor(idx / 4) * 82.5;
+                    const x = (idx % 4) * 82.5, y = Math.floor(idx / 4) * 82.5;
 
                     if (!node) {
                         node = document.createElement('div');
                         node.dataset.id = tile.id;
-                        node.onclick = () => this.handleTileClick(idx);
+                        node.onclick = () => this.handleTileClick(this.grid.findIndex(t => t && t.id === tile.id));
                         layer.appendChild(node);
                     }
                     
@@ -348,7 +350,7 @@
                 });
 
                 document.getElementById('score-2048').innerText = this.score;
-                if (this.score > sys.db.users[sys.user].best2048) {
+                if (sys.user && this.score > sys.db.users[sys.user].best2048) {
                     sys.db.users[sys.user].best2048 = this.score;
                     document.getElementById('best-2048').innerText = this.score;
                     sys.save();
@@ -389,10 +391,7 @@
                         if(tiles[j].val === tiles[j+1].val) {
                             tiles[j] = { id: this.idCounter++, val: tiles[j].val * 2, isNew: false, isMerged: true };
                             this.score += tiles[j].val;
-                            const u = sys.db.users[sys.user];
-                            u.totalMerges++; u.totalPoints += tiles[j].val;
-                            if (tiles[j].val > u.highTile) u.highTile = tiles[j].val;
-                            sys.save();
+                            sys.updateStats(tiles[j].val, tiles[j].val);
                             if (tiles[j].val === this.target) sys.toast("MILESTONE REACHED!");
                             tiles.splice(j+1, 1); moved = true;
                         }
@@ -427,16 +426,15 @@
             },
 
             usePowerup(type) {
-                this.powerup = type;
-                document.getElementById('tutorial-tip').innerHTML = `<b>${type.toUpperCase()} ACTIVE</b>Tap a tile to use the powerup.`;
+                this.powerup = this.powerup === type ? null : type;
+                document.getElementById('btn-del').style.background = this.powerup ? '#a49688' : '#bbada0';
+                if(this.powerup) sys.toast("Tap a tile to delete it");
             },
 
             handleTileClick(idx) {
                 if (this.powerup === 'del' && this.grid[idx]) {
-                    this.saveState(); this.grid[idx] = null; this.powerup = null; this.render();
-                    document.getElementById('tutorial-tip').innerHTML = `<b>BOOM!</b>Tile removed. Swipe to continue.`;
+                    this.saveState(); this.grid[idx] = null; this.usePowerup('del'); this.render();
                 }
-                // (Swap logic would follow similar pattern)
             }
         };
 
@@ -446,19 +444,19 @@
         const gameBP = {
             board: Array(64).fill(0), score: 0,
             shapes: [
-                {m: [[1,1],[1,1]], c: 'bp-block-green'}, 
-                {m: [[1,1,1,1]], c: 'bp-block-beige'},
-                {m: [[1],[1],[1],[1]], c: 'bp-block-green'},
-                {m: [[1,1,1],[0,1,0]], c: 'bp-block-beige'},
-                {m: [[1,0],[1,0],[1,1]], c: 'bp-block-green'},
-                {m: [[1,1,1,1,1]], c: 'bp-block-beige'}
+                {m: [[1,1],[1,1]], c: 'bp-filled-green'}, 
+                {m: [[1,1,1,1]], c: 'bp-filled-beige'},
+                {m: [[1],[1],[1],[1]], c: 'bp-filled-green'},
+                {m: [[1,1,1],[0,1,0]], c: 'bp-filled-beige'},
+                {m: [[1,0],[1,0],[1,1]], c: 'bp-filled-green'},
+                {m: [[1,1,1,1,1]], c: 'bp-filled-beige'}
             ],
 
             init() {
                 this.board.fill(0); this.score = 0;
                 document.getElementById('over-bp').style.display = 'none';
                 document.getElementById('score-bp').innerText = 0;
-                document.getElementById('best-bp').innerText = sys.db.users[sys.user].bestBP || 0;
+                if(sys.user && sys.db.users[sys.user]) document.getElementById('best-bp').innerText = sys.db.users[sys.user].bestBP || 0;
                 
                 const g = document.getElementById('bp-grid'); g.innerHTML = '';
                 for(let i=0; i<64; i++) {
@@ -479,38 +477,50 @@
                         const b = document.createElement('div'); b.className = 'mini-block';
                         if(v) b.classList.add(s.c); d.appendChild(b);
                     });
-                    d.onmousedown = (e) => this.drag(e, d, s.m, s.c);
-                    d.ontouchstart = (e) => this.drag(e.touches[0], d, s.m, s.c), {passive: false};
+                    
+                    const handleDrag = (e, touch) => this.drag(touch ? e.touches[0] : e, d, s.m, s.c);
+                    d.addEventListener('mousedown', e => handleDrag(e, false));
+                    d.addEventListener('touchstart', e => handleDrag(e, true), {passive: false});
                     tray.appendChild(d);
                 }
                 this.checkMoves();
             },
 
-            drag(e, el, matrix, cls) {
+            drag(pt, el, matrix, cls) {
                 const clone = el.cloneNode(true); clone.classList.add('dragging');
                 clone.style.gridTemplateColumns = `repeat(${matrix[0].length}, 42px)`;
                 Array.from(clone.children).forEach(c => { c.style.width = '40px'; c.style.height = '40px'; });
                 document.body.appendChild(clone);
 
+                const getGridPos = (x, y) => {
+                    const r = document.getElementById('bp-grid').getBoundingClientRect();
+                    return { c: Math.round((x - r.left - 20) / 42), r: Math.round((y - r.top - 60) / 42) };
+                };
+
                 const move = ev => {
-                    const pt = ev.touches ? ev.touches[0] : ev;
-                    clone.style.left = pt.clientX - 20 + 'px';
-                    clone.style.top = pt.clientY - 60 + 'px';
-                    this.clearGhosts();
-                    const p = this.getGridPos(pt.clientX, pt.clientY);
-                    if(this.canPlace(matrix, p.r, p.c)) this.ghost(matrix, p.r, p.c);
+                    ev.preventDefault();
+                    const p = ev.touches ? ev.touches[0] : ev;
+                    clone.style.left = p.clientX - 20 + 'px'; clone.style.top = p.clientY - 60 + 'px';
+                    document.querySelectorAll('.bp-ghost').forEach(e => e.classList.remove('bp-ghost'));
+                    const pos = getGridPos(p.clientX, p.clientY);
+                    if(this.canPlace(matrix, pos.r, pos.c)) {
+                        for(let i=0; i<matrix.length; i++) for(let j=0; j<matrix[0].length; j++) 
+                            if(matrix[i][j]) document.getElementById(`bp-c-${(pos.r+i)*8+(pos.c+j)}`).classList.add('bp-ghost');
+                    }
                 };
 
                 const end = ev => {
-                    const pt = ev.changedTouches ? ev.changedTouches[0] : ev;
-                    const p = this.getGridPos(pt.clientX, pt.clientY);
-                    if(this.canPlace(matrix, p.r, p.c)) {
-                        this.place(matrix, p.r, p.c, cls);
+                    const p = ev.changedTouches ? ev.changedTouches[0] : ev;
+                    const pos = getGridPos(p.clientX, p.clientY);
+                    if(this.canPlace(matrix, pos.r, pos.c)) {
+                        for(let i=0; i<matrix.length; i++) for(let j=0; j<matrix[0].length; j++) 
+                            if(matrix[i][j]) { this.board[(pos.r+i)*8+(pos.c+j)] = 1; document.getElementById(`bp-c-${(pos.r+i)*8+(pos.c+j)}`).className = `bp-slot ${cls}`; }
+                        this.score += 10; this.checkLines();
                         el.style.visibility = 'hidden'; el.dataset.used = 'true';
                         if(Array.from(document.getElementById('tray').children).every(n => n.dataset.used)) this.spawn();
                         else this.checkMoves();
                     }
-                    clone.remove(); this.clearGhosts();
+                    clone.remove(); document.querySelectorAll('.bp-ghost').forEach(e => e.classList.remove('bp-ghost'));
                     window.removeEventListener('mousemove', move); window.removeEventListener('mouseup', end);
                     window.removeEventListener('touchmove', move); window.removeEventListener('touchend', end);
                 };
@@ -519,34 +529,10 @@
                 window.addEventListener('touchmove', move, {passive: false}); window.addEventListener('touchend', end);
             },
 
-            getGridPos(x, y) {
-                const r = document.getElementById('bp-grid').getBoundingClientRect();
-                return { c: Math.round((x - r.left - 20) / 42), r: Math.round((y - r.top - 60) / 42) };
-            },
-
             canPlace(m, r, c) {
                 if(r < 0 || c < 0 || r + m.length > 8 || c + m[0].length > 8) return false;
                 for(let i=0; i<m.length; i++) for(let j=0; j<m[0].length; j++) if(m[i][j] && this.board[(r+i)*8+(c+j)]) return false;
                 return true;
-            },
-
-            ghost(m, r, c) {
-                for(let i=0; i<m.length; i++) for(let j=0; j<m[0].length; j++) if(m[i][j]) document.getElementById(`bp-c-${(r+i)*8+(c+j)}`).classList.add('bp-ghost');
-            },
-
-            clearGhosts() { document.querySelectorAll('.bp-ghost').forEach(e => e.classList.remove('bp-ghost')); },
-
-            place(m, r, c, cls) {
-                for(let i=0; i<m.length; i++) for(let j=0; j<m[0].length; j++) if(m[i][j]) {
-                    const idx = (r+i)*8+(c+j); this.board[idx] = 1;
-                    document.getElementById(`bp-c-${idx}`).classList.add(cls);
-                }
-                this.score += 10; this.checkLines();
-                document.getElementById('score-bp').innerText = this.score;
-                if(this.score > sys.db.users[sys.user].bestBP) {
-                    sys.db.users[sys.user].bestBP = this.score; sys.save();
-                    document.getElementById('best-bp').innerText = this.score;
-                }
             },
 
             checkLines() {
@@ -558,17 +544,22 @@
                 }
                 if (rows.length || cols.length) {
                     this.score += (rows.length + cols.length) * 100;
-                    rows.forEach(r => { for(let c=0; c<8; c++) this.clear(r*8+c); });
-                    cols.forEach(c => { for(let r=0; r<8; r++) this.clear(r*8+c); });
+                    const clears = new Set();
+                    rows.forEach(r => { for(let c=0; c<8; c++) clears.add(r*8+c); });
+                    cols.forEach(c => { for(let r=0; r<8; r++) clears.add(r*8+c); });
+                    
+                    clears.forEach(idx => {
+                        this.board[idx] = 0;
+                        const cell = document.getElementById(`bp-c-${idx}`);
+                        sys.particles(cell.getBoundingClientRect().left+20, cell.getBoundingClientRect().top+20, '#fff');
+                        cell.className = 'bp-slot';
+                    });
                 }
-            },
-
-            clear(idx) {
-                this.board[idx] = 0;
-                const cell = document.getElementById(`bp-c-${idx}`);
-                const rect = cell.getBoundingClientRect();
-                sys.particles(rect.left+20, rect.top+20, '#fff');
-                cell.className = 'bp-slot';
+                document.getElementById('score-bp').innerText = this.score;
+                if(sys.user && this.score > sys.db.users[sys.user].bestBP) {
+                    sys.db.users[sys.user].bestBP = this.score; sys.save();
+                    document.getElementById('best-bp').innerText = this.score;
+                }
             },
 
             checkMoves() {
@@ -581,22 +572,6 @@
                 if(!possible && rem.length > 0) document.getElementById('over-bp').style.display = 'flex';
             }
         };
-
-        /* --- Input Setup --- */
-        window.addEventListener('keydown', e => {
-            if(document.getElementById('view-2048').classList.contains('active-view')) {
-                if(e.key.includes('Arrow')) game2048.move(e.key[5][0]);
-            }
-        });
-        let tx, ty;
-        document.getElementById('board-2048').addEventListener('touchstart', e => { tx = e.touches[0].clientX; ty = e.touches[0].clientY; }, {passive: false});
-        document.getElementById('board-2048').addEventListener('touchend', e => {
-            let dx = e.changedTouches[0].clientX - tx, dy = e.changedTouches[0].clientY - ty;
-            if(Math.abs(dx) > 30 || Math.abs(dy) > 30) {
-                if(Math.abs(dx) > Math.abs(dy)) game2048.move(dx > 0 ? 'R' : 'L');
-                else game2048.move(dy > 0 ? 'D' : 'U');
-            }
-        });
 
         window.onload = () => sys.init();
     </script>
