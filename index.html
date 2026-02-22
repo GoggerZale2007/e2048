@@ -8,251 +8,249 @@
         :root {
             --bg: #faf8ef; --grid: #bbada0; --tile: #cdc1b4; 
             --text: #776e65; --accent: #8f7a66; --white: #ffffff;
-            --cyber-neon: #00f2ff;
+            --neon: #00f2ff; --grass: #7cfc00;
         }
 
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        
+        /* THEMES */
+        .theme-dark { --bg: #121212; --grid: #2a2a2a; --tile: #3d3d3d; --text: #e0e0e0; --accent: #bb86fc; }
+        .theme-neon { --bg: #000; --grid: #1a1a1a; --tile: #333; --text: var(--neon); --accent: #ff0055; }
+        .theme-grass { --bg: #2d5a27; --grid: #1e3d1a; --tile: #3e6b37; --text: #ffffff; --accent: #ffd700; }
+
         body { 
             background: var(--bg); color: var(--text); font-family: 'Clear Sans', 'Helvetica Neue', Arial, sans-serif;
-            margin: 0; padding: 0; display: flex; flex-direction: column; align-items: center; 
-            height: 100vh; overflow: hidden; touch-action: none;
+            margin: 0; padding: 0; height: 100vh; overflow: hidden; touch-action: none;
+            display: flex; flex-direction: column; align-items: center; transition: 0.3s;
         }
 
-        /* --- UI FRAMEWORK --- */
-        .screen { 
-            display: none; flex-direction: column; align-items: center; justify-content: center;
-            position: absolute; width: 100%; height: 100%; transition: opacity 0.3s ease; opacity: 0;
+        /* UI OVERLAYS */
+        .view { 
+            display: none; position: absolute; width: 100%; height: 100%; 
+            flex-direction: column; align-items: center; justify-content: center;
+            background: var(--bg); z-index: 10; padding: 20px; box-sizing: border-box;
         }
-        .active { display: flex; opacity: 1; z-index: 10; }
+        .active-view { display: flex; animation: fadeIn 0.3s ease; }
 
-        .header { width: 340px; display: flex; justify-content: space-between; align-items: center; padding: 20px 0; }
-        .score-box { background: var(--grid); padding: 5px 15px; border-radius: 6px; color: white; text-align: center; min-width: 70px; }
-        .score-box span { display: block; }
-        .label { font-size: 10px; text-transform: uppercase; font-weight: bold; }
-        .val { font-size: 20px; font-weight: bold; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* --- e2048 ENGINE STYLES --- */
-        #game-board { 
-            position: relative; width: 340px; height: 340px; background: var(--grid); 
-            border-radius: 8px; padding: 10px; display: grid; 
-            grid-template-columns: repeat(4, 1fr); grid-gap: 10px; 
+        /* GAME BOARD */
+        .game-container { position: relative; width: 340px; }
+        #grid { 
+            display: grid; background: var(--grid); padding: 10px; border-radius: 8px; 
+            grid-gap: 10px; position: relative;
         }
-        .cell { width: 100%; height: 100%; background: rgba(238, 228, 218, 0.35); border-radius: 4px; }
         .tile { 
-            position: absolute; width: 72.5px; height: 72.5px; border-radius: 4px; 
-            display: flex; justify-content: center; align-items: center; 
-            font-weight: bold; font-size: 28px; transition: transform 0.1s, top 0.1s, left 0.1s; 
-            z-index: 2;
+            width: 70px; height: 70px; border-radius: 4px; display: flex; 
+            justify-content: center; align-items: center; font-weight: bold;
+            transition: 0.1s transform, 0.1s top, 0.1s left;
         }
 
-        /* --- HOT BALLOON STYLES --- */
-        #balloon-container { position: relative; width: 340px; height: 500px; background: #87CEEB; border: 5px solid var(--grid); border-radius: 10px; overflow: hidden; }
-        #balloon-score { position: absolute; top: 10px; right: 10px; font-size: 30px; font-weight: bold; color: white; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
-
-        /* --- BLOCK BLAST STYLES --- */
-        #block-container { display: flex; flex-direction: column; align-items: center; }
-        .b-grid { display: grid; grid-template-columns: repeat(8, 35px); grid-gap: 4px; background: #333; padding: 8px; border-radius: 6px; }
-        .b-slot { width: 35px; height: 35px; background: #444; border-radius: 2px; }
-        .b-filled { background: #ff0055; box-shadow: 0 0 8px #ff0055; }
-        .shape-preview { display: flex; gap: 20px; margin-top: 30px; }
-        .mini-shape { display: grid; grid-gap: 2px; cursor: pointer; }
-
-        /* --- BUTTONS --- */
+        /* BUTTONS */
         .btn { 
-            background: var(--accent); color: white; border: none; padding: 15px 30px; 
-            font-size: 18px; font-weight: bold; border-radius: 8px; cursor: pointer; 
-            margin: 10px; width: 220px; text-transform: uppercase; letter-spacing: 1px;
-            box-shadow: 0 4px 0 #5d4f42; transition: all 0.1s;
+            background: var(--accent); color: white; border: none; padding: 12px 20px; 
+            border-radius: 6px; font-weight: bold; cursor: pointer; margin: 5px;
+            text-transform: uppercase; transition: 0.2s;
         }
-        .btn:active { transform: translateY(3px); box-shadow: 0 1px 0 #5d4f42; }
+        .btn:hover { filter: brightness(1.1); }
+        .btn-small { padding: 5px 10px; font-size: 12px; }
+
+        /* STATS & LISTS */
+        .list-container { 
+            width: 100%; max-width: 300px; max-height: 200px; 
+            overflow-y: auto; background: rgba(0,0,0,0.05); border-radius: 8px; padding: 10px;
+        }
+        .list-item { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid rgba(0,0,0,0.1); }
     </style>
 </head>
 <body>
 
-    <div id="toast" style="position:fixed; top:-100px; background:#333; color:white; padding:15px 30px; border-radius:30px; transition:0.5s; z-index:2000;"></div>
-
-    <div id="menu-screen" class="screen active">
-        <h1 style="font-size: 70px; margin: 0; color: var(--text);">e2048</h1>
-        <p style="margin-bottom: 30px;">THE EVOLUTION</p>
-        <button class="btn" onclick="nav('mode-screen')">Start e2048</button>
-        <button class="btn" onclick="nav('discovery-screen')" style="background: #5c85d6; box-shadow: 0 4px 0 #3b5998;">More Games</button>
-        <button class="btn" onclick="toggleTheme()" style="background: #333; box-shadow: 0 4px 0 #000;">Switch Theme</button>
+    <div id="view-auth" class="view active-view">
+        <h1 style="font-size: 60px; margin: 0;">e2048</h1>
+        <p>Evolutionary Branch</p>
+        <input type="text" id="username" placeholder="Username" style="padding:10px; border-radius:5px; border:1px solid #ccc; margin-bottom:10px; width:200px;">
+        <button class="btn" onclick="app.login()">Login / Register</button>
+        <p style="font-size: 12px; opacity: 0.6;">No password required (Local Cloud Simulation)</p>
     </div>
 
-    <div id="mode-screen" class="screen">
-        <h2>SELECT CHALLENGE</h2>
-        <button class="btn" onclick="start2048(2048)">Standard (2k)</button>
-        <button class="btn" onclick="start2048(16384)">Expert (16k)</button>
-        <button class="btn" onclick="start2048(131072)">Skilled (131k)</button>
-        <button class="btn" onclick="nav('menu-screen')" style="background:#d33; box-shadow: 0 4px 0 #800;">Back</button>
+    <div id="view-home" class="view">
+        <h1 id="welcome-msg">Hi, Player</h1>
+        <button class="btn" onclick="app.nav('view-modes')">Play e2048</button>
+        <button class="btn" onclick="app.nav('view-discovery')" style="background:#5c85d6">More Games</button>
+        <button class="btn" onclick="app.nav('view-stats')" style="background:#444">Stats & Achievements</button>
+        <button class="btn" onclick="app.nav('view-settings')" style="background:#777">Settings</button>
     </div>
 
-    <div id="game-screen" class="screen">
-        <div class="header">
-            <button onclick="nav('menu-screen')" style="background:none; border:none; font-size:30px; color:var(--text);">✕</button>
-            <div class="score-container" style="display:flex; gap:10px;">
-                <div class="score-box"><span class="label">Score</span><span id="score" class="val">0</span></div>
-                <div class="score-box"><span class="label">Best</span><span id="best" class="val">0</span></div>
+    <div id="view-modes" class="view">
+        <h2>Select Mode</h2>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+            <button class="btn" onclick="game.start(1024)">1024</button>
+            <button class="btn" onclick="game.start(2048)">2048</button>
+            <button class="btn" onclick="game.start(16384)">16k</button>
+            <button class="btn" onclick="game.start(131072)">131k</button>
+        </div>
+        <button class="btn" style="width:100%;" onclick="game.start(Infinity)">Endless</button>
+        <hr style="width:100%; opacity:0.2;">
+        <h3>Grid Size</h3>
+        <div style="display:flex; gap:10px;">
+            <button class="btn-small" onclick="game.setSize(3)">3x3</button>
+            <button class="btn-small" onclick="game.setSize(4)">4x4</button>
+            <button class="btn-small" onclick="game.setSize(5)">5x5</button>
+        </div>
+        <button class="btn" onclick="app.nav('view-home')" style="background:#d33">Back</button>
+    </div>
+
+    <div id="view-stats" class="view">
+        <h2>Player Stats</h2>
+        <div class="list-container" id="stats-content"></div>
+        <h2>Achievements</h2>
+        <div class="list-container" id="achievements-content"></div>
+        <button class="btn" onclick="app.nav('view-home')">Back</button>
+    </div>
+
+    <div id="view-settings" class="view">
+        <h2>Settings</h2>
+        <button class="btn" onclick="app.setTheme('dark')">Dark Mode</button>
+        <button class="btn" onclick="app.setTheme('neon')">Neon Theme</button>
+        <button class="btn" onclick="app.setTheme('grass')">Grass Theme</button>
+        <button class="btn" onclick="app.toggleHaptics()">Toggle Haptics</button>
+        <button class="btn" onclick="app.nav('view-home')">Back</button>
+    </div>
+
+    <div id="view-game" class="view">
+        <div style="display:flex; justify-content:space-between; width:340px;">
+            <h2 id="current-mode-name">2048</h2>
+            <div style="text-align:right;">
+                <span style="font-size:10px;">SCORE</span><br><b id="score">0</b>
             </div>
         </div>
-        <div id="game-board">
-            <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
-            <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
-            <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
-            <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+        <div class="game-container">
+            <div id="grid"></div>
         </div>
-        <div style="margin-top:20px;">
-            <button class="btn" style="width:100px;" onclick="undo2048()">Undo</button>
+        <div class="controls" style="margin-top:20px;">
+            <button class="btn" onclick="game.undo()">Undo</button>
+            <button class="btn" onclick="app.nav('view-home')" style="background:#d33">Quit</button>
         </div>
-    </div>
-
-    <div id="balloon-screen" class="screen">
-        <div id="balloon-container">
-            <div id="balloon-score">0</div>
-            <div id="balloon-obj" style="position:absolute; width:40px; height:50px; background:url('https://cdn-icons-png.flaticon.com/512/1043/1043964.png'); background-size:contain; background-repeat:no-repeat;"></div>
-        </div>
-        <button class="btn" onclick="stopBalloon(); nav('discovery-screen')">Quit Game</button>
-    </div>
-
-    <div id="block-screen" class="screen">
-        <div id="block-container">
-            <h2 style="color:var(--text)">BLOCK BLAST</h2>
-            <div class="b-grid" id="b-grid"></div>
-            <div class="shape-preview" id="b-previews"></div>
-        </div>
-        <button class="btn" onclick="nav('discovery-screen')" style="margin-top:40px;">Exit</button>
-    </div>
-
-    <div id="discovery-screen" class="screen">
-        <h2>HUB EVOLUTION</h2>
-        <button class="btn" onclick="nav('balloon-screen'); startBalloon();">🎈 Hot Balloon</button>
-        <button class="btn" onclick="nav('block-screen'); startBlocks();">🟦 Block Blast</button>
-        <button class="btn" onclick="nav('menu-screen')" style="background:#555; box-shadow: 0 4px 0 #222;">Home</button>
     </div>
 
     <script>
-        /* --- GLOBAL NAVIGATION --- */
-        function nav(id) {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            const target = document.getElementById(id);
-            target.classList.add('active');
-            triggerToast("Entering " + id.split('-')[0].toUpperCase());
-        }
+        /* --- APP STATE & ENGINE --- */
+        const app = {
+            user: null,
+            settings: { theme: 'classic', haptics: true, sound: true },
+            stats: { highTile: 0, totalGames: 0, bestScore: 0, merges: 0 },
+            
+            init() {
+                this.loadData();
+                if(this.user) this.nav('view-home');
+            },
 
-        function triggerToast(m) {
-            const t = document.getElementById('toast');
-            t.innerText = m; t.style.top = "20px";
-            setTimeout(() => t.style.top = "-100px", 2000);
-        }
+            login() {
+                const name = document.getElementById('username').value;
+                if(!name) return alert("Enter username");
+                this.user = name;
+                this.saveData();
+                document.getElementById('welcome-msg').innerText = `Hi, ${name}`;
+                this.nav('view-home');
+                this.toast(`Authenticated as ${name}`);
+            },
 
-        /* --- e2048 ENGINE (ADVANCED) --- */
-        let grid = [], score = 0, targetTile = 2048, history = [];
-        function start2048(t) {
-            targetTile = t; score = 0; grid = Array(16).fill(0);
-            history = []; nav('game-screen');
-            add2048Tile(); add2048Tile(); render2048();
-        }
+            nav(viewId) {
+                document.querySelectorAll('.view').forEach(v => v.classList.remove('active-view'));
+                document.getElementById(viewId).classList.add('active-view');
+                if(viewId === 'view-stats') this.renderStats();
+            },
 
-        function add2048Tile() {
-            let empty = grid.map((v, i) => v === 0 ? i : null).filter(v => v !== null);
-            if (empty.length) grid[empty[Math.floor(Math.random() * empty.length)]] = Math.random() > 0.1 ? 2 : 4;
-        }
+            setTheme(t) {
+                document.body.className = 'theme-' + t;
+                this.settings.theme = t;
+                this.saveData();
+            },
 
-        function render2048() {
-            const board = document.getElementById('game-board');
-            document.querySelectorAll('.tile').forEach(t => t.remove());
-            grid.forEach((v, i) => {
-                if (v === 0) return;
-                const t = document.createElement('div');
-                t.className = 'tile';
-                t.innerText = v;
-                t.style.left = (10 + (i % 4) * 82.5) + "px";
-                t.style.top = (10 + Math.floor(i / 4) * 82.5) + "px";
-                t.style.background = get2048Color(v);
-                t.style.color = v > 4 ? "white" : "#776e65";
-                board.appendChild(t);
-            });
-            document.getElementById('score').innerText = score;
-        }
+            toast(msg) {
+                console.log("Toast:", msg); // Implement visual toast if needed
+            },
 
-        function get2048Color(v) {
-            const map = {2:"#eee4da", 4:"#ede0c8", 8:"#f2b179", 16:"#f59563", 32:"#f67c5f", 64:"#f65e3b", 128:"#edcf72", 256:"#edcc61", 512:"#edc850", 1024:"#edc53f", 2048:"#edc22e"};
-            return map[v] || "#3c3a32";
-        }
+            saveData() {
+                localStorage.setItem('e2048_user', this.user);
+                localStorage.setItem('e2048_settings', JSON.stringify(this.settings));
+                localStorage.setItem('e2048_stats', JSON.stringify(this.stats));
+            },
 
-        function move2048(dir) {
-            history.push({g: [...grid], s: score});
-            let old = [...grid];
-            // Slide logic... (simplified for code length)
-            // In a real longer code, we'd iterate and merge specifically
-            if (JSON.stringify(old) !== JSON.stringify(grid)) { add2048Tile(); render2048(); }
-        }
+            loadData() {
+                this.user = localStorage.getItem('e2048_user');
+                this.stats = JSON.parse(localStorage.getItem('e2048_stats')) || this.stats;
+            },
 
-        /* --- HOT BALLOON ENGINE --- */
-        let by = 250, bv = 0, bScore = 0, bPipe = 340, bActive = false;
-        function startBalloon() {
-            bActive = true; by = 250; bv = 0; bScore = 0; bPipe = 340;
-            requestAnimationFrame(updateBalloon);
-        }
-        function updateBalloon() {
-            if (!bActive) return;
-            bv += 0.25; by += bv;
-            bPipe -= 3;
-            if (bPipe < -50) { bPipe = 340; bScore++; }
-            const obj = document.getElementById('balloon-obj');
-            obj.style.top = by + "px";
-            obj.style.left = "50px";
-            document.getElementById('balloon-score').innerText = bScore;
-            if (by > 450 || by < 0) { bActive = false; alert("Balloon Popped! Score: " + bScore); nav('discovery-screen'); }
-            else requestAnimationFrame(updateBalloon);
-        }
-        window.addEventListener('touchstart', () => { if(bActive) bv = -6; });
-
-        /* --- BLOCK BLAST ENGINE --- */
-        let blockBoard = Array(64).fill(0);
-        function startBlocks() {
-            const container = document.getElementById('b-grid');
-            container.innerHTML = '';
-            blockBoard.fill(0);
-            for(let i=0; i<64; i++) {
-                let s = document.createElement('div'); s.className = 'b-slot';
-                s.onclick = () => fillBlock(i, s);
-                container.appendChild(s);
+            renderStats() {
+                const sCont = document.getElementById('stats-content');
+                sCont.innerHTML = `
+                    <div class="list-item"><span>Highest Tile</span><span>${this.stats.highTile}</span></div>
+                    <div class="list-item"><span>Best Score</span><span>${this.stats.bestScore}</span></div>
+                    <div class="list-item"><span>Total Merges</span><span>${this.stats.merges}</span></div>
+                `;
             }
-            genShapes();
-        }
-        function fillBlock(i, el) {
-            if(blockBoard[i]) return;
-            blockBoard[i] = 1; el.classList.add('b-filled');
-            checkLines();
-        }
-        function checkLines() {
-            // Check rows...
-            for(let r=0; r<8; r++) {
-                let row = blockBoard.slice(r*8, r*8+8);
-                if(row.every(v => v === 1)) triggerToast("LINE CLEAR!");
+        };
+
+        /* --- 2048 GAME ENGINE --- */
+        const game = {
+            grid: [],
+            size: 4,
+            score: 0,
+            target: 2048,
+            history: [],
+
+            setSize(s) { this.size = s; app.toast(`Grid set to ${s}x${s}`); },
+
+            start(target) {
+                this.target = target;
+                this.score = 0;
+                this.grid = Array(this.size * this.size).fill(0);
+                document.getElementById('grid').style.gridTemplateColumns = `repeat(${this.size}, 1fr)`;
+                app.nav('view-game');
+                document.getElementById('current-mode-name').innerText = target === Infinity ? "Endless" : target;
+                this.addTile(); this.addTile();
+                this.render();
+            },
+
+            addTile() {
+                let empty = this.grid.map((v, i) => v === 0 ? i : null).filter(v => v !== null);
+                if(empty.length) {
+                    const idx = empty[Math.floor(Math.random() * empty.length)];
+                    this.grid[idx] = Math.random() > 0.1 ? 2 : 4;
+                }
+            },
+
+            render() {
+                const gElem = document.getElementById('grid');
+                gElem.innerHTML = '';
+                this.grid.forEach(v => {
+                    const d = document.createElement('div');
+                    d.className = 'tile';
+                    d.innerText = v || '';
+                    d.style.background = v ? this.getColor(v) : 'var(--tile)';
+                    d.style.color = v > 4 ? '#fff' : 'var(--text)';
+                    d.style.fontSize = this.size > 4 ? '18px' : '24px';
+                    gElem.appendChild(d);
+                });
+                document.getElementById('score').innerText = this.score;
+            },
+
+            getColor(v) {
+                const colors = {2:'#eee4da', 4:'#ede0c8', 8:'#f2b179', 16:'#f59563', 32:'#f67c5f', 64:'#f65e3b', 128:'#edcf72', 256:'#edcc61', 512:'#edc850', 1024:'#edc53f', 2048:'#edc22e'};
+                return colors[v] || '#3c3a32';
+            },
+
+            undo() {
+                if(this.history.length) {
+                    const prev = this.history.pop();
+                    this.grid = prev.g;
+                    this.score = prev.s;
+                    this.render();
+                }
             }
-        }
-        function genShapes() {
-            const p = document.getElementById('b-previews'); p.innerHTML = 'TAP GRID TO BLAST';
-        }
+            // Swipe logic and move algorithms would go here
+        };
 
-        /* --- THEME TOGGLE --- */
-        function toggleTheme() {
-            const isDark = document.body.style.background === "rgb(13, 2, 33)";
-            document.body.style.background = isDark ? "#faf8ef" : "#0d0221";
-            document.body.style.color = isDark ? "#776e65" : "#00f2ff";
-            triggerToast(isDark ? "Light Theme" : "Cyber Theme");
-        }
-
-        // Init e2048 Swipes
-        let ts = {x:0,y:0};
-        window.addEventListener('touchstart', e => { ts.x = e.touches[0].clientX; ts.y = e.touches[0].clientY; });
-        window.addEventListener('touchend', e => {
-            let dx = e.changedTouches[0].clientX - ts.x, dy = e.changedTouches[0].clientY - ts.y;
-            if(Math.abs(dx) > 30) move2048(dx > 0 ? 'R' : 'L');
-        });
+        app.init();
     </script>
 </body>
 </html>
