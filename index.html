@@ -5,399 +5,112 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>e2048</title>
     <style>
-        /* =========================================================
-           I. CSS VARIABLES & THEMES
-           ========================================================= */
         :root {
-            /* Classic 2048 Theme */
-            --bg-2048: #faf8ef; 
-            --text-2048: #776e65; 
-            --board-2048: #bbada0; 
-            --cell-2048: rgba(238, 228, 218, 0.35); 
-            --score-bg: #bbada0;
-            
-            /* Block Puzzle Wood Theme */
-            --bp-bg: #a0745b; 
-            --bp-board: #674332; 
-            --bp-cell: #573727; 
-            --bp-green: #71b965; 
-            --bp-beige: #dac6a3;
+            --bg-2048: #faf8ef; --text-2048: #776e65; --board-2048: #bbada0; 
+            --cell-2048: rgba(238, 228, 218, 0.35); --score-bg: #bbada0;
+            --bp-bg: #a0745b; --bp-board: #674332; --bp-cell: #573727; 
+            --bp-green: #71b965; --bp-beige: #dac6a3;
         }
-
-        /* =========================================================
-           II. GLOBAL RESET
-           ========================================================= */
-        * { 
-            box-sizing: border-box; 
-            -webkit-tap-highlight-color: transparent; 
-            outline: none; 
-            user-select: none; 
-        }
-
-        body { 
-            margin: 0; 
-            padding: 0; 
-            height: 100vh; 
-            width: 100vw; 
-            overflow: hidden; 
-            font-family: "Clear Sans", "Helvetica Neue", Arial, sans-serif; 
-            background: var(--bg-2048); 
-            color: var(--text-2048); 
-            transition: background 0.4s ease; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-        }
-
-        /* =========================================================
-           III. UI FRAMEWORK & NAVIGATION
-           ========================================================= */
-        .view { 
-            display: none; 
-            position: absolute; 
-            top: 0; 
-            left: 0; 
-            width: 100%; 
-            height: 100%; 
-            flex-direction: column; 
-            align-items: center; 
-            justify-content: center; 
-            background: inherit; 
-            z-index: 10; 
-            padding: 20px 0; 
-            overflow-y: auto; 
-        }
-
-        .active-view { 
-            display: flex; 
-            animation: slideIn 0.4s cubic-bezier(0.25, 1, 0.5, 1); 
-        }
-
-        @keyframes slideIn { 
-            from { opacity: 0; transform: translateY(15px); } 
-            to { opacity: 1; transform: translateY(0); } 
-        }
-
-        /* Standard Button Styles */
-        .btn { 
-            background: #8f7a66; 
-            color: #f9f6f2; 
-            border: none; 
-            padding: 14px 28px; 
-            border-radius: 6px; 
-            font-weight: bold; 
-            font-size: 16px; 
-            cursor: pointer; 
-            text-transform: uppercase; 
-            margin: 6px; 
-            transition: transform 0.1s, opacity 0.2s; 
-            box-shadow: 0 4px 0 rgba(0,0,0,0.15); 
-        }
-
-        .btn:active { 
-            transform: translateY(4px); 
-            box-shadow: none; 
-        }
-
-        /* Button Color Variants */
-        .btn-green { background: #71b965; } 
-        .btn-blue { background: #5da5da; } 
-        .btn-red { background: #e74c3c; } 
-        .btn-dark { background: #555; }
-
-        /* Input Fields for Login/Register */
-        .input-field { 
-            padding: 15px; 
-            border-radius: 6px; 
-            border: 2px solid var(--board-2048); 
-            width: 280px; 
-            font-size: 16px; 
-            margin-bottom: 12px; 
-            text-align: center; 
-        }
-
-        /* Global Toast Notifications */
-        #toast { 
-            position: fixed; 
-            top: -150px; 
-            left: 50%; 
-            transform: translateX(-50%); 
-            background: rgba(0, 0, 0, 0.9); 
-            color: #fff; 
-            padding: 14px 30px; 
-            border-radius: 40px; 
-            transition: top 0.5s cubic-bezier(0.18, 0.89, 0.32, 1.28); 
-            z-index: 10000; 
-            font-weight: bold; 
-            pointer-events: none; 
-            box-shadow: 0 10px 25px rgba(0,0,0,0.3); 
-        }
-
-        /* Screen Overlays (Game Over, Time Up) */
-        .overlay { 
-            position: absolute; 
-            top: 0; 
-            left: 0; 
-            width: 100%; 
-            height: 100%; 
-            background: rgba(250, 248, 239, 0.85); 
-            z-index: 100; 
-            display: none; 
-            flex-direction: column; 
-            align-items: center; 
-            justify-content: center; 
-            pointer-events: all; 
-            touch-action: none; 
-            backdrop-filter: blur(3px); 
-            border-radius: 8px; 
-        }
-
-        /* =========================================================
-           IV. 2048 ENGINE & HEAVY PHYSICS
-           ========================================================= */
-        .top-header { 
-            width: 340px; 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            margin-bottom: 20px; 
-        }
-
-        .score-box { 
-            background: var(--score-bg); 
-            padding: 8px 15px; 
-            border-radius: 5px; 
-            color: white; 
-            text-align: center; 
-            min-width: 70px; 
-        }
-
-        .score-label { 
-            display: block; 
-            font-size: 11px; 
-            font-weight: bold; 
-            color: #eee4da; 
-            margin-bottom: -2px; 
-        }
-
-        .score-val { 
-            font-size: 22px; 
-            font-weight: bold; 
-        }
-
-        .game-wrapper { 
-            position: relative; 
-            width: 340px; 
-            height: 340px; 
-            background: var(--board-2048); 
-            border-radius: 8px; 
-            padding: 10px; 
-            touch-action: none; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1); 
-        }
-
-        .grid-bg { 
-            display: grid; 
-            grid-template-columns: repeat(4, 1fr); 
-            gap: 10px; 
-            width: 100%; 
-            height: 100%; 
-        }
-
-        .grid-cell { 
-            background: var(--cell-2048); 
-            border-radius: 4px; 
-        }
-
-        .tile-layer { 
-            position: absolute; 
-            top: 10px; 
-            left: 10px; 
-            pointer-events: none; 
-            width: 320px; 
-            height: 320px; 
-        }
-
-        /* Tile Physics Classes */
-        .tile { 
-            position: absolute; 
-            width: 72.5px; 
-            height: 72.5px; 
-            border-radius: 4px; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            font-weight: bold; 
-            font-size: 32px; 
-            z-index: 10; 
-            transition: transform 150ms cubic-bezier(0.25, 0.46, 0.45, 0.94); 
-        }
-
-        .t-new { 
-            animation: appear 200ms ease-out forwards; 
-        }
-
-        .t-merged { 
-            z-index: 20; 
-            animation: pop 200ms ease-in-out forwards; 
-        }
-
-        .t-dying { 
-            opacity: 0; 
-            transform: scale(0.5); 
-            transition: all 150ms ease-in; 
-        }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; user-select: none; }
+        body { margin: 0; padding: 0; height: 100vh; width: 100vw; overflow: hidden; font-family: "Clear Sans", Arial, sans-serif; background: var(--bg-2048); color: var(--text-2048); transition: background 0.3s; }
         
-        @keyframes appear { 
-            0% { opacity: 0; transform: scale(0); } 
-            100% { opacity: 1; transform: scale(1); } 
-        }
-
-        @keyframes pop { 
-            0% { transform: scale(1); } 
-            50% { transform: scale(1.2); } 
-            100% { transform: scale(1); } 
-        }
-
-        /* Individual Tile Colors */
-        .t2 { background:#eee4da; color:#776e65; } 
-        .t4 { background:#ede0c8; color:#776e65; } 
-        .t8 { background:#f2b179; color:#f9f6f2; } 
-        .t16 { background:#f59563; color:#f9f6f2; } 
-        .t32 { background:#f67c5f; color:#f9f6f2; } 
-        .t64 { background:#f65e3b; color:#f9f6f2; } 
-        .t128 { background:#edcf72; color:#f9f6f2; font-size:28px; box-shadow: 0 0 10px rgba(237, 207, 114, 0.5); } 
-        .t256 { background:#edcc61; color:#f9f6f2; font-size:28px; box-shadow: 0 0 15px rgba(237, 204, 97, 0.6); } 
-        .t512 { background:#edc850; color:#f9f6f2; font-size:28px; box-shadow: 0 0 20px rgba(237, 200, 80, 0.7); } 
-        .t1024 { background:#edc53f; color:#f9f6f2; font-size:24px; box-shadow: 0 0 25px rgba(237, 197, 63, 0.8); } 
-        .t2048 { background:#edc22e; color:#f9f6f2; font-size:24px; box-shadow: 0 0 30px rgba(237, 194, 46, 0.9); } 
-        .t-super { background:#3c3a32; color:#f9f6f2; font-size:24px; }
-
-        /* =========================================================
-           V. BLOCK PUZZLE ENGINE
-           ========================================================= */
-        .bp-grid { 
-            display: grid; 
-            grid-template-columns: repeat(8, 40px); 
-            gap: 2px; 
-            background: var(--bp-board); 
-            padding: 10px; 
-            border-radius: 6px; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3); 
-        }
-
-        .bp-slot { 
-            width: 40px; 
-            height: 40px; 
-            background: var(--bp-cell); 
-            border-radius: 2px; 
-            transition: background 0.2s ease; 
-        }
-
-        .bp-filled-green { 
-            background: var(--bp-green); 
-            box-shadow: inset 2px 2px 0 rgba(255,255,255,0.3); 
-            transform: scale(0.95); 
-            border-radius: 4px; 
-        }
-
-        .bp-filled-beige { 
-            background: var(--bp-beige); 
-            box-shadow: inset 2px 2px 0 rgba(255,255,255,0.4); 
-            transform: scale(0.95); 
-            border-radius: 4px; 
-        }
-
-        .bp-ghost { 
-            background: rgba(255,255,255,0.25); 
-            border-radius: 4px; 
-            transform: scale(0.95); 
-        }
+        .view { display: none; position: absolute; top:0; left:0; width:100%; height:100%; flex-direction:column; align-items:center; background:inherit; z-index:10; overflow-y:auto; padding:20px 0; }
+        .active-view { display: flex; animation: fadeIn 0.3s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         
-        .tray { 
-            display: flex; 
-            justify-content: space-around; 
-            align-items: center; 
-            width: 360px; 
-            height: 120px; 
-            margin-top: 30px; 
-            background: rgba(0,0,0,0.1); 
-            border-radius: 12px; 
-        }
+        .btn { background:#8f7a66; color:#f9f6f2; border:none; padding:12px 24px; border-radius:3px; font-weight:bold; font-size:16px; cursor:pointer; text-transform:uppercase; margin:5px; box-shadow:0 4px 0 rgba(0,0,0,0.1); }
+        .btn:active { transform:translateY(2px); box-shadow:none; }
+        .input-field { padding:14px; border-radius:5px; border:2px solid #bbada0; width:280px; font-size:16px; margin-bottom:12px; }
+        
+        .top-header { width:340px; display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; }
+        .score-container { display:flex; gap:8px; }
+        .score-box { background:#bbada0; padding:5px 15px; border-radius:3px; color:white; text-align:center; min-width:60px; position:relative; }
+        .score-label { display:block; font-size:11px; font-weight:bold; color:#eee4da; margin-bottom:-2px; }
+        .score-val { font-size:20px; font-weight:bold; }
+        
+        .game-wrapper { position:relative; width:340px; height:340px; background:var(--board-2048); border-radius:6px; padding:10px; touch-action:none; }
+        .grid-bg { display:grid; grid-template-columns:repeat(4, 1fr); gap:10px; width:100%; height:100%; }
+        .grid-cell { background:var(--cell-2048); border-radius:3px; }
+        .tile-layer { position:absolute; top:10px; left:10px; pointer-events:none; width:320px; height:320px; }
+        
+        .tile { position:absolute; width:72.5px; height:72.5px; border-radius:3px; display:flex; justify-content:center; align-items:center; font-weight:bold; font-size:32px; transition:transform 100ms ease-in-out; z-index:10; pointer-events:auto; }
+        .t-new { animation: appear 150ms ease-out forwards; }
+        .t-merged { z-index:20; animation: pop 180ms ease-in-out forwards; }
+        @keyframes appear { 0% { opacity:0; scale:0; } 100% { opacity:1; scale:1; } }
+        @keyframes pop { 0% { scale:1; } 50% { scale:1.15; } 100% { scale:1; } }
+        
+        .t2{background:#eee4da;color:#776e65} .t4{background:#ede0c8;color:#776e65} .t8{background:#f2b179;color:#f9f6f2} .t16{background:#f59563;color:#f9f6f2} .t32{background:#f67c5f;color:#f9f6f2} .t64{background:#f65e3b;color:#f9f6f2} .t128{background:#edcf72;color:#f9f6f2;font-size:28px} .t256{background:#edcc61;color:#f9f6f2;font-size:28px} .t512{background:#edc850;color:#f9f6f2;font-size:28px} .t1024{background:#edc53f;color:#f9f6f2;font-size:24px} .t2048{background:#edc22e;color:#f9f6f2;font-size:24px} .t4096{background:#3c3a32;color:#f9f6f2} .t131072{background:#000;color:#00f2ff;text-shadow:0 0 8px #00f2ff;}
 
-        .dragging { 
-            position: fixed; 
-            z-index: 1000; 
-            pointer-events: none; 
-            filter: drop-shadow(0 15px 15px rgba(0,0,0,0.5)); 
-        }
+        .bp-score-large { font-size:70px; font-weight:bold; color:white; margin-top:10px; letter-spacing:-2px; }
+        .bp-grid-wrapper { background:var(--bp-board); padding:8px; border-radius:4px; box-shadow:0 10px 20px rgba(0,0,0,0.3); touch-action:none; }
+        .bp-grid { display:grid; grid-template-columns:repeat(8, 40px); gap:2px; }
+        .bp-slot { width:40px; height:40px; background:var(--bp-cell); border-radius:2px; }
+        .bp-filled-green { background:var(--bp-green); box-shadow:inset 3px 3px 0 rgba(255,255,255,0.3), inset -3px -3px 0 rgba(0,0,0,0.2); }
+        .bp-filled-beige { background:var(--bp-beige); box-shadow:inset 3px 3px 0 rgba(255,255,255,0.4), inset -3px -3px 0 rgba(0,0,0,0.1); }
+        .bp-ghost { background:rgba(255,255,255,0.2); }
+        .tray { display:flex; justify-content:space-around; width:360px; height:120px; margin-top:30px; }
+        .shape { display:grid; gap:2px; cursor:grab; padding:10px; }
+        .mini-block { width:20px; height:20px; border-radius:2px; }
+        .dragging { position:fixed; z-index:1000; pointer-events:none; }
+        
+        .overlay { position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(250,248,239,0.85); z-index:100; display:none; flex-direction:column; align-items:center; justify-content:center; }
+        .tutorial-box { background:#5a524b; color:white; padding:15px; border-radius:8px; width:340px; margin-top:15px; font-size:14px; position:relative; }
+        .particle { position:fixed; width:8px; height:8px; pointer-events:none; z-index:2000; border-radius:50%; }
+        #toast { position:fixed; top:-100px; left:50%; transform:translateX(-50%); background:#333; color:white; padding:12px 24px; border-radius:30px; transition:0.4s; z-index:9999; font-weight:bold; }
+        .achievement-badge { background:#edc22e; color:white; padding:6px 12px; border-radius:20px; font-weight:bold; font-size:12px; box-shadow:0 2px 5px rgba(0,0,0,0.2); }
     </style>
 </head>
 <body>
+    <div id="toast">Notification</div>
 
-    <div id="toast">Achievement Unlocked!</div>
-
-    <div id="view-auth" class="view active-view">
-        <h1 style="font-size:80px; margin: 0 0 40px 0;">e2048</h1>
-        
-        <input type="text" id="reg-u" placeholder="Username" class="input-field" autocomplete="off">
-        <input type="password" id="reg-p" placeholder="Password" class="input-field">
-        
-        <button class="btn" style="width: 280px;" onclick="systemManager.login()">Sign In</button>
-        <button class="btn btn-green" style="width: 280px;" onclick="systemManager.register()">Create Account</button>
+    <div id="view-auth" class="view active-view" style="justify-content:center;">
+        <h1 style="font-size:80px; margin:0 0 40px 0;">e2048</h1>
+        <div style="background:rgba(0,0,0,0.05); padding:30px; border-radius:12px; display:flex; flex-direction:column; align-items:center;">
+            <input type="text" id="reg-u" placeholder="Username" class="input-field" autocomplete="off">
+            <input type="password" id="reg-p" placeholder="Password" class="input-field">
+            <div style="display:flex; flex-direction:column; width:100%;">
+                <button class="btn" onclick="auth.login()">Login</button>
+                <button class="btn" style="background:#71b965" onclick="auth.register()">Create Account</button>
+            </div>
+            <button class="btn" style="background:transparent; color:#776e65; box-shadow:none; margin-top:10px;" onclick="auth.guest()">Play as Guest</button>
+        </div>
     </div>
 
     <div id="view-home" class="view">
-        <h2 id="welcome-msg" style="font-size: 32px; margin-bottom: 40px;">Welcome</h2>
-        
-        <button class="btn" style="width:280px;" onclick="systemManager.navigate('view-modes')">Play 2048</button>
-        <button class="btn" style="width:280px; background:#674332;" onclick="systemManager.navigate('view-bp')">Block Puzzle</button>
-        <button class="btn btn-dark" style="width:280px;" onclick="systemManager.navigate('view-stats')">Player Profile</button>
-        <button class="btn btn-red" style="width:280px; margin-top:20px;" onclick="location.reload()">Logout</button>
+        <h2 id="welcome-msg" style="font-size:32px; margin-bottom:40px;">Welcome back</h2>
+        <button class="btn" style="width:260px;" onclick="sys.nav('view-modes')">2048 Standard</button>
+        <button class="btn" style="width:260px; background:#674332" onclick="sys.nav('view-bp')">Block Puzzle</button>
+        <button class="btn" style="width:260px; background:#555" onclick="sys.nav('view-stats')">Player Profile</button>
+        <button class="btn" style="width:260px; background:#d33; margin-top:40px;" onclick="auth.logout()">Logout</button>
     </div>
 
     <div id="view-modes" class="view">
-        <div class="top-header">
-            <button class="btn" style="padding: 8px 16px;" onclick="systemManager.navigate('view-home')">← Back</button>
-            <h2 style="margin: 0;">Game Modes</h2>
-            <div style="width: 60px;"></div>
+        <div class="top-header"><button class="btn" style="padding:5px 15px;" onclick="sys.nav('view-home')">Back</button><h1 style="font-size:24px; margin:0;">Modes</h1><div style="width:50px;"></div></div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; padding:20px;">
+            <button class="btn" onclick="game2048.init(1024)">1024</button>
+            <button class="btn" onclick="game2048.init(2048)">2048</button>
+            <button class="btn" onclick="game2048.init(4096)">4096</button>
+            <button class="btn" onclick="game2048.init(8192)">8192</button>
+            <button class="btn" onclick="game2048.init(16384)">16384</button>
+            <button class="btn" onclick="game2048.init(32768)">32768</button>
+            <button class="btn" onclick="game2048.init(65536)">65536</button>
+            <button class="btn" onclick="game2048.init(131072)">131072</button>
         </div>
-        
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin: 20px 0; width: 320px;">
-            <button class="btn" onclick="gameEngine2048.initialize(1024)">1024</button>
-            <button class="btn" onclick="gameEngine2048.initialize(2048)">2048</button>
-            <button class="btn" onclick="gameEngine2048.initialize(4096)">4096</button>
-            <button class="btn" onclick="gameEngine2048.initialize(8192)">8192</button>
-            <button class="btn" onclick="gameEngine2048.initialize(16384)">16384</button>
-            <button class="btn" onclick="gameEngine2048.initialize(32768)">32768</button>
-            <button class="btn" onclick="gameEngine2048.initialize(65536)">65536</button>
-            <button class="btn" onclick="gameEngine2048.initialize(131072)">131072</button>
-        </div>
-        
-        <button class="btn btn-red" style="width:320px;" onclick="gameEngine2048.initialize(Infinity, 60)">1 Minute Blitz</button>
-        <button class="btn btn-green" style="width:320px;" onclick="let seconds = prompt('Enter time in seconds:', '120'); if(seconds) gameEngine2048.initialize(Infinity, parseInt(seconds))">Custom Time Challenge</button>
-        <button class="btn btn-dark" style="width:320px;" onclick="gameEngine2048.initialize(Infinity)">Endless Sandbox</button>
+        <button class="btn" style="width:320px; background:#f65e3b;" onclick="game2048.init(Infinity, 60)">1 Min Blitz</button>
+        <button class="btn" style="width:320px; background:#333;" onclick="game2048.init(Infinity)">Endless</button>
     </div>
 
     <div id="view-2048" class="view">
         <div class="top-header">
-            <h2 id="display-target" style="margin:0; font-size: 32px;">2048</h2>
-            <div style="display:flex; gap:8px;">
-                <div class="score-box">
-                    <span class="score-label">SCORE</span>
-                    <span class="score-val" id="score-2048">0</span>
-                </div>
-                <div class="score-box">
-                    <span class="score-label">BEST</span>
-                    <span class="score-val" id="best-2048">0</span>
-                </div>
+            <h1 class="title-2048" id="display-target">2048</h1>
+            <div class="score-container">
+                <div class="score-box"><span class="score-label">SCORE</span><span class="score-val" id="score-2048">0</span></div>
+                <div class="score-box"><span class="score-label">BEST</span><span class="score-val" id="best-2048">0</span></div>
             </div>
         </div>
-        
-        <div id="timer-row" style="display:none; width: 340px; margin-bottom:15px; background:#e74c3c; color:white; padding:10px; border-radius:6px; text-align: center; font-weight: bold; box-shadow: 0 4px 0 #c0392b;">
-            TIME REMAINING: <span id="timer-val" style="font-size: 20px; margin-left: 10px;">0:00</span>
+        <div class="score-row" id="timer-row" style="display:none; margin-bottom:10px; width:340px;">
+            <div class="score-box" style="background:#f65e3b; width:100%;"><span class="score-label" style="color:white">TIME LEFT</span><b id="timer-val" style="font-size:20px; color:white;">0:00</b></div>
         </div>
-        
         <div class="game-wrapper" id="board-2048">
             <div class="grid-bg">
                 <div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div>
@@ -405,723 +118,238 @@
                 <div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div>
                 <div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div>
             </div>
-            
             <div class="tile-layer" id="tile-layer"></div>
-            
             <div class="overlay" id="over-2048">
-                <h1 id="over-msg" style="color:#776e65; font-size:40px;">Game Over</h1>
-                <button class="btn" onclick="gameEngine2048.initialize(gameEngine2048.targetValue, gameEngine2048.initialTime)">Play Again</button>
-                <button class="btn btn-dark" onclick="systemManager.navigate('view-modes')">Main Menu</button>
+                <h2 id="over-msg" style="color:#776e65; font-size:36px; margin-bottom:20px;">Game Over!</h2>
+                <button class="btn" onclick="game2048.init(game2048.target, game2048.initTime)">Try Again</button>
+                <button class="btn" style="background:#555" onclick="sys.nav('view-modes')">Menu</button>
             </div>
         </div>
-        
-        <div style="display:flex; gap:10px; margin-top:25px; width: 340px;">
-            <button class="btn btn-dark" style="flex: 1;" onclick="gameEngine2048.undoLastMove()">↩ Undo Move</button>
+        <div class="tutorial-box" id="tutorial-tip"><b style="display:block; font-size:16px; margin-bottom:4px;">WELCOME TO 2048</b>Swipe to move tiles. Matching tiles join into one!</div>
+        <div style="display:flex; gap:15px; margin-top:20px;">
+            <button class="btn" style="width:80px; background:#bbada0" onclick="game2048.undo()">↩</button>
+            <button class="btn" id="btn-del" style="width:80px; background:#bbada0" onclick="game2048.usePowerup('del')">✖</button>
         </div>
     </div>
 
     <div id="view-bp" class="view" style="background:var(--bp-bg)">
-        <div class="top-header">
-            <h2 style="color:white; margin:0; font-size:28px;">Score: <span id="score-bp">0</span></h2>
-            <button class="btn btn-red" style="padding: 10px 15px;" onclick="systemManager.navigate('view-home')">✕</button>
-        </div>
-        
-        <div class="bp-grid" id="bp-grid"></div>
+        <div class="top-header"><div style="color:#ffcc00; font-weight:bold; font-size:20px;">👑 <span id="best-bp">0</span></div><button class="btn" style="background:none; box-shadow:none; font-size:24px;" onclick="sys.nav('view-home')">✕</button></div>
+        <div class="bp-score-large" id="score-bp">0</div>
+        <div class="bp-grid-wrapper"><div class="bp-grid" id="bp-grid"></div></div>
         <div class="tray" id="tray"></div>
-        
-        <div class="overlay" id="over-bp" style="background: rgba(103, 67, 50, 0.95);">
-            <h1 style="color: white; font-size:40px;">No Moves</h1>
-            <button class="btn btn-green" onclick="blockPuzzleEngine.initialize()">Restart Board</button>
+        <div class="overlay" id="over-bp" style="background:rgba(103, 67, 50, 0.9);">
+            <h2 style="color:white; font-size:36px; margin-bottom:20px;">Out of Moves</h2>
+            <button class="btn" style="background:#71b965" onclick="gameBP.init()">Retry</button>
+            <button class="btn" style="background:#555" onclick="sys.nav('view-home')">Menu</button>
         </div>
     </div>
 
     <div id="view-stats" class="view">
-        <h2 style="font-size: 32px; margin-bottom: 20px;">Player Profile</h2>
-        <div style="background: white; padding: 25px; border-radius: 12px; width: 320px; font-size: 18px; line-height: 1.6; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
-            <p>Total Tiles Merged: <b id="stat-merges" style="float: right; color:#e74c3c;">0</b></p>
-            <p>Highest 2048 Score: <b id="stat-high" style="float: right; color:#e74c3c;">0</b></p>
-            <hr style="border: none; border-top: 2px dashed #eee; margin: 20px 0;">
-            <h3 style="margin: 0 0 10px 0; color: #bbada0;">Trophy Case</h3>
-            <div id="achievements-list" style="display:flex; flex-wrap:wrap; gap:8px;"></div>
+        <h1 style="margin-bottom:20px;">Player Profile</h1>
+        <div style="background:white; padding:20px; border-radius:8px; width:320px; font-size:18px; line-height:1.8; margin-bottom:20px; box-shadow:0 4px 6px rgba(0,0,0,0.05);">
+            <b>Highest Tile:</b> <span id="stat-tile">0</span><br><b>Total Merges:</b> <span id="stat-merges">0</span><br><b>All-time Pts:</b> <span id="stat-points">0</span>
         </div>
-        <button class="btn btn-dark" style="margin-top: 30px; width: 320px;" onclick="systemManager.navigate('view-home')">Return Home</button>
+        <h2 style="color:#776e65; margin-bottom:10px;">Achievements</h2>
+        <div id="achievements-list" style="display:flex; flex-wrap:wrap; gap:10px; width:320px; justify-content:center; min-height:50px;"></div>
+        <div style="display:flex; gap:10px; margin-top:30px;">
+            <button class="btn" style="background:#555" id="btn-sound" onclick="sys.toggleSound()">Sound: ON</button>
+            <button class="btn" style="background:#ef4444" onclick="sys.nav('view-home')">Back</button>
+        </div>
     </div>
 
     <script>
-        /**
-         * AUDIO ENGINE
-         * Manages Web Audio API procedural sound generation.
-         */
-        const audioEngine = {
-            audioContext: null,
-            
-            playSound(frequency, oscillatorType, durationInSeconds, volumeLevel) {
-                if (!systemManager.isSoundEnabled) return; 
-                
-                if (!this.audioContext) {
-                    this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                }
-                if (this.audioContext.state === 'suspended') {
-                    this.audioContext.resume();
-                }
-                
-                const oscillator = this.audioContext.createOscillator();
-                const gainNode = this.audioContext.createGain();
-                
-                oscillator.type = oscillatorType; 
-                oscillator.frequency.setValueAtTime(frequency, this.audioContext.currentTime);
-                
-                gainNode.gain.setValueAtTime(volumeLevel, this.audioContext.currentTime); 
-                gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + durationInSeconds);
-                
-                oscillator.connect(gainNode); 
-                gainNode.connect(this.audioContext.destination); 
-                
-                oscillator.start(); 
-                oscillator.stop(this.audioContext.currentTime + durationInSeconds);
+        /* --- AUDIO SYNTHESIZER --- */
+        const sfx = {
+            ctx: null,
+            play(freq, type, dur, vol) {
+                if (!sys.soundOn) return;
+                try {
+                    if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                    if (this.ctx.state === 'suspended') this.ctx.resume();
+                    const osc = this.ctx.createOscillator(), gain = this.ctx.createGain();
+                    osc.type = type; osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+                    gain.gain.setValueAtTime(vol, this.ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + dur);
+                    osc.connect(gain); gain.connect(this.ctx.destination); osc.start(); osc.stop(this.ctx.currentTime + dur);
+                } catch(e) {}
             },
-            
-            playMergeSound() { this.playSound(400, 'sine', 0.15, 0.1); }, 
-            playWoodDropSound() { this.playSound(200, 'square', 0.05, 0.05); },
-            playWinChime() { 
-                this.playSound(600, 'sine', 0.1, 0.1); 
-                setTimeout(() => { this.playSound(800, 'sine', 0.3, 0.1); }, 100); 
+            slide() { this.play(150, 'sine', 0.1, 0.05); }, merge() { this.play(400, 'sine', 0.15, 0.1); }, highMerge() { this.play(800, 'triangle', 0.3, 0.1); },
+            wood() { this.play(200, 'square', 0.05, 0.05); }, blast() { this.play(100, 'sawtooth', 0.3, 0.15); }, achieve() { this.play(600, 'sine', 0.1, 0.1); setTimeout(()=>this.play(800, 'sine', 0.3, 0.1), 100); }
+        };
+
+        /* --- CORE SYSTEM & ACHIEVEMENTS --- */
+        const sys = {
+            db: { users: {} }, user: null, soundOn: true,
+            init() {
+                try { const saved = localStorage.getItem('e2048_plat_db'); if (saved) this.db = JSON.parse(saved); } catch(e) {}
+                if(!this.db.users) this.db.users = {};
+                const sess = sessionStorage.getItem('e2048_session');
+                if (sess && this.db.users[sess]) auth.complete(sess);
+                this.bindEvents();
+            },
+            save() { localStorage.setItem('e2048_plat_db', JSON.stringify(this.db)); },
+            nav(id) {
+                document.querySelectorAll('.view').forEach(v => v.classList.remove('active-view'));
+                document.getElementById(id).classList.add('active-view');
+                document.body.style.background = id === 'view-bp' ? 'var(--bp-bg)' : 'var(--bg-2048)';
+                if (id === 'view-bp') gameBP.init();
+                if (id === 'view-stats') this.renderStats();
+            },
+            toast(m) { const t = document.getElementById('toast'); t.innerText = m; t.style.top = "20px"; setTimeout(() => t.style.top = "-100px", 2500); },
+            toggleSound() { this.soundOn = !this.soundOn; document.getElementById('btn-sound').innerText = `Sound: ${this.soundOn ? 'ON' : 'OFF'}`; if(this.soundOn) sfx.merge(); },
+            renderStats() {
+                if(!this.user) return; const u = this.db.users[this.user];
+                document.getElementById('stat-tile').innerText = u.highTile || 0; document.getElementById('stat-merges').innerText = u.totalMerges || 0; document.getElementById('stat-points').innerText = u.totalPoints || 0;
+                const list = document.getElementById('achievements-list'); list.innerHTML = '';
+                const badges = u.achievements || [];
+                if (badges.length === 0) list.innerHTML = '<span style="opacity:0.5; font-size:14px;">No achievements yet.</span>';
+                badges.forEach(b => { const el = document.createElement('div'); el.className = 'achievement-badge'; el.innerText = '🏆 ' + b; list.appendChild(el); });
+            },
+            checkAchievement(name) {
+                if(!this.user) return; const u = this.db.users[this.user]; if(!u.achievements) u.achievements = [];
+                if(!u.achievements.includes(name)) { u.achievements.push(name); this.save(); this.toast("Achievement Unlocked: " + name); sfx.achieve(); }
+            },
+            updateStats(val, score) {
+                if(!this.user) return; const u = this.db.users[this.user];
+                u.totalMerges++; u.totalPoints += score; if(val > (u.highTile || 0)) u.highTile = val; this.save();
+                if(val===512) this.checkAchievement("Getting Warm (512)"); if(val===2048) this.checkAchievement("2048 Master!");
+            },
+            particles(x, y, color) {
+                for(let i=0; i<12; i++) {
+                    const p = document.createElement('div'); p.className = 'particle'; p.style.background = color; p.style.left = x + 'px'; p.style.top = y + 'px'; document.body.appendChild(p);
+                    const ang = Math.random() * Math.PI * 2, dist = 30 + Math.random() * 50;
+                    p.animate([{transform:'translate(0,0) scale(1)', opacity:1}, {transform:`translate(${Math.cos(ang)*dist}px, ${Math.sin(ang)*dist}px) scale(0)`, opacity:0}], 600).onfinish = () => p.remove();
+                }
+            },
+            bindEvents() {
+                document.body.addEventListener('touchmove', e => { if(!e.target.closest('.view')) e.preventDefault(); }, { passive: false });
+                window.addEventListener('keydown', e => { if(document.getElementById('view-2048').classList.contains('active-view') && e.key.includes('Arrow')) game2048.move(e.key[5][0]); });
+                let tx, ty; const b = document.getElementById('board-2048');
+                b.addEventListener('touchstart', e => { tx = e.touches[0].clientX; ty = e.touches[0].clientY; }, {passive: false});
+                b.addEventListener('touchend', e => {
+                    if(!document.getElementById('view-2048').classList.contains('active-view')) return;
+                    let dx = e.changedTouches[0].clientX - tx, dy = e.changedTouches[0].clientY - ty;
+                    if(Math.abs(dx)>30 || Math.abs(dy)>30) game2048.move(Math.abs(dx)>Math.abs(dy) ? (dx>0?'R':'L') : (dy>0?'D':'U'));
+                });
             }
         };
 
-        /**
-         * SYSTEM CORE (Auth, Nav, DB)
-         * Manages local storage, view routing, and user profiles.
-         */
-        const systemManager = {
-            database: { users: {} }, 
-            currentUser: null, 
-            isSoundEnabled: true, 
-            toastTimerId: null,
-            
-            initializeSystem() {
-                const savedDatabase = localStorage.getItem('e2048_platinum_database'); 
-                if (savedDatabase) {
-                    this.database = JSON.parse(savedDatabase);
-                }
-                this.bindGlobalInputs();
-            },
-            
-            login() { 
-                const usernameInput = document.getElementById('reg-u').value.trim(); 
-                const passwordInput = document.getElementById('reg-p').value.trim();
-                
-                if (!usernameInput) return alert("Please enter a username.");
-                
-                if (this.database.users[usernameInput]) {
-                    if (this.database.users[usernameInput].password === passwordInput || !this.database.users[usernameInput].password) {
-                        this.completeAuthentication(usernameInput);
-                    } else {
-                        alert("Incorrect password!");
-                    }
-                } else {
-                    alert("Account not found! Please click 'Create Account'.");
-                }
-            },
-            
+        /* --- AUTHENTICATION --- */
+        const auth = {
+            guest() { if (!sys.db.users['Guest']) sys.db.users['Guest'] = { pass: '', highTile: 0, totalMerges: 0, totalPoints: 0, best2048: 0, bestBP: 0, achievements: [] }; this.complete('Guest'); },
             register() {
-                const usernameInput = document.getElementById('reg-u').value.trim();
-                const passwordInput = document.getElementById('reg-p').value.trim();
-                
-                if (!usernameInput) return alert("Please enter a username.");
-                if (usernameInput.length < 3) return alert("Username too short (minimum 3 characters).");
-                
-                if (this.database.users[usernameInput]) {
-                    alert("Username already exists! Please Sign In instead.");
-                } else { 
-                    this.database.users[usernameInput] = { 
-                        password: passwordInput, 
-                        achievements: [], 
-                        bestScore2048: 0, 
-                        totalTilesMerged: 0 
-                    }; 
-                    this.saveDatabase(); 
-                    this.completeAuthentication(usernameInput); 
-                }
+                const u = document.getElementById('reg-u').value.trim(), p = document.getElementById('reg-p').value.trim();
+                if (u.length<3 || p.length<3) return alert("Too short"); if (sys.db.users[u]) return alert("Username taken");
+                sys.db.users[u] = { pass: p, highTile: 0, totalMerges: 0, totalPoints: 0, best2048: 0, bestBP: 0, achievements: [] }; sys.save(); this.complete(u);
             },
-            
-            completeAuthentication(username) { 
-                this.currentUser = username; 
-                document.getElementById('welcome-msg').innerText = "Hello, " + username; 
-                this.navigate('view-home'); 
-            },
-
-            navigate(targetViewId) {
-                document.getElementById('toast').style.top = "-150px";
-                
-                const allViews = document.querySelectorAll('.view');
-                allViews.forEach(viewElement => {
-                    viewElement.classList.remove('active-view');
-                });
-                
-                document.getElementById(targetViewId).classList.add('active-view');
-                
-                if (targetViewId === 'view-bp') {
-                    document.body.style.background = 'var(--bp-bg)';
-                    blockPuzzleEngine.initialize();
-                } else {
-                    document.body.style.background = 'var(--bg-2048)';
-                }
-                
-                if (targetViewId === 'view-stats') {
-                    this.updateProfileInterface();
-                }
-            },
-            
-            showToast(messageText) {
-                const toastElement = document.getElementById('toast'); 
-                toastElement.innerText = messageText; 
-                toastElement.style.top = "30px";
-                
-                if (this.toastTimerId) clearTimeout(this.toastTimerId);
-                
-                this.toastTimerId = setTimeout(() => { 
-                    toastElement.style.top = "-150px"; 
-                }, 3000);
-            },
-            
-            saveDatabase() { 
-                localStorage.setItem('e2048_platinum_database', JSON.stringify(this.database)); 
-            },
-            
-            grantAchievement(achievementName) {
-                if (!this.currentUser) return;
-                
-                let userProfile = this.database.users[this.currentUser]; 
-                if (!userProfile.achievements) userProfile.achievements = [];
-                
-                if (!userProfile.achievements.includes(achievementName)) { 
-                    userProfile.achievements.push(achievementName); 
-                    this.saveDatabase(); 
-                    this.showToast("🏆 " + achievementName); 
-                    audioEngine.playWinChime(); 
-                }
-            },
-            
-            updateProfileInterface() {
-                if (!this.currentUser) return;
-                
-                const userProfile = this.database.users[this.currentUser];
-                document.getElementById('stat-merges').innerText = userProfile.totalTilesMerged || 0;
-                document.getElementById('stat-high').innerText = userProfile.bestScore2048 || 0;
-                
-                const achievementListContainer = document.getElementById('achievements-list'); 
-                achievementListContainer.innerHTML = '';
-                
-                if (!userProfile.achievements || userProfile.achievements.length === 0) {
-                    achievementListContainer.innerHTML = '<span style="color:#aaa; font-style:italic;">No achievements yet. Keep playing!</span>';
-                } else {
-                    userProfile.achievements.forEach(achievement => {
-                        const badgeElement = document.createElement('span'); 
-                        badgeElement.style = "background:#edc22e; color:white; padding:6px 12px; border-radius:20px; font-size:12px; font-weight:bold;";
-                        badgeElement.innerText = achievement; 
-                        achievementListContainer.appendChild(badgeElement);
-                    });
-                }
-            },
-            
-            bindGlobalInputs() {
-                let touchStartX, touchStartY; 
-                const gameBoardElement = document.getElementById('board-2048');
-                
-                gameBoardElement.addEventListener('touchstart', event => { 
-                    touchStartX = event.touches[0].clientX; 
-                    touchStartY = event.touches[0].clientY; 
-                }, { passive: true });
-                
-                gameBoardElement.addEventListener('touchend', event => {
-                    let deltaX = event.changedTouches[0].clientX - touchStartX;
-                    let deltaY = event.changedTouches[0].clientY - touchStartY;
-                    
-                    if (Math.abs(deltaX) > 35 || Math.abs(deltaY) > 35) {
-                        if (Math.abs(deltaX) > Math.abs(deltaY)) {
-                            gameEngine2048.processMove(deltaX > 0 ? 'R' : 'L');
-                        } else {
-                            gameEngine2048.processMove(deltaY > 0 ? 'D' : 'U');
-                        }
-                    }
-                }, { passive: true });
-                
-                window.addEventListener('keydown', event => { 
-                    if (event.key.includes('Arrow')) {
-                        gameEngine2048.processMove(event.key[5][0]); 
-                    }
-                });
-            }
+            login() { const u = document.getElementById('reg-u').value.trim(), p = document.getElementById('reg-p').value.trim(); if (sys.db.users[u] && sys.db.users[u].pass === p) this.complete(u); else alert("Invalid login"); },
+            complete(u) { sys.user = u; sessionStorage.setItem('e2048_session', u); document.getElementById('welcome-msg').innerText = "Hi, " + u; if(sfx.ctx === null) sfx.ctx = new (window.AudioContext || window.webkitAudioContext)(); sys.nav('view-home'); },
+            logout() { sessionStorage.clear(); location.reload(); }
         };
 
-        /**
-         * 2048 ENGINE
-         * Manages game grid state, tile spawning, and DOM-diffing renders.
-         */
-        const gameEngine2048 = {
-            logicGrid: [], 
-            currentScore: 0, 
-            targetValue: 2048, 
-            moveHistory: [], 
-            countdownTimer: null, 
-            timeLeftSeconds: 0, 
-            initialTime: 0,
-            
-            initialize(targetGoal, secondsLimit = 0) {
-                this.targetValue = targetGoal; 
-                this.currentScore = 0; 
-                this.logicGrid = Array(16).fill(null); 
-                this.timeLeftSeconds = secondsLimit; 
-                this.initialTime = secondsLimit;
-                
-                document.getElementById('over-2048').style.display = 'none';
-                
-                if (targetGoal === Infinity) {
-                    document.getElementById('display-target').innerText = "ENDLESS";
-                } else {
-                    document.getElementById('display-target').innerText = targetGoal;
-                }
-                
-                if (secondsLimit > 0) {
-                    document.getElementById('timer-row').style.display = 'block';
-                    this.beginCountdown();
-                } else {
-                    document.getElementById('timer-row').style.display = 'none';
-                }
-                
-                clearInterval(this.countdownTimer); 
-                
-                if (systemManager.currentUser) {
-                    document.getElementById('best-2048').innerText = systemManager.database.users[systemManager.currentUser].bestScore2048 || 0;
-                }
-                
-                this.spawnNewTile(); 
-                this.spawnNewTile(); 
-                this.renderGridToDOM(); 
-                
-                systemManager.navigate('view-2048');
+        /* --- 2048 ENGINE --- */
+        const game2048 = {
+            grid: [], score: 0, target: 2048, history: [], idCounter: 0, timer: null, timeLeft: 0, isTimer: false, initTime: 0, powerup: null,
+            init(t, sec = 0) {
+                clearInterval(this.timer); this.target = t; this.score = 0; this.idCounter = 0; this.history = []; this.grid = Array(16).fill(null);
+                this.isTimer = sec > 0; this.timeLeft = sec; this.initTime = sec; this.powerup = null; document.getElementById('btn-del').style.background = '#bbada0';
+                document.getElementById('display-target').innerText = t === Infinity ? "ENDLESS" : t; document.getElementById('over-2048').style.display = 'none';
+                document.getElementById('timer-row').style.display = this.isTimer ? 'flex' : 'none';
+                if(sys.user && sys.db.users[sys.user]) document.getElementById('best-2048').innerText = sys.db.users[sys.user].best2048 || 0;
+                if (this.isTimer) this.startTimer(); this.spawn(); this.spawn(); this.render(); sys.nav('view-2048');
             },
-            
-            beginCountdown() {
-                this.countdownTimer = setInterval(() => {
-                    this.timeLeftSeconds--; 
-                    const minutes = Math.floor(this.timeLeftSeconds / 60);
-                    const seconds = this.timeLeftSeconds % 60;
-                    
-                    let formattedSeconds = seconds;
-                    if (seconds < 10) formattedSeconds = '0' + seconds;
-                    
-                    document.getElementById('timer-val').innerText = minutes + ':' + formattedSeconds;
-                    
-                    if (this.timeLeftSeconds <= 0) { 
-                        clearInterval(this.countdownTimer); 
-                        this.triggerGameOver("Time's Up!"); 
-                    }
-                }, 1000);
+            startTimer() {
+                const tick = () => { this.timeLeft--; const m = Math.floor(this.timeLeft / 60), s = this.timeLeft % 60; document.getElementById('timer-val').innerText = `${m}:${s < 10 ? '0' : ''}${s}`; if (this.timeLeft <= 0) { clearInterval(this.timer); this.gameOver("Time's Up!"); } };
+                tick(); this.timer = setInterval(tick, 1000);
             },
-            
-            spawnNewTile() {
-                const emptySlotIndices = this.logicGrid.map((value, index) => value === null ? index : null).filter(value => value !== null);
-                
-                if (emptySlotIndices.length > 0) {
-                    const randomEmptyIndex = emptySlotIndices[Math.floor(Math.random() * emptySlotIndices.length)];
-                    const uniqueId = `tile_${Date.now()}_${Math.floor(Math.random() * 100000)}`;
-                    
-                    this.logicGrid[randomEmptyIndex] = { 
-                        value: Math.random() > 0.9 ? 4 : 2, 
-                        id: uniqueId,
-                        isNewlySpawned: true, 
-                        hasMergedThisTurn: false
-                    };
-                }
-            },
-            
-            renderGridToDOM() {
-                const visualLayer = document.getElementById('tile-layer');
-                const currentlyActiveTileIds = new Set();
-                
-                this.logicGrid.forEach(tile => {
-                    if (tile) currentlyActiveTileIds.add(tile.id);
+            spawn() { const empty = this.grid.map((v, i) => v === null ? i : null).filter(v => v !== null); if (empty.length) this.grid[empty[Math.floor(Math.random() * empty.length)]] = { id: this.idCounter++, val: Math.random() < 0.9 ? 2 : 4, isNew: true, isMerged: false }; },
+            render() {
+                const layer = document.getElementById('tile-layer'), currentIds = new Set(this.grid.filter(t => t).map(t => t.id));
+                Array.from(layer.children).forEach(n => { if (!currentIds.has(parseInt(n.dataset.id))) { n.style.zIndex = 5; setTimeout(() => n.remove(), 100); } });
+                this.grid.forEach((t, i) => {
+                    if (!t) return; let n = document.querySelector(`.tile[data-id='${t.id}']`);
+                    if (!n) { n = document.createElement('div'); n.dataset.id = t.id; n.onclick = () => this.handleTileClick(this.grid.findIndex(tg => tg && tg.id === t.id)); layer.appendChild(n); }
+                    n.className = `tile t${t.val} ${t.isNew ? 't-new' : ''} ${t.isMerged ? 't-merged' : ''}`;
+                    n.style.transform = `translate(${(i % 4) * 82.5}px, ${Math.floor(i / 4) * 82.5}px)`; n.innerText = t.val;
+                    t.isNew = false; t.isMerged = false;
                 });
-
-                // Remove tiles merged out of existence
-                Array.from(visualLayer.children).forEach(domNode => {
-                    if (!currentlyActiveTileIds.has(domNode.dataset.id)) {
-                        domNode.classList.add('t-dying');
-                        domNode.style.zIndex = 5; 
-                        setTimeout(() => domNode.remove(), 150); 
-                    }
-                });
-
-                // Update alive tiles
-                this.logicGrid.forEach((tile, gridIndex) => {
-                    if (!tile) return; 
-                    
-                    let domNode = document.querySelector(`.tile[data-id='${tile.id}']`);
-                    
-                    if (!domNode) { 
-                        domNode = document.createElement('div'); 
-                        domNode.dataset.id = tile.id; 
-                        visualLayer.appendChild(domNode); 
-                    }
-                    
-                    // Force DOM reflow
-                    void domNode.offsetWidth;
-                    
-                    const pixelX = (gridIndex % 4) * 82.5; 
-                    const pixelY = Math.floor(gridIndex / 4) * 82.5;
-                    
-                    let classString = `tile t${tile.value > 2048 ? '-super' : tile.value}`;
-                    if (tile.isNewlySpawned) classString += ' t-new';
-                    if (tile.hasMergedThisTurn) classString += ' t-merged';
-                    
-                    domNode.className = classString; 
-                    domNode.style.transform = `translate(${pixelX}px, ${pixelY}px)`;
-                    domNode.innerText = tile.value; 
-                    
-                    tile.isNewlySpawned = false; 
-                    tile.hasMergedThisTurn = false;
-                });
-
-                document.getElementById('score-2048').innerText = this.currentScore;
-                
-                if (systemManager.currentUser) {
-                    if (this.currentScore > systemManager.database.users[systemManager.currentUser].bestScore2048) {
-                        systemManager.database.users[systemManager.currentUser].bestScore2048 = this.currentScore; 
-                        systemManager.saveDatabase(); 
-                    }
-                }
+                document.getElementById('score-2048').innerText = this.score;
+                if (sys.user && this.score > sys.db.users[sys.user].best2048) { sys.db.users[sys.user].best2048 = this.score; document.getElementById('best-2048').innerText = this.score; sys.save(); }
             },
-            
-            processMove(direction) {
-                if (document.getElementById('over-2048').style.display === 'flex') return;
-                
-                let boardChanged = false;
-                this.moveHistory.push(JSON.stringify(this.logicGrid));
-
-                const getSequence = (i) => {
-                    if (direction === 'L') return [i*4, i*4+1, i*4+2, i*4+3];
-                    if (direction === 'R') return [i*4+3, i*4+2, i*4+1, i*4];
-                    if (direction === 'U') return [i, i+4, i+8, i+12];
-                    if (direction === 'D') return [i+12, i+8, i+4, i];
-                };
-
-                for (let i = 0; i < 4; i++) {
-                    const indices = getSequence(i);
-                    const row = indices.map(idx => this.logicGrid[idx]);
-                    
-                    let filtered = row.filter(tile => tile !== null);
-                    let newRow = [];
-
-                    for (let j = 0; j < filtered.length; j++) {
-                        if (j < filtered.length - 1 && filtered[j].value === filtered[j+1].value) {
-                            const combinedValue = filtered[j].value * 2;
-                            this.currentScore += combinedValue;
-                            
-                            newRow.push({
-                                ...filtered[j],
-                                value: combinedValue,
-                                hasMergedThisTurn: true
-                            });
-                            j++; 
-                            boardChanged = true;
-                            audioEngine.playMergeSound();
-                            
-                            if (systemManager.currentUser) { 
-                                systemManager.database.users[systemManager.currentUser].totalTilesMerged++; 
-                                systemManager.saveDatabase(); 
-                            }
-                            
-                            if (combinedValue === this.targetValue) {
-                                systemManager.grantAchievement("Master of " + this.targetValue);
-                            }
-                        } else {
-                            newRow.push({ ...filtered[j], hasMergedThisTurn: false });
+            saveState() { this.history.push({ grid: JSON.parse(JSON.stringify(this.grid)), score: this.score }); if (this.history.length > 10) this.history.shift(); },
+            undo() { if (this.history.length) { const s = this.history.pop(); this.grid = s.grid; this.score = s.score; this.render(); } },
+            move(dir) {
+                if (this.powerup) return; this.saveState(); let moved = false, mergedThisTurn = false, highMerge = false;
+                const getRow = (i, d) => { let r = []; for(let j=0; j<4; j++) { if(d==='L') r.push({idx:i*4+j, t:this.grid[i*4+j]}); if(d==='R') r.push({idx:i*4+(3-j), t:this.grid[i*4+(3-j)]}); if(d==='U') r.push({idx:j*4+i, t:this.grid[j*4+i]}); if(d==='D') r.push({idx:(3-j)*4+i, t:this.grid[(3-j)*4+i]}); } return r; };
+                for(let i=0; i<4; i++) {
+                    let rowData = getRow(i, dir), tiles = rowData.map(r => r.t).filter(t => t !== null);
+                    for(let j=0; j<tiles.length - 1; j++) {
+                        if(tiles[j].val === tiles[j+1].val) {
+                            tiles[j] = { id: tiles[j].id, val: tiles[j].val * 2, isNew: false, isMerged: true };
+                            this.score += tiles[j].val; sys.updateStats(tiles[j].val, tiles[j].val);
+                            mergedThisTurn = true; if(tiles[j].val >= 128) highMerge = true;
+                            if (tiles[j].val === this.target) sys.toast("MILESTONE REACHED!");
+                            tiles.splice(j+1, 1); moved = true;
                         }
                     }
-
-                    while (newRow.length < 4) newRow.push(null);
-
-                    indices.forEach((gridIdx, rowIdx) => {
-                        const oldTile = this.logicGrid[gridIdx];
-                        const newTile = newRow[rowIdx];
-                        
-                        if (JSON.stringify(oldTile) !== JSON.stringify(newTile)) {
-                            boardChanged = true;
-                        }
-                        this.logicGrid[gridIdx] = newTile;
-                    });
+                    while(tiles.length < 4) tiles.push(null);
+                    for(let j=0; j<4; j++) if(this.grid[rowData[j].idx] !== tiles[j]) { this.grid[rowData[j].idx] = tiles[j]; moved = true; }
                 }
-
-                if (boardChanged) {
-                    this.spawnNewTile();
-                    this.renderGridToDOM();
-                    if (this.isBoardFull() && !this.areValidMovesRemaining()) {
-                        this.triggerGameOver("Board Locked!");
-                    }
-                } else {
-                    this.moveHistory.pop();
-                }
+                if (moved) { this.spawn(); this.render(); if(highMerge) sfx.highMerge(); else if(mergedThisTurn) sfx.merge(); else sfx.slide(); if(this.checkOver()) this.gameOver(); } else this.history.pop();
             },
-            
-            isBoardFull() { 
-                return !this.logicGrid.includes(null); 
-            },
-            
-            areValidMovesRemaining() {
-                for (let row = 0; row < 4; row++) {
-                    for (let col = 0; col < 3; col++) {
-                        if (this.logicGrid[row * 4 + col].value === this.logicGrid[row * 4 + col + 1].value) return true;
-                        if (this.logicGrid[col * 4 + row].value === this.logicGrid[(col + 1) * 4 + row].value) return true;
-                    }
-                }
-                return false;
-            },
-            
-            undoLastMove() { 
-                if (this.moveHistory.length > 0) { 
-                    const previousStateString = this.moveHistory.pop();
-                    this.logicGrid = JSON.parse(previousStateString); 
-                    this.renderGridToDOM(); 
-                } 
-            },
-            
-            triggerGameOver(messageText) { 
-                document.getElementById('over-msg').innerText = messageText; 
-                document.getElementById('over-2048').style.display = 'flex'; 
-                clearInterval(this.countdownTimer); 
-            }
+            checkOver() { if (this.grid.includes(null)) return false; for(let i=0; i<4; i++) for(let j=0; j<4; j++) { let v = this.grid[i*4+j].val; if (j<3 && this.grid[i*4+j+1].val===v) return false; if (i<3 && this.grid[(i+1)*4+j].val===v) return false; } return true; },
+            gameOver(m = "Game Over!") { document.getElementById('over-msg').innerText = m; document.getElementById('over-2048').style.display = 'flex'; clearInterval(this.timer); },
+            usePowerup(type) { this.powerup = this.powerup === type ? null : type; document.getElementById('btn-del').style.background = this.powerup ? '#a49688' : '#bbada0'; if(this.powerup) document.getElementById('tutorial-tip').innerHTML = `<b>DELETE ACTIVE</b><br>Tap a tile to remove it.`; else document.getElementById('tutorial-tip').innerHTML = `<b>WELCOME TO 2048</b><br>Swipe to move tiles.`; },
+            handleTileClick(idx) { if (this.powerup === 'del' && this.grid[idx]) { this.saveState(); this.grid[idx] = null; this.usePowerup('del'); this.render(); sfx.blast(); } }
         };
 
-        /**
-         * BLOCK PUZZLE ENGINE
-         * Manages 8x8 matrix, block shape configurations, and drag-drop line clearing.
-         */
-        const blockPuzzleEngine = {
-            logicBoard: Array(64).fill(0), 
-            currentScore: 0,
-            
-            blockShapes: [ 
-                { matrix: [[1,1], [1,1]], colorClass: 'bp-filled-green' }, 
-                { matrix: [[1,1,1,1]], colorClass: 'bp-filled-beige' }, 
-                { matrix: [[1,1,1], [0,1,0]], colorClass: 'bp-filled-beige' }, 
-                { matrix: [[1,0], [1,0], [1,1]], colorClass: 'bp-filled-green' }, 
-                { matrix: [[1,1,0], [0,1,1]], colorClass: 'bp-filled-beige' } 
-            ],
-            
-            initialize() {
-                this.logicBoard.fill(0); 
-                this.currentScore = 0; 
-                
-                document.getElementById('over-bp').style.display = 'none';
-                
-                const gridContainer = document.getElementById('bp-grid'); 
-                gridContainer.innerHTML = '';
-                
-                for (let i = 0; i < 64; i++) { 
-                    const slotElement = document.createElement('div'); 
-                    slotElement.className = 'bp-slot'; 
-                    slotElement.id = `bp-c-${i}`; 
-                    gridContainer.appendChild(slotElement); 
-                }
-                
-                this.spawnTrayShapes();
+        /* --- BLOCK PUZZLE ENGINE --- */
+        const gameBP = {
+            board: Array(64).fill(0), score: 0,
+            shapes: [ {m: [[1,1],[1,1]], c: 'bp-filled-green'}, {m: [[1,1,1,1]], c: 'bp-filled-beige'}, {m: [[1],[1],[1],[1]], c: 'bp-filled-green'}, {m: [[1,1,1],[0,1,0]], c: 'bp-filled-beige'}, {m: [[1,0],[1,0],[1,1]], c: 'bp-filled-green'}, {m: [[1,1,1,1,1]], c: 'bp-filled-beige'} ],
+            init() {
+                this.board.fill(0); this.score = 0; document.getElementById('over-bp').style.display = 'none'; document.getElementById('score-bp').innerText = 0;
+                if(sys.user && sys.db.users[sys.user]) document.getElementById('best-bp').innerText = sys.db.users[sys.user].bestBP || 0;
+                const g = document.getElementById('bp-grid'); g.innerHTML = ''; for(let i=0; i<64; i++) { const s = document.createElement('div'); s.className = 'bp-slot'; s.id = `bp-c-${i}`; g.appendChild(s); }
+                this.spawn();
             },
-            
-            spawnTrayShapes() {
-                const trayContainer = document.getElementById('tray'); 
-                trayContainer.innerHTML = '';
-                
-                for (let i = 0; i < 3; i++) {
-                    const randomShape = this.blockShapes[Math.floor(Math.random() * this.blockShapes.length)];
-                    const shapeWrapper = document.createElement('div');
-                    
-                    shapeWrapper.style.display = 'grid'; 
-                    shapeWrapper.style.gridTemplateColumns = `repeat(${randomShape.matrix[0].length}, 20px)`; 
-                    shapeWrapper.style.gap = '2px';
-                    
-                    randomShape.matrix.flat().forEach(cellValue => { 
-                        const blockPiece = document.createElement('div'); 
-                        blockPiece.style.width = '20px'; 
-                        blockPiece.style.height = '20px'; 
-                        blockPiece.style.borderRadius = '2px'; 
-                        
-                        if (cellValue) blockPiece.className = randomShape.colorClass; 
-                        
-                        shapeWrapper.appendChild(blockPiece); 
-                    });
-                    
-                    const handleDragStart = (event) => {
-                        let pointerData = event;
-                        if (event.touches) pointerData = event.touches[0];
-                        this.initiateDrag(pointerData, shapeWrapper, randomShape.matrix, randomShape.colorClass);
-                    };
-                    
-                    shapeWrapper.onmousedown = handleDragStart; 
-                    shapeWrapper.ontouchstart = handleDragStart; 
-                    
-                    trayContainer.appendChild(shapeWrapper);
+            spawn() {
+                const tray = document.getElementById('tray'); tray.innerHTML = '';
+                for(let i=0; i<3; i++) {
+                    const s = this.shapes[Math.floor(Math.random()*this.shapes.length)], d = document.createElement('div');
+                    d.className = 'shape'; d.dataset.matrix = JSON.stringify(s.m); d.style.gridTemplateColumns = `repeat(${s.m[0].length}, 20px)`;
+                    s.m.flat().forEach(v => { const b = document.createElement('div'); b.className = 'mini-block'; if(v) b.classList.add(s.c); d.appendChild(b); });
+                    const handleDrag = (e, touch) => this.drag(touch ? e.touches[0] : e, d, s.m, s.c);
+                    d.addEventListener('mousedown', e => handleDrag(e, false)); d.addEventListener('touchstart', e => handleDrag(e, true), {passive: false});
+                    tray.appendChild(d);
                 }
+                this.checkMoves();
             },
-            
-            initiateDrag(pointerEvent, sourceElement, shapeMatrix, shapeColorClass) {
-                const draggingClone = sourceElement.cloneNode(true); 
-                draggingClone.className = 'dragging'; 
-                
-                draggingClone.style.gridTemplateColumns = `repeat(${shapeMatrix[0].length}, 40px)`;
-                
-                Array.from(draggingClone.children).forEach(childPiece => { 
-                    childPiece.style.width = '40px'; 
-                    childPiece.style.height = '40px'; 
-                });
-                
-                document.body.appendChild(draggingClone);
-                
-                const handlePointerMove = (event) => {
-                    let movePointer = event;
-                    if (event.touches) movePointer = event.touches[0];
-                    
-                    draggingClone.style.left = (movePointer.clientX - (shapeMatrix[0].length * 20)) + 'px'; 
-                    draggingClone.style.top = (movePointer.clientY - (shapeMatrix.length * 60)) + 'px';
-                    
-                    document.querySelectorAll('.bp-ghost').forEach(ghostNode => {
-                        ghostNode.classList.remove('bp-ghost');
-                    });
-                    
-                    const boardRect = document.getElementById('bp-grid').getBoundingClientRect();
-                    const targetColumn = Math.round((movePointer.clientX - boardRect.left - (shapeMatrix[0].length * 20)) / 42);
-                    const targetRow = Math.round((movePointer.clientY - boardRect.top - (shapeMatrix.length * 60)) / 42);
-                    
-                    if (this.validatePlacement(shapeMatrix, targetRow, targetColumn)) {
-                        for (let r = 0; r < shapeMatrix.length; r++) {
-                            for (let c = 0; c < shapeMatrix[0].length; c++) {
-                                if (shapeMatrix[r][c]) {
-                                    const index = (targetRow + r) * 8 + (targetColumn + c);
-                                    document.getElementById(`bp-c-${index}`).classList.add('bp-ghost');
-                                }
-                            }
-                        }
-                    }
-                };
-                
-                const handlePointerEnd = (event) => {
-                    let endPointer = event;
-                    if (event.changedTouches) endPointer = event.changedTouches[0];
-                    
-                    const boardRect = document.getElementById('bp-grid').getBoundingClientRect();
-                    const finalColumn = Math.round((endPointer.clientX - boardRect.left - (shapeMatrix[0].length * 20)) / 42);
-                    const finalRow = Math.round((endPointer.clientY - boardRect.top - (shapeMatrix.length * 60)) / 42);
-                    
-                    if (this.validatePlacement(shapeMatrix, finalRow, finalColumn)) {
-                        for (let r = 0; r < shapeMatrix.length; r++) {
-                            for (let c = 0; c < shapeMatrix[0].length; c++) {
-                                if (shapeMatrix[r][c]) { 
-                                    const index = (finalRow + r) * 8 + (finalColumn + c);
-                                    this.logicBoard[index] = 1; 
-                                    document.getElementById(`bp-c-${index}`).className = `bp-slot ${shapeColorClass}`; 
-                                }
-                            }
-                        }
-                        
-                        audioEngine.playWoodDropSound(); 
-                        sourceElement.style.visibility = 'hidden'; 
-                        
-                        let blocksInShape = 0;
-                        shapeMatrix.flat().forEach(val => { if (val) blocksInShape++; });
-                        this.currentScore += (blocksInShape * 10);
-                        
-                        this.scanAndClearLines(); 
-                        document.getElementById('score-bp').innerText = this.currentScore;
-                        
-                        let isTrayEmpty = true;
-                        Array.from(sourceElement.parentNode.children).forEach(trayItem => {
-                            if (trayItem.style.visibility !== 'hidden') isTrayEmpty = false;
-                        });
-                        
-                        if (isTrayEmpty) this.spawnTrayShapes();
-                    }
-                    
-                    draggingClone.remove(); 
-                    
-                    document.querySelectorAll('.bp-ghost').forEach(ghostNode => {
-                        ghostNode.classList.remove('bp-ghost');
-                    });
-                    
-                    window.removeEventListener('mousemove', handlePointerMove); 
-                    window.removeEventListener('mouseup', handlePointerEnd);
-                    window.removeEventListener('touchmove', handlePointerMove); 
-                    window.removeEventListener('touchend', handlePointerEnd);
-                };
-                
-                window.addEventListener('mousemove', handlePointerMove); 
-                window.addEventListener('mouseup', handlePointerEnd);
-                window.addEventListener('touchmove', handlePointerMove, { passive: false }); 
-                window.addEventListener('touchend', handlePointerEnd);
+            drag(pt, el, matrix, cls) {
+                const clone = el.cloneNode(true); clone.classList.add('dragging'); clone.style.gridTemplateColumns = `repeat(${matrix[0].length}, 40px)`;
+                Array.from(clone.children).forEach(c => { c.style.width = '40px'; c.style.height = '40px'; }); document.body.appendChild(clone);
+                const getGridPos = (x, y) => { const r = document.getElementById('bp-grid').getBoundingClientRect(); return { c: Math.round((x - r.left - 20) / 42), r: Math.round((y - r.top - 60) / 42) }; };
+                const move = ev => { ev.preventDefault(); const p = ev.touches ? ev.touches[0] : ev; clone.style.left = p.clientX - 20 + 'px'; clone.style.top = p.clientY - 60 + 'px'; document.querySelectorAll('.bp-ghost').forEach(e => e.classList.remove('bp-ghost')); const pos = getGridPos(p.clientX, p.clientY); if(this.canPlace(matrix, pos.r, pos.c)) for(let i=0; i<matrix.length; i++) for(let j=0; j<matrix[0].length; j++) if(matrix[i][j]) document.getElementById(`bp-c-${(pos.r+i)*8+(pos.c+j)}`).classList.add('bp-ghost'); };
+                const end = ev => { const p = ev.changedTouches ? ev.changedTouches[0] : ev; const pos = getGridPos(p.clientX, p.clientY); if(this.canPlace(matrix, pos.r, pos.c)) { for(let i=0; i<matrix.length; i++) for(let j=0; j<matrix[0].length; j++) if(matrix[i][j]) { this.board[(pos.r+i)*8+(pos.c+j)] = 1; document.getElementById(`bp-c-${(pos.r+i)*8+(pos.c+j)}`).className = `bp-slot ${cls}`; } sfx.wood(); this.score += 10; this.checkLines(); el.style.visibility = 'hidden'; el.dataset.used = 'true'; if(Array.from(document.getElementById('tray').children).every(n => n.dataset.used)) this.spawn(); else this.checkMoves(); } clone.remove(); document.querySelectorAll('.bp-ghost').forEach(e => e.classList.remove('bp-ghost')); window.removeEventListener('mousemove', move); window.removeEventListener('mouseup', end); window.removeEventListener('touchmove', move); window.removeEventListener('touchend', end); };
+                window.addEventListener('mousemove', move); window.addEventListener('mouseup', end); window.addEventListener('touchmove', move, {passive: false}); window.addEventListener('touchend', end);
             },
-            
-            validatePlacement(shapeMatrix, targetRow, targetColumn) {
-                if (targetRow < 0 || targetColumn < 0 || targetRow + shapeMatrix.length > 8 || targetColumn + shapeMatrix[0].length > 8) {
-                    return false;
+            canPlace(m, r, c) { if(r < 0 || c < 0 || r + m.length > 8 || c + m[0].length > 8) return false; for(let i=0; i<m.length; i++) for(let j=0; j<m[0].length; j++) if(m[i][j] && this.board[(r+i)*8+(c+j)]) return false; return true; },
+            checkLines() {
+                let rows = [], cols = [];
+                for(let i=0; i<8; i++) { if (this.board.slice(i*8, i*8+8).every(v => v)) rows.push(i); let col = []; for(let j=0; j<8; j++) col.push(this.board[j*8+i]); if (col.every(v => v)) cols.push(i); }
+                if (rows.length || cols.length) {
+                    sfx.blast(); const clears = new Set();
+                    rows.forEach(r => { for(let c=0; c<8; c++) clears.add(r*8+c); }); cols.forEach(c => { for(let r=0; r<8; r++) clears.add(r*8+c); });
+                    const combo = rows.length + cols.length; if(combo >= 2) sys.checkAchievement(`Combo x${combo}`); if(combo >= 4) sys.checkAchievement("Tetris Master");
+                    this.score += combo * 100 * combo; 
+                    clears.forEach(idx => { this.board[idx] = 0; const cell = document.getElementById(`bp-c-${idx}`); sys.particles(cell.getBoundingClientRect().left+20, cell.getBoundingClientRect().top+20, '#fff'); cell.className = 'bp-slot'; });
                 }
-                
-                for (let r = 0; r < shapeMatrix.length; r++) {
-                    for (let c = 0; c < shapeMatrix[0].length; c++) {
-                        if (shapeMatrix[r][c] && this.logicBoard[(targetRow + r) * 8 + (targetColumn + c)]) {
-                            return false; 
-                        }
-                    }
-                }
-                return true;
+                document.getElementById('score-bp').innerText = this.score;
+                if(sys.user && this.score > sys.db.users[sys.user].bestBP) { sys.db.users[sys.user].bestBP = this.score; sys.save(); document.getElementById('best-bp').innerText = this.score; }
             },
-            
-            scanAndClearLines() {
-                let fullRows = [];
-                let fullColumns = [];
-                
-                for (let i = 0; i < 8; i++) {
-                    let isRowFull = true;
-                    for (let r = 0; r < 8; r++) {
-                        if (this.logicBoard[i * 8 + r] === 0) isRowFull = false;
-                    }
-                    if (isRowFull) fullRows.push(i);
-                    
-                    let isColFull = true;
-                    for (let c = 0; c < 8; c++) {
-                        if (this.logicBoard[c * 8 + i] === 0) isColFull = false;
-                    }
-                    if (isColFull) fullColumns.push(i);
-                }
-                
-                fullRows.forEach(rowIndex => { 
-                    for (let x = 0; x < 8; x++) { 
-                        this.logicBoard[rowIndex * 8 + x] = 0; 
-                        document.getElementById(`bp-c-${rowIndex * 8 + x}`).className = 'bp-slot'; 
-                    } 
-                });
-                
-                fullColumns.forEach(colIndex => { 
-                    for (let y = 0; y < 8; y++) { 
-                        this.logicBoard[y * 8 + colIndex] = 0; 
-                        document.getElementById(`bp-c-${y * 8 + colIndex}`).className = 'bp-slot'; 
-                    } 
-                });
-                
-                if (fullRows.length > 0 || fullColumns.length > 0) { 
-                    this.currentScore += (fullRows.length + fullColumns.length) * 100; 
-                    audioEngine.playWinChime(); 
-                    
-                    if (fullRows.length + fullColumns.length >= 3) { 
-                        systemManager.grantAchievement("Tetris Master"); 
-                    } 
-                }
-            }
+            checkMoves() { const rem = Array.from(document.getElementById('tray').children).filter(n => !n.dataset.used); let possible = false; rem.forEach(n => { const m = JSON.parse(n.dataset.matrix); for(let r=0; r<8; r++) for(let c=0; c<8; c++) if(this.canPlace(m, r, c)) possible = true; }); if(!possible && rem.length > 0) document.getElementById('over-bp').style.display = 'flex'; }
         };
 
-        // Application Bootstrap
-        window.onload = () => {
-            systemManager.initializeSystem();
-        };
+        window.onload = () => sys.init();
     </script>
 </body>
 </html>
