@@ -799,15 +799,23 @@
             },
             
             spawnNewTile() {
-                const emptySlotIndices = this.logicGrid.map((value, index) => value === null ? index : null).filter(value => value !== null);
-                
-                if (emptySlotIndices.length > 0) {
-                    const randomEmptyIndex = emptySlotIndices[Math.floor(Math.random() * emptySlotIndices.length)];
-                    
-                    let newTileValue = 2;
-                    if (Math.random() > 0.9) {
-                        newTileValue = 4;
-                    }
+    const emptySlotIndices = this.logicGrid.map((value, index) => value === null ? index : null).filter(value => value !== null);
+    
+    if (emptySlotIndices.length > 0) {
+        const randomEmptyIndex = emptySlotIndices[Math.floor(Math.random() * emptySlotIndices.length)];
+        
+        // Robust ID generation using a counter or high-precision random
+        const uniqueId = `tile_${Date.now()}_${Math.floor(Math.random() * 100000)}`;
+        
+        this.logicGrid[randomEmptyIndex] = { 
+            value: Math.random() > 0.9 ? 4 : 2, 
+            id: uniqueId,
+            isNewlySpawned: true, 
+            hasMergedThisTurn: false
+        };
+    }
+        }
+        
                     
                     // Generate a robust unique ID for DOM diffing physics
                     const uniqueIdString = 'tile_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
@@ -891,30 +899,74 @@
                     }
                 }
             },
-            
             processMove(direction) {
-                // Ignore input if overlay is active
-                if (document.getElementById('over-2048').style.display === 'flex') {
-                    return;
-                }
+    if (document.getElementById('over-2048').style.display === 'flex') return;
+    
+    let boardChanged = false;
+    this.moveHistory.push(JSON.stringify(this.logicGrid));
+
+    // Map directions to grid calculations
+    const getSequence = (i) => {
+        if (direction === 'L') return [i*4, i*4+1, i*4+2, i*4+3];
+        if (direction === 'R') return [i*4+3, i*4+2, i*4+1, i*4];
+        if (direction === 'U') return [i, i+4, i+8, i+12];
+        if (direction === 'D') return [i+12, i+8, i+4, i];
+    };
+
+    for (let i = 0; i < 4; i++) {
+        const indices = getSequence(i);
+        const row = indices.map(idx => this.logicGrid[idx]);
+        
+        // 1. Slide: Remove nulls
+        let filtered = row.filter(tile => tile !== null);
+        let newRow = [];
+
+        // 2. Merge: Combine adjacent identical values
+        for (let j = 0; j < filtered.length; j++) {
+            if (j < filtered.length - 1 && filtered[j].value === filtered[j+1].value) {
+                const combinedValue = filtered[j].value * 2;
+                this.currentScore += combinedValue;
                 
-                let boardChanged = false; 
-                this.moveHistory.push(JSON.stringify(this.logicGrid));
-                
-                const calculateRowIndices = (rowNumber) => {
-                    if (direction === 'L') {
-                        return [rowNumber * 4, rowNumber * 4 + 1, rowNumber * 4 + 2, rowNumber * 4 + 3];
-                    }
-                    if (direction === 'R') {
-                        return [rowNumber * 4 + 3, rowNumber * 4 + 2, rowNumber * 4 + 1, rowNumber * 4];
-                    }
-                    if (direction === 'U') {
-                        return [rowNumber, rowNumber + 4, rowNumber + 8, rowNumber + 12];
-                    }
-                    if (direction === 'D') {
-                        return [rowNumber + 12, rowNumber + 8, rowNumber + 4, rowNumber];
-                    }
-                };
+                // Merge into the leading tile
+                newRow.push({
+                    ...filtered[j],
+                    value: combinedValue,
+                    hasMergedThisTurn: true
+                });
+                j++; // Skip the next tile as it's now merged
+                boardChanged = true;
+                audioEngine.playMergeSound();
+            } else {
+                newRow.push({ ...filtered[j], hasMergedThisTurn: false });
+            }
+        }
+
+        // 3. Fill: Add nulls back to maintain row length
+        while (newRow.length < 4) newRow.push(null);
+
+        // 4. Update Grid: Check if positions actually changed
+        indices.forEach((gridIdx, rowIdx) => {
+            const oldTile = this.logicGrid[gridIdx];
+            const newTile = newRow[rowIdx];
+            
+            if (JSON.stringify(oldTile) !== JSON.stringify(newTile)) {
+                boardChanged = true;
+            }
+            this.logicGrid[gridIdx] = newTile;
+        });
+    }
+
+    if (boardChanged) {
+        this.spawnNewTile();
+        this.renderGridToDOM();
+        if (this.isBoardFull() && !this.areValidMovesRemaining()) {
+            this.triggerGameOver("Board Locked!");
+        }
+    } else {
+        this.moveHistory.pop();
+    }
+}
+};
                 
                 for (let i = 0; i < 4; i++) {
                     let tileIndices = calculateRowIndices(i);
