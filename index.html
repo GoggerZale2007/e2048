@@ -549,32 +549,60 @@
                 });
             }
         };
-
         /* ---------------------------------------------------------
            3. AUTHENTICATION MODULE
-           Simple local profile creation and loading.
+           Secure local profile loading and registration.
            --------------------------------------------------------- */
         const auth = {
             login() { 
                 const u = document.getElementById('reg-u').value.trim(); 
-                if(u) this.complete(u); 
+                const p = document.getElementById('reg-p').value.trim();
+                
+                if (!u) return alert("Please enter a username.");
+                
+                // Check if the user actually exists in the database
+                if (sys.db.users[u]) {
+                    // Verify password (allows older accounts without passwords to still log in)
+                    if (sys.db.users[u].pass === p || !sys.db.users[u].pass) {
+                        this.complete(u);
+                    } else {
+                        alert("Incorrect password!");
+                    }
+                } else {
+                    alert("Account not found! Please click 'Create Account'.");
+                }
             },
+            
             register() {
                 const u = document.getElementById('reg-u').value.trim();
-                if(u) { 
-                    if(!sys.db.users[u]) {
-                        sys.db.users[u] = { achievements: [], best2048:0, totalMerges:0 }; 
-                    }
+                const p = document.getElementById('reg-p').value.trim();
+                
+                if (!u) return alert("Please enter a username.");
+                if (u.length < 3) return alert("Username must be at least 3 characters.");
+                
+                // Prevent overwriting an existing account
+                if (sys.db.users[u]) {
+                    alert("Username already exists! Please Log In instead.");
+                } else {
+                    // Create the new user profile and save it
+                    sys.db.users[u] = { 
+                        pass: p, 
+                        achievements: [], 
+                        best2048: 0, 
+                        totalMerges: 0 
+                    }; 
                     sys.save(); 
                     this.complete(u); 
                 }
             },
+            
             complete(u) { 
                 sys.user = u; 
                 document.getElementById('welcome-msg').innerText = "Hello, " + u; 
                 sys.nav('view-home'); 
             }
         };
+        
 
         /* ---------------------------------------------------------
            4. 2048 GAME ENGINE
