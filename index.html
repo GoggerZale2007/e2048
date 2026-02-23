@@ -74,14 +74,8 @@
         }
 
         @keyframes slideIn { 
-            from { 
-                opacity: 0; 
-                transform: translateY(15px); 
-            } 
-            to { 
-                opacity: 1; 
-                transform: translateY(0); 
-            } 
+            from { opacity: 0; transform: translateY(15px); } 
+            to { opacity: 1; transform: translateY(0); } 
         }
 
         /* Standard Button Styles */
@@ -106,21 +100,10 @@
         }
 
         /* Button Color Variants */
-        .btn-green { 
-            background: #71b965; 
-        } 
-        
-        .btn-blue { 
-            background: #5da5da; 
-        } 
-        
-        .btn-red { 
-            background: #e74c3c; 
-        } 
-        
-        .btn-dark { 
-            background: #555; 
-        }
+        .btn-green { background: #71b965; } 
+        .btn-blue { background: #5da5da; } 
+        .btn-red { background: #e74c3c; } 
+        .btn-dark { background: #555; }
 
         /* Input Fields for Login/Register */
         .input-field { 
@@ -266,26 +249,14 @@
         }
         
         @keyframes appear { 
-            0% { 
-                opacity: 0; 
-                transform: scale(0); 
-            } 
-            100% { 
-                opacity: 1; 
-                transform: scale(1); 
-            } 
+            0% { opacity: 0; transform: scale(0); } 
+            100% { opacity: 1; transform: scale(1); } 
         }
 
         @keyframes pop { 
-            0% { 
-                transform: scale(1); 
-            } 
-            50% { 
-                transform: scale(1.2); 
-            } 
-            100% { 
-                transform: scale(1); 
-            } 
+            0% { transform: scale(1); } 
+            50% { transform: scale(1.2); } 
+            100% { transform: scale(1); } 
         }
 
         /* Individual Tile Colors */
@@ -429,29 +400,17 @@
         
         <div class="game-wrapper" id="board-2048">
             <div class="grid-bg">
-                <div class="grid-cell"></div>
-                <div class="grid-cell"></div>
-                <div class="grid-cell"></div>
-                <div class="grid-cell"></div>
-                <div class="grid-cell"></div>
-                <div class="grid-cell"></div>
-                <div class="grid-cell"></div>
-                <div class="grid-cell"></div>
-                <div class="grid-cell"></div>
-                <div class="grid-cell"></div>
-                <div class="grid-cell"></div>
-                <div class="grid-cell"></div>
-                <div class="grid-cell"></div>
-                <div class="grid-cell"></div>
-                <div class="grid-cell"></div>
-                <div class="grid-cell"></div>
+                <div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div>
+                <div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div>
+                <div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div>
+                <div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div>
             </div>
             
             <div class="tile-layer" id="tile-layer"></div>
             
             <div class="overlay" id="over-2048">
                 <h1 id="over-msg" style="color:#776e65; font-size:40px;">Game Over</h1>
-                <button class="btn" onclick="gameEngine2048.initialize(gameEngine2048.target, gameEngine2048.initialTime)">Play Again</button>
+                <button class="btn" onclick="gameEngine2048.initialize(gameEngine2048.targetValue, gameEngine2048.initialTime)">Play Again</button>
                 <button class="btn btn-dark" onclick="systemManager.navigate('view-modes')">Main Menu</button>
             </div>
         </div>
@@ -497,14 +456,11 @@
             audioContext: null,
             
             playSound(frequency, oscillatorType, durationInSeconds, volumeLevel) {
-                if (!systemManager.isSoundEnabled) {
-                    return; 
-                }
+                if (!systemManager.isSoundEnabled) return; 
                 
                 if (!this.audioContext) {
                     this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
                 }
-                
                 if (this.audioContext.state === 'suspended') {
                     this.audioContext.resume();
                 }
@@ -525,19 +481,11 @@
                 oscillator.stop(this.audioContext.currentTime + durationInSeconds);
             },
             
-            playMergeSound() { 
-                this.playSound(400, 'sine', 0.15, 0.1); 
-            }, 
-            
-            playWoodDropSound() { 
-                this.playSound(200, 'square', 0.05, 0.05); 
-            },
-            
+            playMergeSound() { this.playSound(400, 'sine', 0.15, 0.1); }, 
+            playWoodDropSound() { this.playSound(200, 'square', 0.05, 0.05); },
             playWinChime() { 
                 this.playSound(600, 'sine', 0.1, 0.1); 
-                setTimeout(() => {
-                    this.playSound(800, 'sine', 0.3, 0.1);
-                }, 100); 
+                setTimeout(() => { this.playSound(800, 'sine', 0.3, 0.1); }, 100); 
             }
         };
 
@@ -553,11 +501,9 @@
             
             initializeSystem() {
                 const savedDatabase = localStorage.getItem('e2048_platinum_database'); 
-                
                 if (savedDatabase) {
                     this.database = JSON.parse(savedDatabase);
                 }
-                
                 this.bindGlobalInputs();
             },
             
@@ -565,9 +511,7 @@
                 const usernameInput = document.getElementById('reg-u').value.trim(); 
                 const passwordInput = document.getElementById('reg-p').value.trim();
                 
-                if (!usernameInput) {
-                    return alert("Please enter a username.");
-                }
+                if (!usernameInput) return alert("Please enter a username.");
                 
                 if (this.database.users[usernameInput]) {
                     if (this.database.users[usernameInput].password === passwordInput || !this.database.users[usernameInput].password) {
@@ -584,13 +528,8 @@
                 const usernameInput = document.getElementById('reg-u').value.trim();
                 const passwordInput = document.getElementById('reg-p').value.trim();
                 
-                if (!usernameInput) {
-                    return alert("Please enter a username.");
-                }
-                
-                if (usernameInput.length < 3) {
-                    return alert("Username too short (minimum 3 characters).");
-                }
+                if (!usernameInput) return alert("Please enter a username.");
+                if (usernameInput.length < 3) return alert("Username too short (minimum 3 characters).");
                 
                 if (this.database.users[usernameInput]) {
                     alert("Username already exists! Please Sign In instead.");
@@ -601,7 +540,6 @@
                         bestScore2048: 0, 
                         totalTilesMerged: 0 
                     }; 
-                    
                     this.saveDatabase(); 
                     this.completeAuthentication(usernameInput); 
                 }
@@ -640,9 +578,7 @@
                 toastElement.innerText = messageText; 
                 toastElement.style.top = "30px";
                 
-                if (this.toastTimerId) {
-                    clearTimeout(this.toastTimerId);
-                }
+                if (this.toastTimerId) clearTimeout(this.toastTimerId);
                 
                 this.toastTimerId = setTimeout(() => { 
                     toastElement.style.top = "-150px"; 
@@ -654,15 +590,10 @@
             },
             
             grantAchievement(achievementName) {
-                if (!this.currentUser) {
-                    return;
-                }
+                if (!this.currentUser) return;
                 
                 let userProfile = this.database.users[this.currentUser]; 
-                
-                if (!userProfile.achievements) {
-                    userProfile.achievements = [];
-                }
+                if (!userProfile.achievements) userProfile.achievements = [];
                 
                 if (!userProfile.achievements.includes(achievementName)) { 
                     userProfile.achievements.push(achievementName); 
@@ -673,12 +604,9 @@
             },
             
             updateProfileInterface() {
-                if (!this.currentUser) {
-                    return;
-                }
+                if (!this.currentUser) return;
                 
                 const userProfile = this.database.users[this.currentUser];
-                
                 document.getElementById('stat-merges').innerText = userProfile.totalTilesMerged || 0;
                 document.getElementById('stat-high').innerText = userProfile.bestScore2048 || 0;
                 
@@ -721,7 +649,6 @@
                 
                 window.addEventListener('keydown', event => { 
                     if (event.key.includes('Arrow')) {
-                        // Extract direction character (U, D, L, R) from ArrowUp, ArrowDown, etc.
                         gameEngine2048.processMove(event.key[5][0]); 
                     }
                 });
@@ -769,25 +696,21 @@
                     document.getElementById('best-2048').innerText = systemManager.database.users[systemManager.currentUser].bestScore2048 || 0;
                 }
                 
-                // Spawn initial two tiles
                 this.spawnNewTile(); 
                 this.spawnNewTile(); 
-                
                 this.renderGridToDOM(); 
+                
                 systemManager.navigate('view-2048');
             },
             
             beginCountdown() {
                 this.countdownTimer = setInterval(() => {
                     this.timeLeftSeconds--; 
-                    
                     const minutes = Math.floor(this.timeLeftSeconds / 60);
                     const seconds = this.timeLeftSeconds % 60;
                     
                     let formattedSeconds = seconds;
-                    if (seconds < 10) {
-                        formattedSeconds = '0' + seconds;
-                    }
+                    if (seconds < 10) formattedSeconds = '0' + seconds;
                     
                     document.getElementById('timer-val').innerText = minutes + ':' + formattedSeconds;
                     
@@ -799,30 +722,15 @@
             },
             
             spawnNewTile() {
-    const emptySlotIndices = this.logicGrid.map((value, index) => value === null ? index : null).filter(value => value !== null);
-    
-    if (emptySlotIndices.length > 0) {
-        const randomEmptyIndex = emptySlotIndices[Math.floor(Math.random() * emptySlotIndices.length)];
-        
-        // Robust ID generation using a counter or high-precision random
-        const uniqueId = `tile_${Date.now()}_${Math.floor(Math.random() * 100000)}`;
-        
-        this.logicGrid[randomEmptyIndex] = { 
-            value: Math.random() > 0.9 ? 4 : 2, 
-            id: uniqueId,
-            isNewlySpawned: true, 
-            hasMergedThisTurn: false
-        };
-    }
-        }
-        
-                    
-                    // Generate a robust unique ID for DOM diffing physics
-                    const uniqueIdString = 'tile_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
+                const emptySlotIndices = this.logicGrid.map((value, index) => value === null ? index : null).filter(value => value !== null);
+                
+                if (emptySlotIndices.length > 0) {
+                    const randomEmptyIndex = emptySlotIndices[Math.floor(Math.random() * emptySlotIndices.length)];
+                    const uniqueId = `tile_${Date.now()}_${Math.floor(Math.random() * 100000)}`;
                     
                     this.logicGrid[randomEmptyIndex] = { 
-                        value: newTileValue, 
-                        id: uniqueIdString,
+                        value: Math.random() > 0.9 ? 4 : 2, 
+                        id: uniqueId,
                         isNewlySpawned: true, 
                         hasMergedThisTurn: false
                     };
@@ -834,29 +742,21 @@
                 const currentlyActiveTileIds = new Set();
                 
                 this.logicGrid.forEach(tile => {
-                    if (tile) {
-                        currentlyActiveTileIds.add(tile.id);
-                    }
+                    if (tile) currentlyActiveTileIds.add(tile.id);
                 });
 
-                // Phase 1: Remove tiles that have been merged out of existence
+                // Remove tiles merged out of existence
                 Array.from(visualLayer.children).forEach(domNode => {
                     if (!currentlyActiveTileIds.has(domNode.dataset.id)) {
                         domNode.classList.add('t-dying');
                         domNode.style.zIndex = 5; 
-                        
-                        // Wait for transition to finish before removing from DOM
-                        setTimeout(() => {
-                            domNode.remove();
-                        }, 150); 
+                        setTimeout(() => domNode.remove(), 150); 
                     }
                 });
 
-                // Phase 2: Update positions and values of alive tiles
+                // Update alive tiles
                 this.logicGrid.forEach((tile, gridIndex) => {
-                    if (!tile) {
-                        return; 
-                    }
+                    if (!tile) return; 
                     
                     let domNode = document.querySelector(`.tile[data-id='${tile.id}']`);
                     
@@ -866,30 +766,24 @@
                         visualLayer.appendChild(domNode); 
                     }
                     
-                    // Force DOM reflow to ensure CSS animations trigger correctly
+                    // Force DOM reflow
                     void domNode.offsetWidth;
                     
                     const pixelX = (gridIndex % 4) * 82.5; 
                     const pixelY = Math.floor(gridIndex / 4) * 82.5;
                     
                     let classString = `tile t${tile.value > 2048 ? '-super' : tile.value}`;
-                    if (tile.isNewlySpawned) {
-                        classString += ' t-new';
-                    }
-                    if (tile.hasMergedThisTurn) {
-                        classString += ' t-merged';
-                    }
+                    if (tile.isNewlySpawned) classString += ' t-new';
+                    if (tile.hasMergedThisTurn) classString += ' t-merged';
                     
                     domNode.className = classString; 
                     domNode.style.transform = `translate(${pixelX}px, ${pixelY}px)`;
                     domNode.innerText = tile.value; 
                     
-                    // Reset animation flags
                     tile.isNewlySpawned = false; 
                     tile.hasMergedThisTurn = false;
                 });
 
-                // Update UI Scores
                 document.getElementById('score-2048').innerText = this.currentScore;
                 
                 if (systemManager.currentUser) {
@@ -899,97 +793,39 @@
                     }
                 }
             },
-            processMove(direction) {
-    if (document.getElementById('over-2048').style.display === 'flex') return;
-    
-    let boardChanged = false;
-    this.moveHistory.push(JSON.stringify(this.logicGrid));
-
-    // Map directions to grid calculations
-    const getSequence = (i) => {
-        if (direction === 'L') return [i*4, i*4+1, i*4+2, i*4+3];
-        if (direction === 'R') return [i*4+3, i*4+2, i*4+1, i*4];
-        if (direction === 'U') return [i, i+4, i+8, i+12];
-        if (direction === 'D') return [i+12, i+8, i+4, i];
-    };
-
-    for (let i = 0; i < 4; i++) {
-        const indices = getSequence(i);
-        const row = indices.map(idx => this.logicGrid[idx]);
-        
-        // 1. Slide: Remove nulls
-        let filtered = row.filter(tile => tile !== null);
-        let newRow = [];
-
-        // 2. Merge: Combine adjacent identical values
-        for (let j = 0; j < filtered.length; j++) {
-            if (j < filtered.length - 1 && filtered[j].value === filtered[j+1].value) {
-                const combinedValue = filtered[j].value * 2;
-                this.currentScore += combinedValue;
-                
-                // Merge into the leading tile
-                newRow.push({
-                    ...filtered[j],
-                    value: combinedValue,
-                    hasMergedThisTurn: true
-                });
-                j++; // Skip the next tile as it's now merged
-                boardChanged = true;
-                audioEngine.playMergeSound();
-            } else {
-                newRow.push({ ...filtered[j], hasMergedThisTurn: false });
-            }
-        }
-
-        // 3. Fill: Add nulls back to maintain row length
-        while (newRow.length < 4) newRow.push(null);
-
-        // 4. Update Grid: Check if positions actually changed
-        indices.forEach((gridIdx, rowIdx) => {
-            const oldTile = this.logicGrid[gridIdx];
-            const newTile = newRow[rowIdx];
             
-            if (JSON.stringify(oldTile) !== JSON.stringify(newTile)) {
-                boardChanged = true;
-            }
-            this.logicGrid[gridIdx] = newTile;
-        });
-    }
-
-    if (boardChanged) {
-        this.spawnNewTile();
-        this.renderGridToDOM();
-        if (this.isBoardFull() && !this.areValidMovesRemaining()) {
-            this.triggerGameOver("Board Locked!");
-        }
-    } else {
-        this.moveHistory.pop();
-    }
-}
-};
+            processMove(direction) {
+                if (document.getElementById('over-2048').style.display === 'flex') return;
                 
+                let boardChanged = false;
+                this.moveHistory.push(JSON.stringify(this.logicGrid));
+
+                const getSequence = (i) => {
+                    if (direction === 'L') return [i*4, i*4+1, i*4+2, i*4+3];
+                    if (direction === 'R') return [i*4+3, i*4+2, i*4+1, i*4];
+                    if (direction === 'U') return [i, i+4, i+8, i+12];
+                    if (direction === 'D') return [i+12, i+8, i+4, i];
+                };
+
                 for (let i = 0; i < 4; i++) {
-                    let tileIndices = calculateRowIndices(i);
+                    const indices = getSequence(i);
+                    const row = indices.map(idx => this.logicGrid[idx]);
                     
-                    // Deep copy the row data to avoid altering the history string reference
-                    let rowTiles = tileIndices.map(index => {
-                        if (this.logicGrid[index]) {
-                            return { ...this.logicGrid[index] };
-                        } else {
-                            return null;
-                        }
-                    }).filter(value => value !== null);
-                    
-                    for (let j = 0; j < rowTiles.length - 1; j++) {
-                        if (rowTiles[j].value === rowTiles[j + 1].value) {
-                            // Merge happens here
-                            rowTiles[j].value *= 2; 
-                            rowTiles[j].hasMergedThisTurn = true; 
-                            this.currentScore += rowTiles[j].value; 
+                    let filtered = row.filter(tile => tile !== null);
+                    let newRow = [];
+
+                    for (let j = 0; j < filtered.length; j++) {
+                        if (j < filtered.length - 1 && filtered[j].value === filtered[j+1].value) {
+                            const combinedValue = filtered[j].value * 2;
+                            this.currentScore += combinedValue;
                             
-                            rowTiles.splice(j + 1, 1); 
-                            boardChanged = true; 
-                            
+                            newRow.push({
+                                ...filtered[j],
+                                value: combinedValue,
+                                hasMergedThisTurn: true
+                            });
+                            j++; 
+                            boardChanged = true;
                             audioEngine.playMergeSound();
                             
                             if (systemManager.currentUser) { 
@@ -997,40 +833,35 @@
                                 systemManager.saveDatabase(); 
                             }
                             
-                            if (rowTiles[j].value === this.targetValue) {
+                            if (combinedValue === this.targetValue) {
                                 systemManager.grantAchievement("Master of " + this.targetValue);
                             }
+                        } else {
+                            newRow.push({ ...filtered[j], hasMergedThisTurn: false });
                         }
                     }
-                    
-                    // Fill remaining empty space in the row
-                    while (rowTiles.length < 4) {
-                        rowTiles.push(null);
-                    }
-                    
-                    // Check if actual movement occurred and apply back to logic grid
-                    tileIndices.forEach((gridIndex, rowIndex) => { 
-                        const originalTileString = JSON.stringify(this.logicGrid[gridIndex]);
-                        const newTileString = JSON.stringify(rowTiles[rowIndex]);
+
+                    while (newRow.length < 4) newRow.push(null);
+
+                    indices.forEach((gridIdx, rowIdx) => {
+                        const oldTile = this.logicGrid[gridIdx];
+                        const newTile = newRow[rowIdx];
                         
-                        if (originalTileString !== newTileString) {
-                            boardChanged = true; 
+                        if (JSON.stringify(oldTile) !== JSON.stringify(newTile)) {
+                            boardChanged = true;
                         }
-                        
-                        this.logicGrid[gridIndex] = rowTiles[rowIndex]; 
+                        this.logicGrid[gridIdx] = newTile;
                     });
                 }
-                
-                if (boardChanged) { 
-                    this.spawnNewTile(); 
-                    this.renderGridToDOM(); 
-                    
+
+                if (boardChanged) {
+                    this.spawnNewTile();
+                    this.renderGridToDOM();
                     if (this.isBoardFull() && !this.areValidMovesRemaining()) {
-                        this.triggerGameOver("Board Locked!"); 
+                        this.triggerGameOver("Board Locked!");
                     }
                 } else {
-                    // Revert history push if no move happened
-                    this.moveHistory.pop(); 
+                    this.moveHistory.pop();
                 }
             },
             
@@ -1041,14 +872,8 @@
             areValidMovesRemaining() {
                 for (let row = 0; row < 4; row++) {
                     for (let col = 0; col < 3; col++) {
-                        // Check horizontal neighbors
-                        if (this.logicGrid[row * 4 + col].value === this.logicGrid[row * 4 + col + 1].value) {
-                            return true;
-                        }
-                        // Check vertical neighbors
-                        if (this.logicGrid[col * 4 + row].value === this.logicGrid[(col + 1) * 4 + row].value) {
-                            return true;
-                        }
+                        if (this.logicGrid[row * 4 + col].value === this.logicGrid[row * 4 + col + 1].value) return true;
+                        if (this.logicGrid[col * 4 + row].value === this.logicGrid[(col + 1) * 4 + row].value) return true;
                     }
                 }
                 return false;
@@ -1122,18 +947,14 @@
                         blockPiece.style.height = '20px'; 
                         blockPiece.style.borderRadius = '2px'; 
                         
-                        if (cellValue) {
-                            blockPiece.className = randomShape.colorClass; 
-                        }
+                        if (cellValue) blockPiece.className = randomShape.colorClass; 
                         
                         shapeWrapper.appendChild(blockPiece); 
                     });
                     
                     const handleDragStart = (event) => {
                         let pointerData = event;
-                        if (event.touches) {
-                            pointerData = event.touches[0];
-                        }
+                        if (event.touches) pointerData = event.touches[0];
                         this.initiateDrag(pointerData, shapeWrapper, randomShape.matrix, randomShape.colorClass);
                     };
                     
@@ -1148,7 +969,6 @@
                 const draggingClone = sourceElement.cloneNode(true); 
                 draggingClone.className = 'dragging'; 
                 
-                // Scale up dragging clone to match board sizes
                 draggingClone.style.gridTemplateColumns = `repeat(${shapeMatrix[0].length}, 40px)`;
                 
                 Array.from(draggingClone.children).forEach(childPiece => { 
@@ -1160,14 +980,11 @@
                 
                 const handlePointerMove = (event) => {
                     let movePointer = event;
-                    if (event.touches) {
-                        movePointer = event.touches[0];
-                    }
+                    if (event.touches) movePointer = event.touches[0];
                     
                     draggingClone.style.left = (movePointer.clientX - (shapeMatrix[0].length * 20)) + 'px'; 
                     draggingClone.style.top = (movePointer.clientY - (shapeMatrix.length * 60)) + 'px';
                     
-                    // Clear previous ghosts
                     document.querySelectorAll('.bp-ghost').forEach(ghostNode => {
                         ghostNode.classList.remove('bp-ghost');
                     });
@@ -1190,9 +1007,7 @@
                 
                 const handlePointerEnd = (event) => {
                     let endPointer = event;
-                    if (event.changedTouches) {
-                        endPointer = event.changedTouches[0];
-                    }
+                    if (event.changedTouches) endPointer = event.changedTouches[0];
                     
                     const boardRect = document.getElementById('bp-grid').getBoundingClientRect();
                     const finalColumn = Math.round((endPointer.clientX - boardRect.left - (shapeMatrix[0].length * 20)) / 42);
@@ -1212,7 +1027,6 @@
                         audioEngine.playWoodDropSound(); 
                         sourceElement.style.visibility = 'hidden'; 
                         
-                        // Score calculation based on number of blocks placed
                         let blocksInShape = 0;
                         shapeMatrix.flat().forEach(val => { if (val) blocksInShape++; });
                         this.currentScore += (blocksInShape * 10);
@@ -1220,17 +1034,12 @@
                         this.scanAndClearLines(); 
                         document.getElementById('score-bp').innerText = this.currentScore;
                         
-                        // Check if tray needs refilling
                         let isTrayEmpty = true;
                         Array.from(sourceElement.parentNode.children).forEach(trayItem => {
-                            if (trayItem.style.visibility !== 'hidden') {
-                                isTrayEmpty = false;
-                            }
+                            if (trayItem.style.visibility !== 'hidden') isTrayEmpty = false;
                         });
                         
-                        if (isTrayEmpty) {
-                            this.spawnTrayShapes();
-                        }
+                        if (isTrayEmpty) this.spawnTrayShapes();
                     }
                     
                     draggingClone.remove(); 
@@ -1252,12 +1061,10 @@
             },
             
             validatePlacement(shapeMatrix, targetRow, targetColumn) {
-                // Check outer grid boundaries
                 if (targetRow < 0 || targetColumn < 0 || targetRow + shapeMatrix.length > 8 || targetColumn + shapeMatrix[0].length > 8) {
                     return false;
                 }
                 
-                // Check internal collisions
                 for (let r = 0; r < shapeMatrix.length; r++) {
                     for (let c = 0; c < shapeMatrix[0].length; c++) {
                         if (shapeMatrix[r][c] && this.logicBoard[(targetRow + r) * 8 + (targetColumn + c)]) {
@@ -1265,7 +1072,6 @@
                         }
                     }
                 }
-                
                 return true;
             },
             
@@ -1274,14 +1080,12 @@
                 let fullColumns = [];
                 
                 for (let i = 0; i < 8; i++) {
-                    // Row Check
                     let isRowFull = true;
                     for (let r = 0; r < 8; r++) {
                         if (this.logicBoard[i * 8 + r] === 0) isRowFull = false;
                     }
                     if (isRowFull) fullRows.push(i);
                     
-                    // Column Check
                     let isColFull = true;
                     for (let c = 0; c < 8; c++) {
                         if (this.logicBoard[c * 8 + i] === 0) isColFull = false;
@@ -1289,7 +1093,6 @@
                     if (isColFull) fullColumns.push(i);
                 }
                 
-                // Visually and logically clear identified lines
                 fullRows.forEach(rowIndex => { 
                     for (let x = 0; x < 8; x++) { 
                         this.logicBoard[rowIndex * 8 + x] = 0; 
@@ -1304,7 +1107,6 @@
                     } 
                 });
                 
-                // Apply combo scoring
                 if (fullRows.length > 0 || fullColumns.length > 0) { 
                     this.currentScore += (fullRows.length + fullColumns.length) * 100; 
                     audioEngine.playWinChime(); 
