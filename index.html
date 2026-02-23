@@ -20,10 +20,8 @@
         
         .btn { background:#8f7a66; color:#f9f6f2; border:none; padding:12px 24px; border-radius:3px; font-weight:bold; font-size:16px; cursor:pointer; text-transform:uppercase; margin:5px; box-shadow:0 4px 0 rgba(0,0,0,0.1); }
         .btn:active { transform:translateY(2px); box-shadow:none; }
-        
-        /* OWNER ADDITION: Disabled state for locked modes */
         .btn:disabled { background: #ccc !important; color: #999 !important; cursor: not-allowed; box-shadow: none; pointer-events: none; }
-
+        
         .input-field { padding:14px; border-radius:5px; border:2px solid #bbada0; width:280px; font-size:16px; margin-bottom:12px; }
         
         .top-header { width:340px; display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; }
@@ -44,7 +42,7 @@
         @keyframes pop { 0% { scale:1; } 50% { scale:1.15; } 100% { scale:1; } }
         
         .t2{background:#eee4da;color:#776e65} .t4{background:#ede0c8;color:#776e65} .t8{background:#f2b179;color:#f9f6f2} .t16{background:#f59563;color:#f9f6f2} .t32{background:#f67c5f;color:#f9f6f2} .t64{background:#f65e3b;color:#f9f6f2} .t128{background:#edcf72;color:#f9f6f2;font-size:28px} .t256{background:#edcc61;color:#f9f6f2;font-size:28px} .t512{background:#edc850;color:#f9f6f2;font-size:28px} .t1024{background:#edc53f;color:#f9f6f2;font-size:24px} .t2048{background:#edc22e;color:#f9f6f2;font-size:24px} .t4096{background:#3c3a32;color:#f9f6f2} .t131072{background:#000;color:#00f2ff;text-shadow:0 0 8px #00f2ff;}
-        .t1{background:#ff4b2b; color:white; text-shadow: 0 0 5px red;} /* Impossible tile */
+        .t1{background:#ff4b2b; color:white; text-shadow: 0 0 5px red;}
 
         .bp-score-large { font-size:70px; font-weight:bold; color:white; margin-top:10px; letter-spacing:-2px; }
         .bp-grid-wrapper { background:var(--bp-board); padding:8px; border-radius:4px; box-shadow:0 10px 20px rgba(0,0,0,0.3); touch-action:none; }
@@ -58,21 +56,26 @@
         .mini-block { width:20px; height:20px; border-radius:2px; }
         .dragging { position:fixed; z-index:1000; pointer-events:none; }
         
-        .overlay { position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(250,248,239,0.85); z-index:100; display:none; flex-direction:column; align-items:center; justify-content:center; text-align: center; }
+        .overlay { position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(250,248,239,0.95); z-index:100; display:none; flex-direction:column; align-items:center; justify-content:center; text-align: center; padding: 20px; }
         .tutorial-box { background:#5a524b; color:white; padding:15px; border-radius:8px; width:340px; margin-top:15px; font-size:14px; position:relative; }
         .particle { position:fixed; width:8px; height:8px; pointer-events:none; z-index:2000; border-radius:50%; }
         #toast { position:fixed; top:-100px; left:50%; transform:translateX(-50%); background:#333; color:white; padding:12px 24px; border-radius:30px; transition:0.4s; z-index:9999; font-weight:bold; }
         .achievement-badge { background:#edc22e; color:white; padding:6px 12px; border-radius:20px; font-weight:bold; font-size:12px; box-shadow:0 2px 5px rgba(0,0,0,0.2); }
+
+        /* Global Announcement */
+        #global-announcement { position: fixed; top: 0; left: 0; width: 100%; background: #ffcc00; color: #333; padding: 8px; font-weight: bold; text-align: center; z-index: 5000; display: none; font-size: 14px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
     </style>
 </head>
 <body>
     <div id="toast">Notification</div>
+    <div id="global-announcement"></div>
 
-    <button id="owner-login-btn" class="btn" style="position:fixed; top:10px; right:10px; z-index:2000; font-size:10px; padding:5px 10px; opacity:0.6;" onclick="owner.promptLogin()">Login as Owner</button>
+    <button id="owner-login-btn" class="btn" style="position:fixed; top:40px; right:10px; z-index:2000; font-size:10px; padding:5px 10px; opacity:0.6;" onclick="owner.promptLogin()">Login as Owner</button>
 
     <div id="stop-overlay" class="overlay" style="z-index: 10000; background: #faf8ef;">
         <h1 style="font-size: 50px;">🛑</h1>
-        <h2 style="color:#776e65; padding: 20px;">e2048 was stopped by the owner, please wait until e2048 starts again.</h2>
+        <h2 style="color:#776e65;">e2048 was stopped by the owner, please wait until e2048 starts again.</h2>
+        <p id="stop-timer-display" style="font-weight: bold; color: #d33;"></p>
         <button class="btn" onclick="document.getElementById('stop-overlay').style.display='none'">I understand</button>
     </div>
 
@@ -92,7 +95,6 @@
     <div id="view-home" class="view">
         <h2 id="welcome-msg" style="font-size:32px; margin-bottom:40px;">Welcome back</h2>
         <button id="owner-panel-btn" class="btn" style="display:none; width:260px; background:#ffcc00; color:black;" onclick="sys.nav('view-owner')">Owner Control Panel</button>
-        
         <button class="btn" style="width:260px;" onclick="sys.nav('view-modes')">2048 Standard</button>
         <button class="btn" style="width:260px; background:#674332" onclick="sys.nav('view-bp')">Block Puzzle</button>
         <button class="btn" style="width:260px; background:#555" onclick="sys.nav('view-stats')">Player Profile</button>
@@ -100,15 +102,37 @@
     </div>
 
     <div id="view-owner" class="view">
-        <h1 style="margin-bottom:20px;">Owner Settings</h1>
-        <div style="background:white; padding:20px; border-radius:8px; width:320px; box-shadow:0 4px 6px rgba(0,0,0,0.05); display:flex; flex-direction:column; gap:10px;">
-            <button id="owner-stop-btn" class="btn" onclick="owner.toggleSystem()">Stop System</button>
+        <h1>Owner Settings</h1>
+        <div style="background:white; padding:15px; border-radius:8px; width:340px; box-shadow:0 4px 6px rgba(0,0,0,0.1); display:flex; flex-direction:column; gap:10px; margin-bottom: 50px;">
+            <div style="border: 1px solid #ddd; padding: 10px; border-radius: 5px;">
+                <p style="margin:0 0 5px 0; font-weight:bold;">1. Stop System</p>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:5px;">
+                    <input type="number" id="stop-val" placeholder="Qty" style="width:100%; padding:5px;">
+                    <select id="stop-unit" style="width:100%; padding:5px;">
+                        <option value="1000">Seconds</option>
+                        <option value="60000">Minutes</option>
+                        <option value="3600000">Hours</option>
+                        <option value="86400000">Days</option>
+                        <option value="604800000">Weeks</option>
+                        <option value="2592000000">Months</option>
+                        <option value="31536000000">Years</option>
+                    </select>
+                </div>
+                <button id="owner-stop-btn" class="btn" style="width:100%; margin: 10px 0 0 0;" onclick="owner.toggleSystem()">Stop System</button>
+            </div>
+
+            <div style="border: 1px solid #ddd; padding: 10px; border-radius: 5px;">
+                <p style="margin:0 0 5px 0; font-weight:bold;">2. Global Announcement</p>
+                <input type="text" id="owner-announce-input" placeholder="Type message..." class="input-field" style="width:100%; margin:0;">
+                <button class="btn" style="width:100%; margin-top:5px; background:#444;" onclick="owner.setAnnouncement()">Update Announcement</button>
+            </div>
+
             <button class="btn" style="background:#8f7a66" onclick="owner.cycleDifficulty()">Difficulty: <span id="owner-diff-text">Normal</span></button>
-            <hr style="width:100%; opacity:0.2;">
-            <p style="margin:0; font-weight:bold; font-size:14px;">Toggle Mode Locks:</p>
+            
+            <p style="margin:0; font-weight:bold; font-size:14px;">3. Mode Locks:</p>
             <div id="owner-lock-controls" style="display:grid; grid-template-columns:1fr 1fr; gap:5px;"></div>
         </div>
-        <button class="btn" style="margin-top:30px; background:#555" onclick="sys.nav('view-home')">Back</button>
+        <button class="btn" style="background:#555" onclick="sys.nav('view-home')">Back</button>
     </div>
 
     <div id="view-modes" class="view">
@@ -188,12 +212,12 @@
         /* --- OWNER LOGIC --- */
         const owner = {
             isAdmin: false,
-            settings: { isStopped: false, difficulty: 2, lockedModes: [] },
+            settings: { stopUntil: 0, difficulty: 2, lockedModes: [], announcement: "" },
             
             init() {
                 const saved = localStorage.getItem('e2048_owner_settings');
                 if (saved) this.settings = JSON.parse(saved);
-                this.applyToAll();
+                setInterval(() => this.applyToAll(), 1000);
             },
 
             promptLogin() {
@@ -203,14 +227,25 @@
                     document.getElementById('owner-login-btn').style.display = 'none';
                     sys.toast("Admin Access Granted");
                     this.renderControls();
-                } else {
-                    sys.toast("Invalid Password");
-                }
+                } else { sys.toast("Invalid Password"); }
             },
 
             toggleSystem() {
-                this.settings.isStopped = !this.settings.isStopped;
+                if (Date.now() < this.settings.stopUntil) {
+                    this.settings.stopUntil = 0;
+                } else {
+                    const qty = parseFloat(document.getElementById('stop-val').value) || 0;
+                    const unit = parseFloat(document.getElementById('stop-unit').value);
+                    if (qty <= 0) return sys.toast("Set a valid time");
+                    this.settings.stopUntil = Date.now() + (qty * unit);
+                }
                 this.save();
+            },
+
+            setAnnouncement() {
+                this.settings.announcement = document.getElementById('owner-announce-input').value;
+                this.save();
+                sys.toast("Announcement Updated");
             },
 
             cycleDifficulty() {
@@ -219,11 +254,8 @@
             },
 
             toggleLock(mode) {
-                if (this.settings.lockedModes.includes(mode)) {
-                    this.settings.lockedModes = this.settings.lockedModes.filter(m => m !== mode);
-                } else {
-                    this.settings.lockedModes.push(mode);
-                }
+                if (this.settings.lockedModes.includes(mode)) this.settings.lockedModes = this.settings.lockedModes.filter(m => m !== mode);
+                else this.settings.lockedModes.push(mode);
                 this.save();
             },
 
@@ -234,28 +266,36 @@
             },
 
             applyToAll() {
-                // If stopped and not owner, force stop overlay
-                if (this.settings.isStopped && !this.isAdmin) {
-                    document.getElementById('stop-overlay').style.display = 'flex';
+                const isStopped = Date.now() < this.settings.stopUntil;
+                const overlay = document.getElementById('stop-overlay');
+                
+                if (isStopped && !this.isAdmin) {
+                    overlay.style.display = 'flex';
+                    const remaining = Math.max(0, this.settings.stopUntil - Date.now());
+                    const d = Math.floor(remaining / 86400000), h = Math.floor((remaining % 86400000) / 3600000), m = Math.floor((remaining % 3600000) / 60000), s = Math.floor((remaining % 60000) / 1000);
+                    document.getElementById('stop-timer-display').innerText = `Remaining: ${d}d ${h}h ${m}m ${s}s`;
                 } else {
-                    document.getElementById('stop-overlay').style.display = 'none';
+                    overlay.style.display = 'none';
                 }
 
-                // Handle Mode Locks
                 document.querySelectorAll('.mode-btn').forEach(btn => {
-                    const m = btn.dataset.mode;
-                    if (this.settings.lockedModes.includes(m)) {
-                        btn.disabled = true;
-                    } else {
-                        btn.disabled = false;
-                    }
+                    btn.disabled = (!this.isAdmin && this.settings.lockedModes.includes(btn.dataset.mode));
                 });
+
+                const ann = document.getElementById('global-announcement');
+                if (this.settings.announcement && this.settings.announcement.trim() !== "") {
+                    ann.innerText = "📢 " + this.settings.announcement;
+                    ann.style.display = 'block';
+                } else {
+                    ann.style.display = 'none';
+                }
             },
 
             renderControls() {
+                const isStopped = Date.now() < this.settings.stopUntil;
                 const sBtn = document.getElementById('owner-stop-btn');
-                sBtn.innerText = this.settings.isStopped ? "START SYSTEM" : "STOP SYSTEM";
-                sBtn.style.background = this.settings.isStopped ? "#71b965" : "#d33";
+                sBtn.innerText = isStopped ? "START SYSTEM" : "STOP SYSTEM";
+                sBtn.style.background = isStopped ? "#71b965" : "#d33";
 
                 const diffNames = ["", "Easy", "Normal", "Hard", "Impossible"];
                 document.getElementById('owner-diff-text').innerText = diffNames[this.settings.difficulty];
@@ -265,9 +305,7 @@
                 const modes = ["1024", "2048", "4096", "8192", "16384", "32768", "65536", "131072", "Blitz", "Endless"];
                 modes.forEach(m => {
                     const b = document.createElement('button');
-                    b.className = 'btn';
-                    b.style.fontSize = '10px';
-                    b.style.padding = '5px';
+                    b.className = 'btn'; b.style.fontSize = '10px'; b.style.padding = '5px';
                     b.innerText = (this.settings.lockedModes.includes(m) ? "Unlock " : "Lock ") + m;
                     b.onclick = () => this.toggleLock(m);
                     container.appendChild(b);
@@ -307,8 +345,7 @@
             save() { localStorage.setItem('e2048_plat_db', JSON.stringify(this.db)); },
             nav(id) {
                 owner.applyToAll();
-                if (owner.settings.isStopped && !owner.isAdmin && id !== 'view-auth') return;
-                
+                if (Date.now() < owner.settings.stopUntil && !owner.isAdmin && id !== 'view-auth') return;
                 document.querySelectorAll('.view').forEach(v => v.classList.remove('active-view'));
                 document.getElementById(id).classList.add('active-view');
                 document.body.style.background = id === 'view-bp' ? 'var(--bp-bg)' : 'var(--bg-2048)';
@@ -322,7 +359,6 @@
                 document.getElementById('stat-tile').innerText = u.highTile || 0; document.getElementById('stat-merges').innerText = u.totalMerges || 0; document.getElementById('stat-points').innerText = u.totalPoints || 0;
                 const list = document.getElementById('achievements-list'); list.innerHTML = '';
                 const badges = u.achievements || [];
-                if (badges.length === 0) list.innerHTML = '<span style="opacity:0.5; font-size:14px;">No achievements yet.</span>';
                 badges.forEach(b => { const el = document.createElement('div'); el.className = 'achievement-badge'; el.innerText = '🏆 ' + b; list.appendChild(el); });
             },
             checkAchievement(name) {
@@ -372,11 +408,8 @@
             grid: [], score: 0, target: 2048, history: [], idCounter: 0, timer: null, timeLeft: 0, isTimer: false, initTime: 0, powerup: null,
             init(t, sec = 0) {
                 owner.applyToAll();
-                const modeName = sec > 0 ? "Blitz" : (t === Infinity ? "Endless" : t.toString());
-                if (owner.settings.lockedModes.includes(modeName) && !owner.isAdmin) {
-                    sys.toast("This mode is locked!");
-                    return;
-                }
+                const mName = sec > 0 ? "Blitz" : (t === Infinity ? "Endless" : t.toString());
+                if (owner.settings.lockedModes.includes(mName) && !owner.isAdmin) return sys.toast("Mode Locked");
                 
                 clearInterval(this.timer); this.target = t; this.score = 0; this.idCounter = 0; this.history = []; this.grid = Array(16).fill(null);
                 this.isTimer = sec > 0; this.timeLeft = sec; this.initTime = sec; this.powerup = null; document.getElementById('btn-del').style.background = '#bbada0';
@@ -393,15 +426,12 @@
                 const empty = this.grid.map((v, i) => v === null ? i : null).filter(v => v !== null); 
                 if (empty.length) {
                     let val = Math.random() < 0.9 ? 2 : 4;
-                    // Apply Difficulty
                     const d = owner.settings.difficulty;
-                    if (d === 1) val = Math.random() < 0.7 ? 2 : 4; // Easy: more 4s
-                    if (d === 3) val = Math.random() < 0.98 ? 2 : 4; // Hard: less 4s
-                    if (d === 4) { // Impossible
+                    if (d === 1) val = Math.random() < 0.7 ? 2 : 4;
+                    if (d === 3) val = Math.random() < 0.98 ? 2 : 4;
+                    if (d === 4) {
                         const r = Math.random();
-                        if (r < 0.1) val = 1; // Spawns a 1
-                        else if (r < 0.15) val = 131072; // Spawns massive tile
-                        else val = 2;
+                        if (r < 0.1) val = 1; else if (r < 0.15) val = 131072; else val = 2;
                     }
                     this.grid[empty[Math.floor(Math.random() * empty.length)]] = { id: this.idCounter++, val: val, isNew: true, isMerged: false }; 
                 }
@@ -431,7 +461,6 @@
                             tiles[j] = { id: tiles[j].id, val: tiles[j].val * 2, isNew: false, isMerged: true };
                             this.score += tiles[j].val; sys.updateStats(tiles[j].val, tiles[j].val);
                             mergedThisTurn = true; if(tiles[j].val >= 128) highMerge = true;
-                            if (tiles[j].val === this.target) sys.toast("MILESTONE REACHED!");
                             tiles.splice(j+1, 1); moved = true;
                         }
                     }
@@ -442,7 +471,7 @@
             },
             checkOver() { if (this.grid.includes(null)) return false; for(let i=0; i<4; i++) for(let j=0; j<4; j++) { let v = this.grid[i*4+j].val; if (j<3 && this.grid[i*4+j+1].val===v) return false; if (i<3 && this.grid[(i+1)*4+j].val===v) return false; } return true; },
             gameOver(m = "Game Over!") { document.getElementById('over-msg').innerText = m; document.getElementById('over-2048').style.display = 'flex'; clearInterval(this.timer); },
-            usePowerup(type) { this.powerup = this.powerup === type ? null : type; document.getElementById('btn-del').style.background = this.powerup ? '#a49688' : '#bbada0'; if(this.powerup) document.getElementById('tutorial-tip').innerHTML = `<b>DELETE ACTIVE</b><br>Tap a tile to remove it.`; else document.getElementById('tutorial-tip').innerHTML = `<b>WELCOME TO 2048</b><br>Swipe to move tiles.`; },
+            usePowerup(type) { this.powerup = this.powerup === type ? null : type; document.getElementById('btn-del').style.background = this.powerup ? '#a49688' : '#bbada0'; },
             handleTileClick(idx) { if (this.powerup === 'del' && this.grid[idx]) { this.saveState(); this.grid[idx] = null; this.usePowerup('del'); this.render(); sfx.blast(); } }
         };
 
@@ -484,12 +513,10 @@
                 if (rows.length || cols.length) {
                     sfx.blast(); const clears = new Set();
                     rows.forEach(r => { for(let c=0; c<8; c++) clears.add(r*8+c); }); cols.forEach(c => { for(let r=0; r<8; r++) clears.add(r*8+c); });
-                    const combo = rows.length + cols.length; if(combo >= 2) sys.checkAchievement(`Combo x${combo}`); if(combo >= 4) sys.checkAchievement("Tetris Master");
-                    this.score += combo * 100 * combo; 
-                    clears.forEach(idx => { this.board[idx] = 0; const cell = document.getElementById(`bp-c-${idx}`); sys.particles(cell.getBoundingClientRect().left+20, cell.getBoundingClientRect().top+20, '#fff'); cell.className = 'bp-slot'; });
+                    this.score += (rows.length + cols.length) * 100; 
+                    clears.forEach(idx => { this.board[idx] = 0; const cell = document.getElementById(`bp-c-${idx}`); cell.className = 'bp-slot'; });
                 }
                 document.getElementById('score-bp').innerText = this.score;
-                if(sys.user && this.score > sys.db.users[sys.user].bestBP) { sys.db.users[sys.user].bestBP = this.score; sys.save(); document.getElementById('best-bp').innerText = this.score; }
             },
             checkMoves() { const rem = Array.from(document.getElementById('tray').children).filter(n => !n.dataset.used); let possible = false; rem.forEach(n => { const m = JSON.parse(n.dataset.matrix); for(let r=0; r<8; r++) for(let c=0; c<8; c++) if(this.canPlace(m, r, c)) possible = true; }); if(!possible && rem.length > 0) document.getElementById('over-bp').style.display = 'flex'; }
         };
