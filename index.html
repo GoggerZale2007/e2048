@@ -6,299 +6,319 @@
     <title>e2048</title>
     <style>
         /* =========================================================
-           I. CSS VARIABLES & THEME SETUP
+           I. CSS VARIABLES (Classic Colors)
            ========================================================= */
         :root {
-            /* 2048 Authentic Theme */
-            --bg-2048: #faf8ef; 
-            --text-2048: #776e65; 
-            --board-2048: #bbada0; 
-            --cell-2048: rgba(238, 228, 218, 0.35); 
+            /* 2048 Theme Colors */
+            --bg-2048: #faf8ef;
+            --text-2048: #776e65;
+            --board-2048: #bbada0;
+            --cell-2048: rgba(238, 228, 218, 0.35);
             --score-bg: #bbada0;
             
-            /* Block Puzzle Wood Theme */
-            --bp-bg: #a0745b; 
-            --bp-board: #674332; 
-            --bp-cell: #573727; 
-            --bp-green: #71b965; 
+            /* Block Puzzle Theme Colors */
+            --bp-bg: #a0745b;
+            --bp-board: #674332;
+            --bp-cell: #573727;
+            --bp-green: #71b965;
             --bp-beige: #dac6a3;
         }
 
         /* =========================================================
-           II. GLOBAL RESET
+           II. GLOBAL RESET & TYPOGRAPHY
            ========================================================= */
-        * { 
-            box-sizing: border-box; 
-            -webkit-tap-highlight-color: transparent; 
-            outline: none; 
-            user-select: none; 
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            outline: none;
+            user-select: none;
         }
 
-        body { 
-            margin: 0; 
-            padding: 0; 
-            height: 100vh; 
-            width: 100vw; 
-            overflow: hidden; 
-            font-family: "Clear Sans", "Helvetica Neue", Arial, sans-serif; 
-            background: var(--bg-2048); 
-            color: var(--text-2048); 
-            transition: background 0.3s ease-in-out; 
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            font-family: "Clear Sans", Arial, sans-serif;
+            background: var(--bg-2048);
+            color: var(--text-2048);
+            transition: background 0.3s ease-in-out;
         }
 
         /* =========================================================
            III. UI FRAMEWORK & NAVIGATION
            ========================================================= */
-        .view { 
-            display: none; 
-            position: absolute; 
-            top: 0; 
-            left: 0; 
-            width: 100%; 
-            height: 100%; 
-            flex-direction: column; 
-            align-items: center; 
-            background: inherit; 
-            z-index: 10; 
-            overflow-y: auto; 
-            padding: 20px 0; 
+        .view {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            flex-direction: column;
+            align-items: center;
+            background: inherit;
+            z-index: 10;
+            overflow-y: auto;
+            padding: 20px 0;
         }
 
-        .active-view { 
-            display: flex; 
-            animation: fadeIn 0.3s ease-out; 
+        .active-view {
+            display: flex;
+            animation: fadeIn 0.3s ease-out;
         }
 
-        @keyframes fadeIn { 
-            from { opacity: 0; } 
-            to { opacity: 1; } 
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
         }
 
-        .btn { 
-            background: #8f7a66; 
-            color: #f9f6f2; 
-            border: none; 
-            padding: 12px 24px; 
-            border-radius: 3px; 
-            font-weight: bold; 
-            font-size: 16px; 
-            cursor: pointer; 
-            text-transform: uppercase; 
-            margin: 5px; 
-            transition: all 0.1s ease; 
+        /* Buttons */
+        .btn {
+            background: #8f7a66;
+            color: #f9f6f2;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 3px;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            text-transform: uppercase;
+            margin: 5px;
+            transition: 0.1s;
         }
 
-        .btn:active { 
-            transform: translateY(2px); 
-            opacity: 0.8; 
+        .btn:active {
+            transform: translateY(2px);
+            opacity: 0.8;
         }
 
-        .input-field { 
-            padding: 14px; 
-            border-radius: 5px; 
-            border: 2px solid #bbada0; 
-            width: 280px; 
-            font-size: 16px; 
-            margin-bottom: 12px; 
-            text-align: center; 
-        }
-
-        /* =========================================================
-           IV. NOTIFICATIONS & OVERLAYS
-           ========================================================= */
-        #toast { 
-            position: fixed; 
-            top: -150px; 
-            left: 50%; 
-            transform: translateX(-50%); 
-            background: rgba(0, 0, 0, 0.85); 
-            color: #fff; 
-            padding: 12px 24px; 
-            border-radius: 30px; 
-            transition: top 0.4s ease; 
-            z-index: 10000; 
-            font-weight: bold; 
-            pointer-events: none; 
-        }
-
-        .overlay { 
-            position: absolute; 
-            top: 0; 
-            left: 0; 
-            width: 100%; 
-            height: 100%; 
-            background: rgba(250, 248, 239, 0.85); 
-            z-index: 100; 
-            display: none; 
-            flex-direction: column; 
-            align-items: center; 
-            justify-content: center; 
-            pointer-events: all; 
-            touch-action: none; 
+        /* Inputs */
+        .input-field {
+            padding: 14px;
+            border-radius: 5px;
+            border: 2px solid #bbada0;
+            width: 280px;
+            font-size: 16px;
+            margin-bottom: 12px;
+            text-align: center;
         }
 
         /* =========================================================
-           V. 2048 CLASSIC BOARD STYLES
+           IV. OVERLAYS & TOAST NOTIFICATIONS
            ========================================================= */
-        .top-header { 
-            width: 340px; 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            margin-bottom: 20px; 
+        #toast {
+            position: fixed;
+            top: -150px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.85);
+            color: #fff;
+            padding: 12px 24px;
+            border-radius: 30px;
+            transition: top 0.4s ease;
+            z-index: 10000;
+            font-weight: bold;
+            pointer-events: none;
         }
 
-        .score-box { 
-            background: var(--score-bg); 
-            padding: 5px 15px; 
-            border-radius: 3px; 
-            color: white; 
-            text-align: center; 
-            min-width: 60px; 
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(250, 248, 239, 0.85);
+            z-index: 100;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            pointer-events: all;
+            touch-action: none;
         }
 
-        .score-label { 
-            display: block; 
-            font-size: 11px; 
-            font-weight: bold; 
-            color: #eee4da; 
-            margin-bottom: -2px; 
+        /* =========================================================
+           V. 2048 GAME UI
+           ========================================================= */
+        .top-header {
+            width: 340px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
         }
 
-        .score-val { 
-            font-size: 20px; 
-            font-weight: bold; 
+        .score-box {
+            background: var(--score-bg);
+            padding: 5px 15px;
+            border-radius: 3px;
+            color: white;
+            text-align: center;
+            min-width: 60px;
         }
 
-        .game-wrapper { 
-            position: relative; 
-            width: 340px; 
-            height: 340px; 
-            background: var(--board-2048); 
-            border-radius: 6px; 
-            padding: 10px; 
-            touch-action: none; 
+        .score-label {
+            display: block;
+            font-size: 11px;
+            font-weight: bold;
+            color: #eee4da;
+            margin-bottom: -2px;
         }
 
-        .grid-bg { 
-            display: grid; 
-            grid-template-columns: repeat(4, 1fr); 
-            gap: 10px; 
-            width: 100%; 
-            height: 100%; 
+        .score-val {
+            font-size: 20px;
+            font-weight: bold;
         }
 
-        .grid-cell { 
-            background: var(--cell-2048); 
-            border-radius: 3px; 
+        .game-wrapper {
+            position: relative;
+            width: 340px;
+            height: 340px;
+            background: var(--board-2048);
+            border-radius: 6px;
+            padding: 10px;
+            touch-action: none;
         }
 
-        .tile-layer { 
-            position: absolute; 
-            top: 10px; 
-            left: 10px; 
-            pointer-events: none; 
-            width: 320px; 
-            height: 320px; 
+        .grid-bg {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            width: 100%;
+            height: 100%;
         }
 
-        /* Tile Physics & Animations */
-        .tile { 
-            position: absolute; 
-            width: 72.5px; 
-            height: 72.5px; 
-            border-radius: 3px; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            font-weight: bold; 
-            font-size: 32px; 
-            transition: transform 100ms ease-in-out; 
-            z-index: 10; 
+        .grid-cell {
+            background: var(--cell-2048);
+            border-radius: 3px;
         }
 
-        .t-new { 
-            animation: appear 150ms ease-out forwards; 
+        .tile-layer {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            pointer-events: none;
+            width: 320px;
+            height: 320px;
         }
 
-        .t-merged { 
-            z-index: 20; 
-            animation: pop 180ms ease-in-out forwards; 
+        /* =========================================================
+           VI. 2048 TILE ANIMATIONS & COLORS
+           ========================================================= */
+        .tile {
+            position: absolute;
+            width: 72.5px;
+            height: 72.5px;
+            border-radius: 3px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            font-size: 32px;
+            transition: transform 120ms ease-in-out;
+            z-index: 10;
         }
 
-        @keyframes appear { 
-            0% { opacity: 0; scale: 0; } 
-            100% { opacity: 1; scale: 1; } 
+        .t-new {
+            animation: appear 200ms ease-out forwards;
         }
 
-        @keyframes pop { 
-            0% { scale: 1; } 
-            50% { scale: 1.15; } 
-            100% { scale: 1; } 
+        .t-merged {
+            z-index: 20;
+            animation: pop 200ms ease-in-out forwards;
         }
 
-        /* Tile Color Scale */
-        .t2 { background: #eee4da; color: #776e65; } 
-        .t4 { background: #ede0c8; color: #776e65; } 
-        .t8 { background: #f2b179; color: #f9f6f2; } 
-        .t16 { background: #f59563; color: #f9f6f2; } 
-        .t32 { background: #f67c5f; color: #f9f6f2; } 
-        .t64 { background: #f65e3b; color: #f9f6f2; } 
-        .t128 { background: #edcf72; color: #f9f6f2; font-size: 28px; } 
-        .t256 { background: #edcc61; color: #f9f6f2; font-size: 28px; } 
-        .t512 { background: #edc850; color: #f9f6f2; font-size: 28px; } 
-        .t1024 { background: #edc53f; color: #f9f6f2; font-size: 24px; } 
-        .t2048 { background: #edc22e; color: #f9f6f2; font-size: 24px; } 
-        .t4096 { background: #3c3a32; color: #f9f6f2; } 
+        @keyframes appear {
+            0% {
+                opacity: 0;
+                transform: scale(0);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        @keyframes pop {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.2);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        /* Tile Specific Colors */
+        .t2 { background: #eee4da; color: #776e65; }
+        .t4 { background: #ede0c8; color: #776e65; }
+        .t8 { background: #f2b179; color: #f9f6f2; }
+        .t16 { background: #f59563; color: #f9f6f2; }
+        .t32 { background: #f67c5f; color: #f9f6f2; }
+        .t64 { background: #f65e3b; color: #f9f6f2; }
+        .t128 { background: #edcf72; color: #f9f6f2; font-size: 28px; }
+        .t256 { background: #edcc61; color: #f9f6f2; font-size: 28px; }
+        .t512 { background: #edc850; color: #f9f6f2; font-size: 28px; }
+        .t1024 { background: #edc53f; color: #f9f6f2; font-size: 24px; }
+        .t2048 { background: #edc22e; color: #f9f6f2; font-size: 24px; }
+        .t4096 { background: #3c3a32; color: #f9f6f2; }
         .t131072 { background: #000; color: #00f2ff; text-shadow: 0 0 8px #00f2ff; }
 
         /* =========================================================
-           VI. BLOCK PUZZLE WOODEN BOARD
+           VII. BLOCK PUZZLE UI
            ========================================================= */
-        .bp-grid { 
-            display: grid; 
-            grid-template-columns: repeat(8, 40px); 
-            gap: 2px; 
-            background: var(--bp-board); 
-            padding: 8px; 
-            border-radius: 4px; 
+        .bp-grid {
+            display: grid;
+            grid-template-columns: repeat(8, 40px);
+            gap: 2px;
+            background: var(--bp-board);
+            padding: 8px;
+            border-radius: 4px;
         }
 
-        .bp-slot { 
-            width: 40px; 
-            height: 40px; 
-            background: var(--bp-cell); 
-            border-radius: 2px; 
+        .bp-slot {
+            width: 40px;
+            height: 40px;
+            background: var(--bp-cell);
+            border-radius: 2px;
         }
 
-        .bp-filled-green { 
-            background: var(--bp-green); 
-            box-shadow: inset 2px 2px 0 rgba(255,255,255,0.3); 
+        .bp-filled-green {
+            background: var(--bp-green);
+            box-shadow: inset 2px 2px 0 rgba(255, 255, 255, 0.3);
         }
 
-        .bp-filled-beige { 
-            background: var(--bp-beige); 
-            box-shadow: inset 2px 2px 0 rgba(255,255,255,0.4); 
+        .bp-filled-beige {
+            background: var(--bp-beige);
+            box-shadow: inset 2px 2px 0 rgba(255, 255, 255, 0.4);
         }
 
-        .bp-ghost { 
-            background: rgba(255,255,255,0.2); 
-            border-radius: 2px; 
+        .bp-ghost {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 2px;
         }
         
-        .tray { 
-            display: flex; 
-            justify-content: space-around; 
-            align-items: center; 
-            width: 360px; 
-            height: 120px; 
-            margin-top: 30px; 
+        .tray {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            width: 360px;
+            height: 120px;
+            margin-top: 30px;
         }
 
-        .dragging { 
-            position: fixed; 
-            z-index: 1000; 
-            pointer-events: none; 
+        .dragging {
+            position: fixed;
+            z-index: 1000;
+            pointer-events: none;
         }
     </style>
 </head>
@@ -306,22 +326,22 @@
 
     <div id="toast">Achievement Unlocked!</div>
 
-    <div id="view-auth" class="view active-view" style="justify-content:center;">
-        <h1 style="font-size:80px; margin: 0 0 40px 0;">e2048</h1>
+    <div id="view-auth" class="view active-view" style="justify-content: center;">
+        <h1 style="font-size: 80px; margin: 0 0 40px 0;">e2048</h1>
         
         <input type="text" id="reg-u" placeholder="Username" class="input-field" autocomplete="off">
         <input type="password" id="reg-p" placeholder="Password" class="input-field">
         
         <button class="btn" style="width: 280px;" onclick="auth.login()">Login</button>
-        <button class="btn" style="width: 280px; background:#71b965;" onclick="auth.register()">Create Account</button>
+        <button class="btn" style="width: 280px; background: #71b965;" onclick="auth.register()">Create Account</button>
     </div>
 
     <div id="view-home" class="view">
         <h2 id="welcome-msg" style="font-size: 32px; margin-bottom: 40px;">Welcome</h2>
         
-        <button class="btn" style="width:280px;" onclick="sys.nav('view-modes')">2048 Modes</button>
-        <button class="btn" style="width:280px; background:#674332" onclick="sys.nav('view-bp')">Block Puzzle</button>
-        <button class="btn" style="width:280px; background:#555" onclick="sys.nav('view-stats')">Player Profile</button>
+        <button class="btn" style="width: 280px;" onclick="sys.nav('view-modes')">2048 Modes</button>
+        <button class="btn" style="width: 280px; background: #674332;" onclick="sys.nav('view-bp')">Block Puzzle</button>
+        <button class="btn" style="width: 280px; background: #555;" onclick="sys.nav('view-stats')">Player Profile</button>
     </div>
 
     <div id="view-modes" class="view">
@@ -331,7 +351,7 @@
             <div style="width: 50px;"></div>
         </div>
         
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin: 20px 0; width: 320px;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 20px 0; width: 320px;">
             <button class="btn" onclick="game2048.init(1024)">1024</button>
             <button class="btn" onclick="game2048.init(2048)">2048</button>
             <button class="btn" onclick="game2048.init(4096)">4096</button>
@@ -342,15 +362,15 @@
             <button class="btn" onclick="game2048.init(131072)">131072</button>
         </div>
         
-        <button class="btn" style="width:320px; background:#f65e3b;" onclick="game2048.init(Infinity, 60)">1 Minute Challenge</button>
-        <button class="btn" style="width:320px; background:#71b965;" onclick="let s=prompt('Enter time in seconds:', '120'); if(s) game2048.init(Infinity, parseInt(s))">Custom Time Challenge</button>
-        <button class="btn" style="width:320px; background:#333;" onclick="game2048.init(Infinity)">Endless Mode</button>
+        <button class="btn" style="width: 320px; background: #f65e3b;" onclick="game2048.init(Infinity, 60)">1 Minute Challenge</button>
+        <button class="btn" style="width: 320px; background: #71b965;" onclick="let s = prompt('Enter time in seconds:', '120'); if(s) game2048.init(Infinity, parseInt(s))">Custom Time</button>
+        <button class="btn" style="width: 320px; background: #333;" onclick="game2048.init(Infinity)">Endless Mode</button>
     </div>
 
     <div id="view-2048" class="view">
         <div class="top-header">
-            <h2 id="display-target" style="margin:0; font-size: 32px;">2048</h2>
-            <div style="display:flex; gap:8px;">
+            <h2 id="display-target" style="margin: 0; font-size: 32px;">2048</h2>
+            <div style="display: flex; gap: 8px;">
                 <div class="score-box">
                     <span class="score-label">SCORE</span>
                     <span class="score-val" id="score-2048">0</span>
@@ -362,7 +382,7 @@
             </div>
         </div>
         
-        <div id="timer-row" style="display:none; width: 340px; margin-bottom:10px; background:#f65e3b; color:white; padding:10px; border-radius:4px; text-align: center; font-weight: bold;">
+        <div id="timer-row" style="display: none; width: 340px; margin-bottom: 10px; background: #f65e3b; color: white; padding: 10px; border-radius: 4px; text-align: center; font-weight: bold;">
             TIME REMAINING: <span id="timer-val" style="font-size: 20px;">0:00</span>
         </div>
         
@@ -377,20 +397,20 @@
             <div class="tile-layer" id="tile-layer"></div>
             
             <div class="overlay" id="over-2048">
-                <h1 id="over-msg" style="color:#776e65;">Game Over</h1>
+                <h1 id="over-msg" style="color: #776e65;">Game Over</h1>
                 <button class="btn" onclick="game2048.init(game2048.target, game2048.initTime)">Try Again</button>
                 <button class="btn" style="background: #555;" onclick="sys.nav('view-modes')">Menu</button>
             </div>
         </div>
         
-        <div style="display:flex; gap:10px; margin-top:20px; width: 340px;">
-            <button class="btn" style="flex: 1; background: #bbada0;" onclick="game2048.undo()">↩ Undo Move</button>
+        <div style="display: flex; gap: 10px; margin-top: 20px; width: 340px;">
+            <button class="btn" style="flex: 1; background: #bbada0;" onclick="game2048.undo()">↩ Undo</button>
         </div>
     </div>
 
-    <div id="view-bp" class="view" style="background:var(--bp-bg)">
+    <div id="view-bp" class="view" style="background: var(--bp-bg);">
         <div class="top-header">
-            <h2 style="color:white; margin:0;">Score: <span id="score-bp">0</span></h2>
+            <h2 style="color: white; margin: 0;">Score: <span id="score-bp">0</span></h2>
             <button class="btn" style="background: none; box-shadow: none; font-size: 24px;" onclick="sys.nav('view-home')">✕</button>
         </div>
         
@@ -412,19 +432,22 @@
             <hr style="border: none; border-top: 2px dashed #eee; margin: 20px 0;">
             
             <h3 style="margin: 0 0 10px 0; color: #bbada0;">Achievements</h3>
-            <div id="achievements-list" style="display:flex; flex-wrap:wrap; gap:8px;"></div>
+            <div id="achievements-list" style="display: flex; flex-wrap: wrap; gap: 8px;"></div>
         </div>
-        <button class="btn" style="margin-top: 30px; width: 320px;" onclick="sys.nav('view-home')">Back to Menu</button>
+        <button class="btn" style="margin-top: 30px; width: 320px;" onclick="sys.nav('view-home')">Back</button>
     </div>
 
     <script>
         /**
-         * AUDIO SYNTHESIZER
-         * Generates sound waves via the Web Audio API.
+         * AUDIO SYNTHESIZER MODULE
+         * Generates sound waves via the Web Audio API natively.
          */
         const sfx = {
             ctx: null,
             
+            /**
+             * Core tone generator function
+             */
             play(frequency, type, duration, volume) {
                 if (!sys.soundOn) return; 
                 
@@ -452,8 +475,14 @@
                 osc.stop(this.ctx.currentTime + duration);
             },
             
-            merge() { this.play(400, 'sine', 0.15, 0.1); }, 
-            wood() { this.play(200, 'square', 0.05, 0.05); },
+            merge() { 
+                this.play(400, 'sine', 0.15, 0.1); 
+            },
+            
+            wood() { 
+                this.play(200, 'square', 0.05, 0.05); 
+            },
+            
             win() { 
                 this.play(600, 'sine', 0.1, 0.1); 
                 setTimeout(() => this.play(800, 'sine', 0.3, 0.1), 100); 
@@ -461,7 +490,7 @@
         };
 
         /**
-         * SYSTEM MANAGER
+         * SYSTEM CORE MANAGER
          * Handles Navigation, Databases, Achievements, and Input Binding.
          */
         const sys = {
@@ -479,19 +508,19 @@
             },
             
             nav(id) {
-                // Ensure toast doesn't carry over to new screens
+                // Instantly hide any visible toast notifications during view changes
                 document.getElementById('toast').style.top = "-150px";
                 
-                // Toggle active views
+                // Toggle active view classes
                 document.querySelectorAll('.view').forEach(v => {
                     v.classList.remove('active-view');
                 });
                 document.getElementById(id).classList.add('active-view');
                 
-                // Adjust global background color
+                // Set the global body background dependent on the game mode
                 document.body.style.background = id === 'view-bp' ? 'var(--bp-bg)' : 'var(--bg-2048)';
                 
-                // Initialize specific views
+                // Specific view initializers
                 if (id === 'view-bp') {
                     gameBP.init();
                 }
@@ -509,6 +538,7 @@
                     clearTimeout(this.toastTimer);
                 }
                 
+                // Slide back up after 3 seconds
                 this.toastTimer = setTimeout(() => { 
                     toastEl.style.top = "-150px"; 
                 }, 3000);
@@ -547,11 +577,11 @@
                 list.innerHTML = '';
                 
                 if (!currentUser.achievements || currentUser.achievements.length === 0) {
-                    list.innerHTML = '<span style="color:#aaa;">No achievements yet.</span>';
+                    list.innerHTML = '<span style="color: #aaa;">No achievements yet.</span>';
                 } else {
                     currentUser.achievements.forEach(achievement => {
                         const badge = document.createElement('span'); 
-                        badge.style = "background:#edc22e; color:white; padding:4px 10px; border-radius:20px; font-size:12px; font-weight:bold;";
+                        badge.style = "background: #edc22e; color: white; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: bold;";
                         badge.innerText = achievement; 
                         list.appendChild(badge);
                     });
@@ -562,7 +592,6 @@
                 let touchStartX, touchStartY; 
                 const board = document.getElementById('board-2048');
                 
-                // Mobile Touch Swipes
                 board.addEventListener('touchstart', e => { 
                     touchStartX = e.touches[0].clientX; 
                     touchStartY = e.touches[0].clientY; 
@@ -581,10 +610,10 @@
                     }
                 }, { passive: true });
                 
-                // Desktop Keyboard Arrow Keys
                 window.addEventListener('keydown', e => { 
                     if (e.key.includes('Arrow')) {
-                        game2048.move(e.key[5][0]); // Extracts U, D, L, R from ArrowUp, etc.
+                        // ArrowUp returns 'U', ArrowDown returns 'D', etc.
+                        game2048.move(e.key[5][0]); 
                     }
                 });
             }
@@ -592,7 +621,7 @@
 
         /**
          * AUTHENTICATION CONTROLLER
-         * Secure local login and registration verification.
+         * Secure local login logic and profile creation.
          */
         const auth = {
             login() { 
@@ -623,11 +652,11 @@
                 }
                 
                 if (username.length < 3) {
-                    return alert("Username must be at least 3 characters.");
+                    return alert("Username too short.");
                 }
                 
                 if (sys.db.users[username]) {
-                    alert("Username already exists! Please Login.");
+                    alert("Username exists! Please Login.");
                 } else { 
                     sys.db.users[username] = { 
                         pass: password, 
@@ -649,7 +678,7 @@
 
         /**
          * 2048 GAME ENGINE
-         * Manages grid, sliding physics, merging math, and game state.
+         * Manages grid arrays, sliding physics, merging math, DOM diffing, and game states.
          */
         const game2048 = {
             grid: [], 
@@ -672,7 +701,6 @@
                 document.getElementById('timer-row').style.display = seconds > 0 ? 'block' : 'none';
                 
                 clearInterval(this.timer); 
-                
                 if (seconds > 0) {
                     this.startTimer();
                 }
@@ -681,9 +709,11 @@
                     document.getElementById('best-2048').innerText = sys.db.users[sys.user].best2048 || 0;
                 }
                 
+                // Spawn the first two starting tiles
                 this.spawn(); 
                 this.spawn(); 
                 this.render(); 
+                
                 sys.nav('view-2048');
             },
             
@@ -708,37 +738,67 @@
                 
                 if (emptySlots.length > 0) {
                     const randomSlot = emptySlots[Math.floor(Math.random() * emptySlots.length)];
+                    
                     this.grid[randomSlot] = { 
                         val: Math.random() < 0.9 ? 2 : 4, 
-                        id: Date.now() + Math.random() 
+                        // Creates a unique ID so the CSS tracks the tile perfectly across DOM renders
+                        id: 't_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+                        isNew: true
                     };
                 }
             },
             
+            /**
+             * The Render function utilizes DOM Diffing to ensure CSS slide transitions fire properly.
+             */
             render() {
                 const layer = document.getElementById('tile-layer'); 
-                layer.innerHTML = '';
+                const currentIds = new Set(this.grid.filter(t => t).map(t => t.id));
                 
+                // 1. Remove dead tiles gracefully so merge animations have time to finish
+                Array.from(layer.children).forEach(node => {
+                    if (!currentIds.has(node.dataset.id)) {
+                        node.style.zIndex = 5; 
+                        setTimeout(() => node.remove(), 150); 
+                    }
+                });
+                
+                // 2. Map existing logic array to DOM elements
                 this.grid.forEach((tile, index) => {
                     if (!tile) return; 
                     
-                    const node = document.createElement('div');
+                    let node = document.querySelector(`.tile[data-id='${tile.id}']`);
                     
-                    // Apply merge animation class if flagged
-                    node.className = `tile t${tile.val} ${tile.merged ? 't-merged' : ''}`; 
+                    if (!node) {
+                        node = document.createElement('div');
+                        node.dataset.id = tile.id;
+                        layer.appendChild(node);
+                    }
                     
-                    // Calculate exact X and Y offsets
+                    // Force a browser reflow to guarantee CSS animation restarts
+                    void node.offsetWidth;
+                    
+                    node.className = `tile t${tile.val} ${tile.isNew ? 't-new' : ''} ${tile.merged ? 't-merged' : ''}`; 
+                    
+                    // Direct transform injection for smooth coordinate sliding
                     const x = (index % 4) * 82.5;
                     const y = Math.floor(index / 4) * 82.5;
-                    node.style.transform = `translate(${x}px, ${y}px)`;
+                    
+                    node.style.transform = `translate(${x}px, ${y}px) scale(${tile.merged ? 1.1 : 1})`;
+                    
+                    if (tile.merged) {
+                        setTimeout(() => {
+                            node.style.transform = `translate(${x}px, ${y}px) scale(1)`;
+                        }, 150);
+                    }
                     
                     node.innerText = tile.val; 
-                    layer.appendChild(node); 
                     
-                    // Reset merge flag after rendering
+                    tile.isNew = false; 
                     tile.merged = false;
                 });
                 
+                // Update Scoreboard
                 document.getElementById('score-2048').innerText = this.score;
                 
                 if (sys.user && this.score > sys.db.users[sys.user].best2048) { 
@@ -748,31 +808,35 @@
             },
             
             move(direction) {
-                // Prevent moving if game is over
-                if (document.getElementById('over-2048').style.display === 'flex') return;
+                // Prevent swipes if overlay is blocking the board
+                if (document.getElementById('over-2048').style.display === 'flex') {
+                    return;
+                }
                 
                 let moved = false; 
-                this.history.push(JSON.stringify(this.grid)); // Save for Undo functionality
+                this.history.push(JSON.stringify(this.grid));
                 
                 const getRowIndices = (rowIndex) => {
-                    if (direction === 'L') return [rowIndex*4, rowIndex*4+1, rowIndex*4+2, rowIndex*4+3];
-                    if (direction === 'R') return [rowIndex*4+3, rowIndex*4+2, rowIndex*4+1, rowIndex*4];
-                    if (direction === 'U') return [rowIndex, rowIndex+4, rowIndex+8, rowIndex+12];
-                    return [rowIndex+12, rowIndex+8, rowIndex+4, rowIndex];
+                    if (direction === 'L') return [rowIndex * 4, rowIndex * 4 + 1, rowIndex * 4 + 2, rowIndex * 4 + 3];
+                    if (direction === 'R') return [rowIndex * 4 + 3, rowIndex * 4 + 2, rowIndex * 4 + 1, rowIndex * 4];
+                    if (direction === 'U') return [rowIndex, rowIndex + 4, rowIndex + 8, rowIndex + 12];
+                    return [rowIndex + 12, rowIndex + 8, rowIndex + 4, rowIndex];
                 };
                 
                 for (let i = 0; i < 4; i++) {
                     let indices = getRowIndices(i);
-                    let row = indices.map(idx => this.grid[idx]).filter(val => val !== null);
+                    // Deep copy current row to prevent reference leaking to history
+                    let row = indices.map(idx => this.grid[idx] ? { ...this.grid[idx] } : null).filter(val => val !== null);
                     
-                    // Process Merges
+                    // Calculate Merges
                     for (let j = 0; j < row.length - 1; j++) {
-                        if (row[j].val === row[j+1].val) {
+                        if (row[j].val === row[j + 1].val) {
                             row[j].val *= 2; 
                             row[j].merged = true; 
                             this.score += row[j].val; 
                             
-                            row.splice(j+1, 1); 
+                            // Splice removes the consumed tile and shifts the array down
+                            row.splice(j + 1, 1); 
                             moved = true; 
                             sfx.merge();
                             
@@ -787,12 +851,12 @@
                         }
                     }
                     
-                    // Fill remaining space with nulls
+                    // Pad array back to length 4 with nulls
                     while (row.length < 4) {
                         row.push(null);
                     }
                     
-                    // Update main grid and check if anything actually moved
+                    // Overwrite actual grid and verify if any movement occurred
                     indices.forEach((idx, j) => { 
                         if (JSON.stringify(this.grid[idx]) !== JSON.stringify(row[j])) {
                             moved = true; 
@@ -808,8 +872,8 @@
                     if (this.isFull() && !this.canMove()) {
                         this.gameOver("No Moves Left!"); 
                     }
-                } else { 
-                    // Revert history if swipe was invalid
+                } else {
+                    // Revert history if swipe was ignored (nothing shifted)
                     this.history.pop(); 
                 }
             },
@@ -821,17 +885,15 @@
             canMove() {
                 for (let i = 0; i < 4; i++) {
                     for (let j = 0; j < 3; j++) {
-                        // Check horizontal matches
-                        if (this.grid[i*4+j].val === this.grid[i*4+j+1].val) return true;
-                        // Check vertical matches
-                        if (this.grid[j*4+i].val === this.grid[(j+1)*4+i].val) return true;
+                        if (this.grid[i * 4 + j].val === this.grid[i * 4 + j + 1].val) return true;
+                        if (this.grid[j * 4 + i].val === this.grid[(j + 1) * 4 + i].val) return true;
                     }
                 }
                 return false;
             },
             
             undo() { 
-                if (this.history.length > 0) { 
+                if (this.history.length) { 
                     this.grid = JSON.parse(this.history.pop()); 
                     this.render(); 
                 } 
@@ -846,7 +908,7 @@
 
         /**
          * BLOCK PUZZLE ENGINE
-         * Drag-and-drop mechanics, grid validation, and line clearing logic.
+         * Drag-and-drop physics, boundary checks, grid alignment, and 10x10 style logic.
          */
         const gameBP = {
             board: Array(64).fill(0), 
@@ -863,17 +925,17 @@
             init() {
                 this.board.fill(0); 
                 this.score = 0; 
+                
                 document.getElementById('over-bp').style.display = 'none';
                 
-                const gridContainer = document.getElementById('bp-grid'); 
-                gridContainer.innerHTML = '';
+                const grid = document.getElementById('bp-grid'); 
+                grid.innerHTML = '';
                 
-                // Build the 8x8 Grid HTML
                 for (let i = 0; i < 64; i++) { 
                     const slot = document.createElement('div'); 
                     slot.className = 'bp-slot'; 
                     slot.id = `bp-c-${i}`; 
-                    gridContainer.appendChild(slot); 
+                    grid.appendChild(slot); 
                 }
                 
                 this.spawn();
@@ -884,28 +946,32 @@
                 tray.innerHTML = '';
                 
                 for (let i = 0; i < 3; i++) {
-                    const shapeData = this.shapes[Math.floor(Math.random() * this.shapes.length)];
-                    const shapeDiv = document.createElement('div');
+                    const shapeObj = this.shapes[Math.floor(Math.random() * this.shapes.length)];
+                    const div = document.createElement('div');
                     
-                    shapeDiv.style.display = 'grid'; 
-                    shapeDiv.style.gridTemplateColumns = `repeat(${shapeData.m[0].length}, 20px)`; 
-                    shapeDiv.style.gap = '2px';
+                    div.style.display = 'grid'; 
+                    div.style.gridTemplateColumns = `repeat(${shapeObj.m[0].length}, 20px)`; 
+                    div.style.gap = '2px';
                     
-                    // Render mini-blocks inside the tray
-                    shapeData.m.flat().forEach(val => { 
+                    shapeObj.m.flat().forEach(val => { 
                         const block = document.createElement('div'); 
                         block.style.width = '20px'; 
                         block.style.height = '20px'; 
                         block.style.borderRadius = '2px'; 
-                        if (val) block.className = shapeData.c; 
-                        shapeDiv.appendChild(block); 
+                        
+                        if (val) {
+                            block.className = shapeObj.c; 
+                        }
+                        
+                        div.appendChild(block); 
                     });
                     
-                    const startDrag = (e) => this.drag(e.touches ? e.touches[0] : e, shapeDiv, shapeData.m, shapeData.c);
-                    shapeDiv.onmousedown = startDrag; 
-                    shapeDiv.ontouchstart = startDrag; 
+                    const startDrag = (e) => this.drag(e.touches ? e.touches[0] : e, div, shapeObj.m, shapeObj.c);
                     
-                    tray.appendChild(shapeDiv);
+                    div.onmousedown = startDrag; 
+                    div.ontouchstart = startDrag; 
+                    
+                    tray.appendChild(div);
                 }
             },
             
@@ -913,8 +979,8 @@
                 const clone = element.cloneNode(true); 
                 clone.className = 'dragging'; 
                 
-                // Scale blocks up to match the 40px grid perfectly
                 clone.style.gridTemplateColumns = `repeat(${matrix[0].length}, 40px)`;
+                
                 Array.from(clone.children).forEach(child => { 
                     child.style.width = '40px'; 
                     child.style.height = '40px'; 
@@ -925,22 +991,22 @@
                 const handleMove = (e) => {
                     const p = e.touches ? e.touches[0] : e;
                     
-                    // Center the dragging clone on the pointer
                     clone.style.left = p.clientX - (matrix[0].length * 20) + 'px'; 
                     clone.style.top = p.clientY - (matrix.length * 60) + 'px';
                     
-                    document.querySelectorAll('.bp-ghost').forEach(g => g.classList.remove('bp-ghost'));
+                    document.querySelectorAll('.bp-ghost').forEach(g => {
+                        g.classList.remove('bp-ghost');
+                    });
                     
                     const rect = document.getElementById('bp-grid').getBoundingClientRect();
                     const targetCol = Math.round((p.clientX - rect.left - (matrix[0].length * 20)) / 42);
                     const targetRow = Math.round((p.clientY - rect.top - (matrix.length * 60)) / 42);
                     
-                    // Draw Ghost Preview
                     if (this.canPlace(matrix, targetRow, targetCol)) {
                         for (let i = 0; i < matrix.length; i++) {
                             for (let j = 0; j < matrix[0].length; j++) {
                                 if (matrix[i][j]) {
-                                    document.getElementById(`bp-c-${(targetRow+i)*8+(targetCol+j)}`).classList.add('bp-ghost');
+                                    document.getElementById(`bp-c-${(targetRow + i) * 8 + (targetCol + j)}`).classList.add('bp-ghost');
                                 }
                             }
                         }
@@ -949,18 +1015,17 @@
                 
                 const handleEnd = (e) => {
                     const p = e.changedTouches ? e.changedTouches[0] : e;
+                    
                     const rect = document.getElementById('bp-grid').getBoundingClientRect();
+                    const targetCol = Math.round((p.clientX - rect.left - (matrix[0].length * 20)) / 42);
+                    const targetRow = Math.round((p.clientY - rect.top - (matrix.length * 60)) / 42);
                     
-                    const finalCol = Math.round((p.clientX - rect.left - (matrix[0].length * 20)) / 42);
-                    const finalRow = Math.round((p.clientY - rect.top - (matrix.length * 60)) / 42);
-                    
-                    if (this.canPlace(matrix, finalRow, finalCol)) {
-                        // Lock piece into the board array and HTML
+                    if (this.canPlace(matrix, targetRow, targetCol)) {
                         for (let i = 0; i < matrix.length; i++) {
                             for (let j = 0; j < matrix[0].length; j++) {
                                 if (matrix[i][j]) { 
-                                    this.board[(finalRow+i)*8+(finalCol+j)] = 1; 
-                                    document.getElementById(`bp-c-${(finalRow+i)*8+(finalCol+j)}`).className = `bp-slot ${colorClass}`; 
+                                    this.board[(targetRow + i) * 8 + (targetCol + j)] = 1; 
+                                    document.getElementById(`bp-c-${(targetRow + i) * 8 + (targetCol + j)}`).className = `bp-slot ${colorClass}`; 
                                 }
                             }
                         }
@@ -970,16 +1035,19 @@
                         this.score += (matrix.flat().filter(v => v).length * 10);
                         
                         this.clearLines(); 
+                        
                         document.getElementById('score-bp').innerText = this.score;
                         
-                        // Refill tray if empty
                         if (Array.from(element.parentNode.children).every(c => c.style.visibility === 'hidden')) {
                             this.spawn();
                         }
                     }
                     
                     clone.remove(); 
-                    document.querySelectorAll('.bp-ghost').forEach(g => g.classList.remove('bp-ghost'));
+                    
+                    document.querySelectorAll('.bp-ghost').forEach(g => {
+                        g.classList.remove('bp-ghost');
+                    });
                     
                     window.removeEventListener('mousemove', handleMove); 
                     window.removeEventListener('mouseup', handleEnd);
@@ -994,15 +1062,13 @@
             },
             
             canPlace(matrix, row, col) {
-                // Out of Bounds check
                 if (row < 0 || col < 0 || row + matrix.length > 8 || col + matrix[0].length > 8) {
                     return false;
                 }
                 
-                // Overlap check
                 for (let i = 0; i < matrix.length; i++) {
                     for (let j = 0; j < matrix[0].length; j++) {
-                        if (matrix[i][j] && this.board[(row+i)*8+(col+j)]) {
+                        if (matrix[i][j] && this.board[(row + i) * 8 + (col + j)]) {
                             return false;
                         }
                     }
@@ -1015,39 +1081,35 @@
                 let rowsToClear = [];
                 let colsToClear = [];
                 
-                // Identify Full Rows and Columns
                 for (let i = 0; i < 8; i++) {
-                    if (this.board.slice(i*8, i*8+8).every(v => v)) {
+                    if (this.board.slice(i * 8, i * 8 + 8).every(v => v)) {
                         rowsToClear.push(i);
                     }
                     
-                    let currentCol = []; 
+                    let tempCol = []; 
                     for (let j = 0; j < 8; j++) {
-                        currentCol.push(this.board[j*8+i]);
+                        tempCol.push(this.board[j * 8 + i]);
                     }
                     
-                    if (currentCol.every(v => v)) {
+                    if (tempCol.every(v => v)) {
                         colsToClear.push(i);
                     }
                 }
                 
-                // Clear Rows
                 rowsToClear.forEach(r => { 
                     for (let i = 0; i < 8; i++) { 
-                        this.board[r*8+i] = 0; 
-                        document.getElementById(`bp-c-${r*8+i}`).className = 'bp-slot'; 
+                        this.board[r * 8 + i] = 0; 
+                        document.getElementById(`bp-c-${r * 8 + i}`).className = 'bp-slot'; 
                     } 
                 });
                 
-                // Clear Columns
                 colsToClear.forEach(c => { 
                     for (let i = 0; i < 8; i++) { 
-                        this.board[i*8+c] = 0; 
-                        document.getElementById(`bp-c-${i*8+c}`).className = 'bp-slot'; 
+                        this.board[i * 8 + c] = 0; 
+                        document.getElementById(`bp-c-${i * 8 + c}`).className = 'bp-slot'; 
                     } 
                 });
                 
-                // Handle Scoring and Sound
                 if (rowsToClear.length > 0 || colsToClear.length > 0) { 
                     this.score += (rowsToClear.length + colsToClear.length) * 100; 
                     sfx.win(); 
@@ -1059,9 +1121,10 @@
             }
         };
 
-        // Bootstrap the application
-        window.onload = () => sys.init();
-        
+        // Initialize application on load
+        window.onload = () => {
+            sys.init();
+        };
     </script>
 </body>
 </html>
