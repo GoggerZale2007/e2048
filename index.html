@@ -3,15 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    
     <title>e2048</title>
-    
     <style>
         /* =========================================================
-           I. CSS VARIABLES & COLOR PALETTES
+           I. CSS VARIABLES & THEME SETUP
            ========================================================= */
         :root {
-            /* 2048 Standard Theme */
+            /* 2048 Authentic Theme */
             --bg-2048: #faf8ef; 
             --text-2048: #776e65; 
             --board-2048: #bbada0; 
@@ -24,12 +22,10 @@
             --bp-cell: #573727; 
             --bp-green: #71b965; 
             --bp-beige: #dac6a3;
-            --bp-blue: #3498db;
-            --bp-orange: #e67e22;
         }
 
         /* =========================================================
-           II. GLOBAL RESET & BASE STYLES
+           II. GLOBAL RESET
            ========================================================= */
         * { 
             box-sizing: border-box; 
@@ -47,7 +43,7 @@
             font-family: "Clear Sans", "Helvetica Neue", Arial, sans-serif; 
             background: var(--bg-2048); 
             color: var(--text-2048); 
-            transition: background 0.4s ease-in-out; 
+            transition: background 0.3s ease-in-out; 
         }
 
         /* =========================================================
@@ -74,58 +70,55 @@
         }
 
         @keyframes fadeIn { 
-            from { opacity: 0; transform: translateY(10px); } 
-            to { opacity: 1; transform: translateY(0); } 
+            from { opacity: 0; } 
+            to { opacity: 1; } 
         }
 
         .btn { 
             background: #8f7a66; 
             color: #f9f6f2; 
             border: none; 
-            padding: 14px 24px; 
-            border-radius: 6px; 
+            padding: 12px 24px; 
+            border-radius: 3px; 
             font-weight: bold; 
             font-size: 16px; 
             cursor: pointer; 
             text-transform: uppercase; 
-            margin: 6px; 
+            margin: 5px; 
             transition: all 0.1s ease; 
-            box-shadow: 0 4px 0 rgba(0,0,0,0.15); 
         }
 
         .btn:active { 
-            transform: translateY(4px); 
-            box-shadow: none; 
+            transform: translateY(2px); 
+            opacity: 0.8; 
         }
 
         .input-field { 
             padding: 14px; 
-            border-radius: 6px; 
+            border-radius: 5px; 
             border: 2px solid #bbada0; 
             width: 280px; 
             font-size: 16px; 
             margin-bottom: 12px; 
-            text-align: center;
+            text-align: center; 
         }
 
         /* =========================================================
-           IV. NOTIFICATIONS (TOASTS & OVERLAYS)
+           IV. NOTIFICATIONS & OVERLAYS
            ========================================================= */
         #toast { 
             position: fixed; 
-            top: -150px; /* Safe distance to hide */
+            top: -150px; 
             left: 50%; 
             transform: translateX(-50%); 
-            background: rgba(0, 0, 0, 0.9); 
+            background: rgba(0, 0, 0, 0.85); 
             color: #fff; 
-            padding: 14px 28px; 
-            border-radius: 40px; 
-            transition: top 0.5s cubic-bezier(0.18, 0.89, 0.32, 1.28); 
+            padding: 12px 24px; 
+            border-radius: 30px; 
+            transition: top 0.4s ease; 
             z-index: 10000; 
             font-weight: bold; 
-            pointer-events: none; /* Prevents blocking clicks */
-            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
-            border: 1px solid rgba(255,255,255,0.1);
+            pointer-events: none; 
         }
 
         .overlay { 
@@ -140,13 +133,12 @@
             flex-direction: column; 
             align-items: center; 
             justify-content: center; 
-            pointer-events: all; /* Blocks touches to the board below */
-            touch-action: none;
-            backdrop-filter: blur(3px);
+            pointer-events: all; 
+            touch-action: none; 
         }
 
         /* =========================================================
-           V. 2048 GAME STYLES
+           V. 2048 CLASSIC BOARD STYLES
            ========================================================= */
         .top-header { 
             width: 340px; 
@@ -158,11 +150,11 @@
 
         .score-box { 
             background: var(--score-bg); 
-            padding: 6px 15px; 
-            border-radius: 4px; 
+            padding: 5px 15px; 
+            border-radius: 3px; 
             color: white; 
             text-align: center; 
-            min-width: 65px; 
+            min-width: 60px; 
         }
 
         .score-label { 
@@ -183,10 +175,9 @@
             width: 340px; 
             height: 340px; 
             background: var(--board-2048); 
-            border-radius: 8px; 
+            border-radius: 6px; 
             padding: 10px; 
             touch-action: none; 
-            box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
         }
 
         .grid-bg { 
@@ -199,7 +190,7 @@
 
         .grid-cell { 
             background: var(--cell-2048); 
-            border-radius: 4px; 
+            border-radius: 3px; 
         }
 
         .tile-layer { 
@@ -211,11 +202,12 @@
             height: 320px; 
         }
 
+        /* Tile Physics & Animations */
         .tile { 
             position: absolute; 
             width: 72.5px; 
             height: 72.5px; 
-            border-radius: 4px; 
+            border-radius: 3px; 
             display: flex; 
             justify-content: center; 
             align-items: center; 
@@ -225,6 +217,26 @@
             z-index: 10; 
         }
 
+        .t-new { 
+            animation: appear 150ms ease-out forwards; 
+        }
+
+        .t-merged { 
+            z-index: 20; 
+            animation: pop 180ms ease-in-out forwards; 
+        }
+
+        @keyframes appear { 
+            0% { opacity: 0; scale: 0; } 
+            100% { opacity: 1; scale: 1; } 
+        }
+
+        @keyframes pop { 
+            0% { scale: 1; } 
+            50% { scale: 1.15; } 
+            100% { scale: 1; } 
+        }
+
         /* Tile Color Scale */
         .t2 { background: #eee4da; color: #776e65; } 
         .t4 { background: #ede0c8; color: #776e65; } 
@@ -232,23 +244,24 @@
         .t16 { background: #f59563; color: #f9f6f2; } 
         .t32 { background: #f67c5f; color: #f9f6f2; } 
         .t64 { background: #f65e3b; color: #f9f6f2; } 
-        .t128 { background: #edcf72; color: #f9f6f2; font-size: 28px; box-shadow: 0 0 10px rgba(237, 207, 114, 0.4); } 
-        .t256 { background: #edcc61; color: #f9f6f2; font-size: 28px; box-shadow: 0 0 15px rgba(237, 204, 97, 0.5); } 
-        .t512 { background: #edc850; color: #f9f6f2; font-size: 28px; box-shadow: 0 0 20px rgba(237, 200, 80, 0.6); } 
-        .t1024 { background: #edc53f; color: #f9f6f2; font-size: 24px; box-shadow: 0 0 25px rgba(237, 197, 63, 0.7); } 
-        .t2048 { background: #edc22e; color: #f9f6f2; font-size: 24px; box-shadow: 0 0 30px rgba(237, 194, 46, 0.8); }
+        .t128 { background: #edcf72; color: #f9f6f2; font-size: 28px; } 
+        .t256 { background: #edcc61; color: #f9f6f2; font-size: 28px; } 
+        .t512 { background: #edc850; color: #f9f6f2; font-size: 28px; } 
+        .t1024 { background: #edc53f; color: #f9f6f2; font-size: 24px; } 
+        .t2048 { background: #edc22e; color: #f9f6f2; font-size: 24px; } 
+        .t4096 { background: #3c3a32; color: #f9f6f2; } 
+        .t131072 { background: #000; color: #00f2ff; text-shadow: 0 0 8px #00f2ff; }
 
         /* =========================================================
-           VI. BLOCK PUZZLE STYLES
+           VI. BLOCK PUZZLE WOODEN BOARD
            ========================================================= */
         .bp-grid { 
             display: grid; 
             grid-template-columns: repeat(8, 40px); 
             gap: 2px; 
             background: var(--bp-board); 
-            padding: 10px; 
-            border-radius: 6px; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            padding: 8px; 
+            border-radius: 4px; 
         }
 
         .bp-slot { 
@@ -256,37 +269,36 @@
             height: 40px; 
             background: var(--bp-cell); 
             border-radius: 2px; 
-            transition: background 0.2s ease;
         }
 
-        .bp-filled-green { background: var(--bp-green); box-shadow: inset 3px 3px 0 rgba(255,255,255,0.2); }
-        .bp-filled-beige { background: var(--bp-beige); box-shadow: inset 3px 3px 0 rgba(255,255,255,0.3); }
-        .bp-filled-blue { background: var(--bp-blue); box-shadow: inset 3px 3px 0 rgba(255,255,255,0.2); }
-        .bp-filled-orange { background: var(--bp-orange); box-shadow: inset 3px 3px 0 rgba(255,255,255,0.2); }
-        
+        .bp-filled-green { 
+            background: var(--bp-green); 
+            box-shadow: inset 2px 2px 0 rgba(255,255,255,0.3); 
+        }
+
+        .bp-filled-beige { 
+            background: var(--bp-beige); 
+            box-shadow: inset 2px 2px 0 rgba(255,255,255,0.4); 
+        }
+
         .bp-ghost { 
             background: rgba(255,255,255,0.2); 
-            transform: scale(0.9);
-            border-radius: 4px;
+            border-radius: 2px; 
         }
-
+        
         .tray { 
             display: flex; 
             justify-content: space-around; 
-            align-items: center;
+            align-items: center; 
             width: 360px; 
             height: 120px; 
             margin-top: 30px; 
-            background: rgba(0,0,0,0.05);
-            border-radius: 12px;
-            padding: 10px;
         }
 
         .dragging { 
             position: fixed; 
             z-index: 1000; 
             pointer-events: none; 
-            filter: drop-shadow(0 15px 15px rgba(0,0,0,0.4));
         }
     </style>
 </head>
@@ -295,15 +307,13 @@
     <div id="toast">Achievement Unlocked!</div>
 
     <div id="view-auth" class="view active-view" style="justify-content:center;">
-        <h1 style="font-size:70px; margin-bottom: 40px;">e2048</h1>
+        <h1 style="font-size:80px; margin: 0 0 40px 0;">e2048</h1>
         
         <input type="text" id="reg-u" placeholder="Username" class="input-field" autocomplete="off">
         <input type="password" id="reg-p" placeholder="Password" class="input-field">
         
-        <div style="display:flex; flex-direction:column; gap: 5px; margin-top: 10px;">
-            <button class="btn" style="width: 280px;" onclick="auth.login()">Sign In</button>
-            <button class="btn" style="width: 280px; background:#71b965" onclick="auth.register()">Create Account</button>
-        </div>
+        <button class="btn" style="width: 280px;" onclick="auth.login()">Login</button>
+        <button class="btn" style="width: 280px; background:#71b965;" onclick="auth.register()">Create Account</button>
     </div>
 
     <div id="view-home" class="view">
@@ -316,27 +326,25 @@
 
     <div id="view-modes" class="view">
         <div class="top-header">
-            <button class="btn" onclick="sys.nav('view-home')">←</button>
+            <button class="btn" style="padding: 5px 15px;" onclick="sys.nav('view-home')">Back</button>
             <h2 style="margin: 0;">Game Modes</h2>
-            <div style="width: 60px;"></div>
+            <div style="width: 50px;"></div>
         </div>
         
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin: 20px 0; width: 320px;">
-                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin: 20px 0; width: 320px;">
-            <button class="btn" onclick="game2048.init(1024)">1024 Target</button>
-            <button class="btn" onclick="game2048.init(2048)">2048 Target</button>
-            <button class="btn" onclick="game2048.init(4096)">4096 Target</button>
-            <button class="btn" onclick="game2048.init(8192)">8192 Target</button>
-            <button class="btn" onclick="game2048.init(16384)">16384 Target</button>
-            <button class="btn" onclick="game2048.init(32768)">32768 Target</button>
-            <button class="btn" onclick="game2048.init(65536)">65536 Target</button>
-            <button class="btn" onclick="game2048.init(131072)">131072 Target</button>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin: 20px 0; width: 320px;">
+            <button class="btn" onclick="game2048.init(1024)">1024</button>
+            <button class="btn" onclick="game2048.init(2048)">2048</button>
+            <button class="btn" onclick="game2048.init(4096)">4096</button>
+            <button class="btn" onclick="game2048.init(8192)">8192</button>
+            <button class="btn" onclick="game2048.init(16384)">16384</button>
+            <button class="btn" onclick="game2048.init(32768)">32768</button>
+            <button class="btn" onclick="game2048.init(65536)">65536</button>
+            <button class="btn" onclick="game2048.init(131072)">131072</button>
         </div>
-
         
         <button class="btn" style="width:320px; background:#f65e3b;" onclick="game2048.init(Infinity, 60)">1 Minute Challenge</button>
         <button class="btn" style="width:320px; background:#71b965;" onclick="let s=prompt('Enter time in seconds:', '120'); if(s) game2048.init(Infinity, parseInt(s))">Custom Time Challenge</button>
-        <button class="btn" style="width:320px; background:#333;" onclick="game2048.init(Infinity)">Endless Sandbox</button>
+        <button class="btn" style="width:320px; background:#333;" onclick="game2048.init(Infinity)">Endless Mode</button>
     </div>
 
     <div id="view-2048" class="view">
@@ -354,8 +362,8 @@
             </div>
         </div>
         
-        <div id="timer-row" style="display:none; width: 340px; margin-bottom:15px; background:#f65e3b; color:white; padding:10px; border-radius:6px; text-align: center; font-weight: bold; box-shadow: 0 4px 0 #c44a2f;">
-            TIME REMAINING: <span id="timer-val" style="font-size: 20px; margin-left: 10px;">0:00</span>
+        <div id="timer-row" style="display:none; width: 340px; margin-bottom:10px; background:#f65e3b; color:white; padding:10px; border-radius:4px; text-align: center; font-weight: bold;">
+            TIME REMAINING: <span id="timer-val" style="font-size: 20px;">0:00</span>
         </div>
         
         <div class="game-wrapper" id="board-2048">
@@ -365,89 +373,97 @@
                 <div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div>
                 <div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div>
             </div>
+            
             <div class="tile-layer" id="tile-layer"></div>
             
             <div class="overlay" id="over-2048">
-                <h1 id="over-msg" style="color:#776e65; font-size: 40px;">Game Over</h1>
-                <button class="btn" onclick="game2048.init(game2048.target, game2048.initTime)">Play Again</button>
-                <button class="btn" style="background: #555;" onclick="sys.nav('view-modes')">Return to Menu</button>
+                <h1 id="over-msg" style="color:#776e65;">Game Over</h1>
+                <button class="btn" onclick="game2048.init(game2048.target, game2048.initTime)">Try Again</button>
+                <button class="btn" style="background: #555;" onclick="sys.nav('view-modes')">Menu</button>
             </div>
         </div>
         
-        <div style="display:flex; gap:10px; margin-top:25px; width: 340px;">
-            <button class="btn" style="flex: 1; background: #bbada0;" onclick="game2048.undo()">↩ UNDO</button>
-            <button class="btn" style="flex: 1; background: #d33; box-shadow: 0 4px 0 #a00;" onclick="sys.nav('view-modes')">✖ EXIT</button>
+        <div style="display:flex; gap:10px; margin-top:20px; width: 340px;">
+            <button class="btn" style="flex: 1; background: #bbada0;" onclick="game2048.undo()">↩ Undo Move</button>
         </div>
     </div>
 
     <div id="view-bp" class="view" style="background:var(--bp-bg)">
         <div class="top-header">
-            <h2 style="color:white; margin:0; font-size: 28px;">Score: <span id="score-bp">0</span></h2>
-            <button class="btn" style="background: #e74c3c; box-shadow: 0 4px 0 #c0392b; padding: 10px 15px;" onclick="sys.nav('view-home')">✕</button>
+            <h2 style="color:white; margin:0;">Score: <span id="score-bp">0</span></h2>
+            <button class="btn" style="background: none; box-shadow: none; font-size: 24px;" onclick="sys.nav('view-home')">✕</button>
         </div>
         
         <div class="bp-grid" id="bp-grid"></div>
-        
         <div class="tray" id="tray"></div>
         
-        <div class="overlay" id="over-bp" style="background: rgba(103, 67, 50, 0.95); color: white;">
-            <h1 style="font-size: 40px; text-shadow: 2px 2px rgba(0,0,0,0.5);">No Moves</h1>
-            <button class="btn" style="background: #2ecc71;" onclick="gameBP.init()">Restart Level</button>
+        <div class="overlay" id="over-bp" style="background: rgba(103, 67, 50, 0.9);">
+            <h1 style="color: white;">Out of Moves</h1>
+            <button class="btn" style="background: #71b965;" onclick="gameBP.init()">Retry</button>
         </div>
     </div>
 
     <div id="view-stats" class="view">
         <h2 style="font-size: 32px; margin-bottom: 20px;">Player Profile</h2>
-        
-        <div style="background: white; padding: 25px; border-radius: 12px; width: 320px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); font-size: 18px; line-height: 1.6;">
-            <p>Total Tiles Merged: <b id="stat-merges" style="float: right; color: #f65e3b;">0</b></p>
-            <p>Highest 2048 Score: <b id="stat-high" style="float: right; color: #f65e3b;">0</b></p>
+        <div style="background: white; padding: 25px; border-radius: 8px; width: 320px; font-size: 18px; line-height: 1.6;">
+            <p>Total Merges: <b id="stat-merges" style="float: right;">0</b></p>
+            <p>Highest Score: <b id="stat-high" style="float: right;">0</b></p>
+            
             <hr style="border: none; border-top: 2px dashed #eee; margin: 20px 0;">
-            <h3 style="margin: 0 0 10px 0; color: #bbada0;">Trophy Case</h3>
-            <div id="achievements-list" style="display:flex; flex-wrap:wrap; gap:8px;">
-                </div>
+            
+            <h3 style="margin: 0 0 10px 0; color: #bbada0;">Achievements</h3>
+            <div id="achievements-list" style="display:flex; flex-wrap:wrap; gap:8px;"></div>
         </div>
-        
-        <button class="btn" style="margin-top: 30px; width: 320px;" onclick="sys.nav('view-home')">Return Home</button>
+        <button class="btn" style="margin-top: 30px; width: 320px;" onclick="sys.nav('view-home')">Back to Menu</button>
     </div>
 
     <script>
-        /* ---------------------------------------------------------
-           1. AUDIO SYNTHESIZER
-           Generates procedural sound effects without external files.
-           --------------------------------------------------------- */
+        /**
+         * AUDIO SYNTHESIZER
+         * Generates sound waves via the Web Audio API.
+         */
         const sfx = {
             ctx: null,
-            play(f, t, d, v) {
-                if(!sys.soundOn) return; 
-                if(!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)();
-                if(this.ctx.state === 'suspended') this.ctx.resume();
+            
+            play(frequency, type, duration, volume) {
+                if (!sys.soundOn) return; 
+                
+                if (!this.ctx) {
+                    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                
+                if (this.ctx.state === 'suspended') {
+                    this.ctx.resume();
+                }
                 
                 const osc = this.ctx.createOscillator();
                 const gain = this.ctx.createGain();
                 
-                osc.type = t; 
-                osc.frequency.setValueAtTime(f, this.ctx.currentTime);
-                gain.gain.setValueAtTime(v, this.ctx.currentTime); 
-                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime+d);
+                osc.type = type; 
+                osc.frequency.setValueAtTime(frequency, this.ctx.currentTime);
+                
+                gain.gain.setValueAtTime(volume, this.ctx.currentTime); 
+                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + duration);
                 
                 osc.connect(gain); 
                 gain.connect(this.ctx.destination); 
+                
                 osc.start(); 
-                osc.stop(this.ctx.currentTime+d);
+                osc.stop(this.ctx.currentTime + duration);
             },
-            merge() { this.play(523.25, 'sine', 0.15, 0.1); }, 
-            wood() { this.play(120, 'square', 0.08, 0.05); },
+            
+            merge() { this.play(400, 'sine', 0.15, 0.1); }, 
+            wood() { this.play(200, 'square', 0.05, 0.05); },
             win() { 
-                this.play(880, 'sine', 0.1, 0.1); 
-                setTimeout(() => this.play(1046, 'sine', 0.3, 0.1), 100); 
+                this.play(600, 'sine', 0.1, 0.1); 
+                setTimeout(() => this.play(800, 'sine', 0.3, 0.1), 100); 
             }
         };
 
-        /* ---------------------------------------------------------
-           2. CORE SYSTEM MANAGER
-           Handles Database, Navigation, Stats, and Global Events.
-           --------------------------------------------------------- */
+        /**
+         * SYSTEM MANAGER
+         * Handles Navigation, Databases, Achievements, and Input Binding.
+         */
         const sys = {
             db: { users: {} }, 
             user: null, 
@@ -455,122 +471,141 @@
             toastTimer: null,
             
             init() {
-                // Load local storage database securely
-                const saved = localStorage.getItem('e2048_platinum_db'); 
-                if(saved) this.db = JSON.parse(saved);
+                const savedData = localStorage.getItem('e2048_plat_db'); 
+                if (savedData) {
+                    this.db = JSON.parse(savedData);
+                }
                 this.bindInputs();
             },
             
             nav(id) {
-                // Hide toast to prevent it from bleeding into the next screen
+                // Ensure toast doesn't carry over to new screens
                 document.getElementById('toast').style.top = "-150px";
                 
-                // Switch active views
-                document.querySelectorAll('.view').forEach(v => v.classList.remove('active-view'));
+                // Toggle active views
+                document.querySelectorAll('.view').forEach(v => {
+                    v.classList.remove('active-view');
+                });
                 document.getElementById(id).classList.add('active-view');
                 
-                // Swap Background Colors based on game mode
+                // Adjust global background color
                 document.body.style.background = id === 'view-bp' ? 'var(--bp-bg)' : 'var(--bg-2048)';
                 
-                if(id === 'view-bp') gameBP.init();
-                if(id === 'view-stats') this.updateProfile();
+                // Initialize specific views
+                if (id === 'view-bp') {
+                    gameBP.init();
+                }
+                if (id === 'view-stats') {
+                    this.updateProfile();
+                }
             },
             
             toast(message) {
-                const t = document.getElementById('toast'); 
-                t.innerText = message; 
-                t.style.top = "30px"; // Slide down into view
+                const toastEl = document.getElementById('toast'); 
+                toastEl.innerText = message; 
+                toastEl.style.top = "20px";
                 
-                // Clear the old timer to prevent glitching if multiple achievements unlock
-                if(this.toastTimer) clearTimeout(this.toastTimer);
+                if (this.toastTimer) {
+                    clearTimeout(this.toastTimer);
+                }
                 
                 this.toastTimer = setTimeout(() => { 
-                    t.style.top = "-150px"; // Slide back up
-                }, 3500);
+                    toastEl.style.top = "-150px"; 
+                }, 3000);
             },
             
             save() { 
-                localStorage.setItem('e2048_platinum_db', JSON.stringify(this.db)); 
+                localStorage.setItem('e2048_plat_db', JSON.stringify(this.db)); 
             },
             
-            checkAchievement(name) {
-                if(!this.user) return; 
-                let u = this.db.users[this.user]; 
-                if(!u.achievements) u.achievements = [];
+            checkAchievement(achievementName) {
+                if (!this.user) return; 
                 
-                if(!u.achievements.includes(name)) { 
-                    u.achievements.push(name); 
+                let currentUser = this.db.users[this.user]; 
+                
+                if (!currentUser.achievements) {
+                    currentUser.achievements = [];
+                }
+                
+                if (!currentUser.achievements.includes(achievementName)) { 
+                    currentUser.achievements.push(achievementName); 
                     this.save(); 
-                    this.toast("🏆 Achievement: " + name); 
+                    this.toast("Achievement: " + achievementName); 
                     sfx.win(); 
                 }
             },
             
             updateProfile() {
-                if(!this.user) return; 
-                const u = this.db.users[this.user];
+                if (!this.user) return; 
                 
-                document.getElementById('stat-merges').innerText = u.totalMerges || 0;
-                document.getElementById('stat-high').innerText = u.best2048 || 0;
+                const currentUser = this.db.users[this.user];
+                
+                document.getElementById('stat-merges').innerText = currentUser.totalMerges || 0;
+                document.getElementById('stat-high').innerText = currentUser.best2048 || 0;
                 
                 const list = document.getElementById('achievements-list'); 
                 list.innerHTML = '';
                 
-                if(!u.achievements || u.achievements.length === 0) {
-                    list.innerHTML = '<span style="color:#aaa; font-style:italic;">No achievements yet. Keep playing!</span>';
+                if (!currentUser.achievements || currentUser.achievements.length === 0) {
+                    list.innerHTML = '<span style="color:#aaa;">No achievements yet.</span>';
                 } else {
-                    u.achievements.forEach(a => {
-                        const b = document.createElement('span'); 
-                        b.style = "background:#edc22e; color:white; padding:6px 12px; border-radius:20px; font-size:12px; font-weight:bold; box-shadow: 0 2px 5px rgba(0,0,0,0.1);";
-                        b.innerText = a; 
-                        list.appendChild(b);
+                    currentUser.achievements.forEach(achievement => {
+                        const badge = document.createElement('span'); 
+                        badge.style = "background:#edc22e; color:white; padding:4px 10px; border-radius:20px; font-size:12px; font-weight:bold;";
+                        badge.innerText = achievement; 
+                        list.appendChild(badge);
                     });
                 }
             },
             
             bindInputs() {
-                let tx, ty;
-                const b = document.getElementById('board-2048');
+                let touchStartX, touchStartY; 
+                const board = document.getElementById('board-2048');
                 
-                // Touch Listeners for Mobile Swiping
-                b.addEventListener('touchstart', e => { 
-                    tx = e.touches[0].clientX; 
-                    ty = e.touches[0].clientY; 
-                }, {passive:true});
+                // Mobile Touch Swipes
+                board.addEventListener('touchstart', e => { 
+                    touchStartX = e.touches[0].clientX; 
+                    touchStartY = e.touches[0].clientY; 
+                }, { passive: true });
                 
-                b.addEventListener('touchend', e => {
-                    let dx = e.changedTouches[0].clientX - tx;
-                    let dy = e.changedTouches[0].clientY - ty;
+                board.addEventListener('touchend', e => {
+                    let deltaX = e.changedTouches[0].clientX - touchStartX;
+                    let deltaY = e.changedTouches[0].clientY - touchStartY;
                     
-                    if(Math.abs(dx) > 35 || Math.abs(dy) > 35) {
-                        game2048.move(Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 'R' : 'L') : (dy > 0 ? 'D' : 'U'));
+                    if (Math.abs(deltaX) > 30 || Math.abs(deltaY) > 30) {
+                        if (Math.abs(deltaX) > Math.abs(deltaY)) {
+                            game2048.move(deltaX > 0 ? 'R' : 'L');
+                        } else {
+                            game2048.move(deltaY > 0 ? 'D' : 'U');
+                        }
                     }
-                }, {passive:true});
+                }, { passive: true });
                 
-                // Keyboard Listeners for Desktop
+                // Desktop Keyboard Arrow Keys
                 window.addEventListener('keydown', e => { 
-                    if(e.key.includes('Arrow')) {
+                    if (e.key.includes('Arrow')) {
                         game2048.move(e.key[5][0]); // Extracts U, D, L, R from ArrowUp, etc.
                     }
                 });
             }
         };
-        /* ---------------------------------------------------------
-           3. AUTHENTICATION MODULE
-           Secure local profile loading and registration.
-           --------------------------------------------------------- */
+
+        /**
+         * AUTHENTICATION CONTROLLER
+         * Secure local login and registration verification.
+         */
         const auth = {
             login() { 
-                const u = document.getElementById('reg-u').value.trim(); 
-                const p = document.getElementById('reg-p').value.trim();
+                const username = document.getElementById('reg-u').value.trim(); 
+                const password = document.getElementById('reg-p').value.trim();
                 
-                if (!u) return alert("Please enter a username.");
+                if (!username) {
+                    return alert("Please enter a username.");
+                }
                 
-                // Check if the user actually exists in the database
-                if (sys.db.users[u]) {
-                    // Verify password (allows older accounts without passwords to still log in)
-                    if (sys.db.users[u].pass === p || !sys.db.users[u].pass) {
-                        this.complete(u);
+                if (sys.db.users[username]) {
+                    if (sys.db.users[username].pass === password || !sys.db.users[username].pass) {
+                        this.complete(username);
                     } else {
                         alert("Incorrect password!");
                     }
@@ -580,40 +615,42 @@
             },
             
             register() {
-                const u = document.getElementById('reg-u').value.trim();
-                const p = document.getElementById('reg-p').value.trim();
+                const username = document.getElementById('reg-u').value.trim();
+                const password = document.getElementById('reg-p').value.trim();
                 
-                if (!u) return alert("Please enter a username.");
-                if (u.length < 3) return alert("Username must be at least 3 characters.");
+                if (!username) {
+                    return alert("Please enter a username.");
+                }
                 
-                // Prevent overwriting an existing account
-                if (sys.db.users[u]) {
-                    alert("Username already exists! Please Log In instead.");
-                } else {
-                    // Create the new user profile and save it
-                    sys.db.users[u] = { 
-                        pass: p, 
+                if (username.length < 3) {
+                    return alert("Username must be at least 3 characters.");
+                }
+                
+                if (sys.db.users[username]) {
+                    alert("Username already exists! Please Login.");
+                } else { 
+                    sys.db.users[username] = { 
+                        pass: password, 
                         achievements: [], 
                         best2048: 0, 
                         totalMerges: 0 
                     }; 
                     sys.save(); 
-                    this.complete(u); 
+                    this.complete(username); 
                 }
             },
             
-            complete(u) { 
-                sys.user = u; 
-                document.getElementById('welcome-msg').innerText = "Hello, " + u; 
+            complete(username) { 
+                sys.user = username; 
+                document.getElementById('welcome-msg').innerText = "Hello, " + username; 
                 sys.nav('view-home'); 
             }
         };
-        
 
-        /* ---------------------------------------------------------
-           4. 2048 GAME ENGINE
-           Handles Grid Logic, Spawning, Rendering, and History.
-           --------------------------------------------------------- */
+        /**
+         * 2048 GAME ENGINE
+         * Manages grid, sliding physics, merging math, and game state.
+         */
         const game2048 = {
             grid: [], 
             score: 0, 
@@ -623,25 +660,27 @@
             timeLeft: 0, 
             initTime: 0,
             
-            init(t, sec=0) {
-                this.target = t; 
+            init(targetValue, seconds = 0) {
+                this.target = targetValue; 
                 this.score = 0; 
                 this.grid = Array(16).fill(null); 
-                this.timeLeft = sec; 
-                this.initTime = sec;
+                this.timeLeft = seconds; 
+                this.initTime = seconds;
                 
                 document.getElementById('over-2048').style.display = 'none';
-                document.getElementById('display-target').innerText = t === Infinity ? "ENDLESS" : t;
-                document.getElementById('timer-row').style.display = sec > 0 ? 'block' : 'none';
+                document.getElementById('display-target').innerText = targetValue === Infinity ? "ENDLESS" : targetValue;
+                document.getElementById('timer-row').style.display = seconds > 0 ? 'block' : 'none';
                 
                 clearInterval(this.timer); 
-                if(sec > 0) this.startTimer();
                 
-                if(sys.user) {
+                if (seconds > 0) {
+                    this.startTimer();
+                }
+                
+                if (sys.user) {
                     document.getElementById('best-2048').innerText = sys.db.users[sys.user].best2048 || 0;
                 }
                 
-                // Spawn the first two tiles
                 this.spawn(); 
                 this.spawn(); 
                 this.render(); 
@@ -651,23 +690,25 @@
             startTimer() {
                 this.timer = setInterval(() => {
                     this.timeLeft--; 
-                    const m = Math.floor(this.timeLeft / 60);
-                    const s = this.timeLeft % 60;
                     
-                    document.getElementById('timer-val').innerText = `${m}:${s < 10 ? '0' : ''}${s}`;
+                    const minutes = Math.floor(this.timeLeft / 60);
+                    const seconds = this.timeLeft % 60;
                     
-                    if(this.timeLeft <= 0) { 
+                    document.getElementById('timer-val').innerText = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+                    
+                    if (this.timeLeft <= 0) { 
                         clearInterval(this.timer); 
-                        this.gameOver("Challenge Complete!"); 
+                        this.gameOver("Time's Up!"); 
                     }
                 }, 1000);
             },
             
             spawn() {
-                const empty = this.grid.map((v, i) => v === null ? i : null).filter(v => v !== null);
-                if(empty.length) {
-                    const idx = empty[Math.floor(Math.random() * empty.length)];
-                    this.grid[idx] = { 
+                const emptySlots = this.grid.map((val, index) => val === null ? index : null).filter(val => val !== null);
+                
+                if (emptySlots.length > 0) {
+                    const randomSlot = emptySlots[Math.floor(Math.random() * emptySlots.length)];
+                    this.grid[randomSlot] = { 
                         val: Math.random() < 0.9 ? 2 : 4, 
                         id: Date.now() + Math.random() 
                     };
@@ -678,79 +719,98 @@
                 const layer = document.getElementById('tile-layer'); 
                 layer.innerHTML = '';
                 
-                this.grid.forEach((t, i) => {
-                    if(!t) return; 
-                    const n = document.createElement('div');
-                    n.className = `tile t${t.val}`; 
+                this.grid.forEach((tile, index) => {
+                    if (!tile) return; 
                     
-                    // Calculate precise X and Y coordinates based on grid index
-                    const x = (i % 4) * 82.5;
-                    const y = Math.floor(i / 4) * 82.5;
-                    n.style.transform = `translate(${x}px, ${y}px)`;
+                    const node = document.createElement('div');
                     
-                    n.innerText = t.val; 
-                    layer.appendChild(n);
+                    // Apply merge animation class if flagged
+                    node.className = `tile t${tile.val} ${tile.merged ? 't-merged' : ''}`; 
+                    
+                    // Calculate exact X and Y offsets
+                    const x = (index % 4) * 82.5;
+                    const y = Math.floor(index / 4) * 82.5;
+                    node.style.transform = `translate(${x}px, ${y}px)`;
+                    
+                    node.innerText = tile.val; 
+                    layer.appendChild(node); 
+                    
+                    // Reset merge flag after rendering
+                    tile.merged = false;
                 });
                 
                 document.getElementById('score-2048').innerText = this.score;
                 
-                if(sys.user && this.score > sys.db.users[sys.user].best2048) { 
+                if (sys.user && this.score > sys.db.users[sys.user].best2048) { 
                     sys.db.users[sys.user].best2048 = this.score; 
                     sys.save(); 
                 }
             },
             
-            move(dir) {
-                // Ignore moves if the Game Over screen is showing
-                if(document.getElementById('over-2048').style.display === 'flex') return;
+            move(direction) {
+                // Prevent moving if game is over
+                if (document.getElementById('over-2048').style.display === 'flex') return;
                 
                 let moved = false; 
-                this.history.push(JSON.stringify(this.grid)); // Save state for Undo
+                this.history.push(JSON.stringify(this.grid)); // Save for Undo functionality
                 
-                const getRow = (idx) => {
-                    if(dir === 'L') return [idx*4, idx*4+1, idx*4+2, idx*4+3];
-                    if(dir === 'R') return [idx*4+3, idx*4+2, idx*4+1, idx*4];
-                    if(dir === 'U') return [idx, idx+4, idx+8, idx+12];
-                    return [idx+12, idx+8, idx+4, idx];
+                const getRowIndices = (rowIndex) => {
+                    if (direction === 'L') return [rowIndex*4, rowIndex*4+1, rowIndex*4+2, rowIndex*4+3];
+                    if (direction === 'R') return [rowIndex*4+3, rowIndex*4+2, rowIndex*4+1, rowIndex*4];
+                    if (direction === 'U') return [rowIndex, rowIndex+4, rowIndex+8, rowIndex+12];
+                    return [rowIndex+12, rowIndex+8, rowIndex+4, rowIndex];
                 };
                 
-                for(let i=0; i<4; i++) {
-                    let indices = getRow(i);
-                    let row = indices.map(idx => this.grid[idx]).filter(v => v);
+                for (let i = 0; i < 4; i++) {
+                    let indices = getRowIndices(i);
+                    let row = indices.map(idx => this.grid[idx]).filter(val => val !== null);
                     
-                    for(let j=0; j<row.length-1; j++) {
-                        if(row[j].val === row[j+1].val) {
+                    // Process Merges
+                    for (let j = 0; j < row.length - 1; j++) {
+                        if (row[j].val === row[j+1].val) {
                             row[j].val *= 2; 
+                            row[j].merged = true; 
                             this.score += row[j].val; 
+                            
                             row.splice(j+1, 1); 
                             moved = true; 
                             sfx.merge();
                             
-                            // Database & Achievement Tracking
-                            if(sys.user) { 
+                            if (sys.user) { 
                                 sys.db.users[sys.user].totalMerges++; 
                                 sys.save(); 
                             }
-                            if(row[j].val === this.target) {
-                                sys.checkAchievement(this.target + " Conqueror");
+                            
+                            if (row[j].val === this.target) {
+                                sys.checkAchievement("Reached " + this.target);
                             }
                         }
                     }
                     
-                    while(row.length < 4) row.push(null);
+                    // Fill remaining space with nulls
+                    while (row.length < 4) {
+                        row.push(null);
+                    }
                     
+                    // Update main grid and check if anything actually moved
                     indices.forEach((idx, j) => { 
-                        if(JSON.stringify(this.grid[idx]) !== JSON.stringify(row[j])) moved = true; 
+                        if (JSON.stringify(this.grid[idx]) !== JSON.stringify(row[j])) {
+                            moved = true; 
+                        }
                         this.grid[idx] = row[j]; 
                     });
                 }
                 
-                if(moved) { 
+                if (moved) { 
                     this.spawn(); 
                     this.render(); 
-                    if(this.isFull() && !this.canMove()) this.gameOver("Board Locked!"); 
+                    
+                    if (this.isFull() && !this.canMove()) {
+                        this.gameOver("No Moves Left!"); 
+                    }
                 } else { 
-                    this.history.pop(); // Remove history if no move occurred
+                    // Revert history if swipe was invalid
+                    this.history.pop(); 
                 }
             },
             
@@ -759,17 +819,19 @@
             },
             
             canMove() {
-                for(let i=0; i<4; i++) {
-                    for(let j=0; j<3; j++) {
-                        if(this.grid[i*4+j].val === this.grid[i*4+j+1].val) return true; // Horizontal Check
-                        if(this.grid[j*4+i].val === this.grid[(j+1)*4+i].val) return true; // Vertical Check
+                for (let i = 0; i < 4; i++) {
+                    for (let j = 0; j < 3; j++) {
+                        // Check horizontal matches
+                        if (this.grid[i*4+j].val === this.grid[i*4+j+1].val) return true;
+                        // Check vertical matches
+                        if (this.grid[j*4+i].val === this.grid[(j+1)*4+i].val) return true;
                     }
                 }
                 return false;
             },
             
             undo() { 
-                if(this.history.length) { 
+                if (this.history.length > 0) { 
                     this.grid = JSON.parse(this.history.pop()); 
                     this.render(); 
                 } 
@@ -782,21 +844,20 @@
             }
         };
 
-        /* ---------------------------------------------------------
-           5. BLOCK PUZZLE ENGINE
-           Grid Placement, Matrix Math, Line Clearing, and Drag-and-Drop.
-           --------------------------------------------------------- */
+        /**
+         * BLOCK PUZZLE ENGINE
+         * Drag-and-drop mechanics, grid validation, and line clearing logic.
+         */
         const gameBP = {
             board: Array(64).fill(0), 
             score: 0,
             
-            // Expanded Shape Dictionary
-            shapes: [
-                { m: [[1,1],[1,1]], c: 'bp-filled-green' }, // 2x2 Square
-                { m: [[1,1,1,1]], c: 'bp-filled-blue' },    // 4x1 Line
-                { m: [[1,1,1],[0,1,0]], c: 'bp-filled-orange' }, // T-Shape
-                { m: [[1,0],[1,0],[1,1]], c: 'bp-filled-blue' }, // L-Shape Left
-                { m: [[1,1,0],[0,1,1]], c: 'bp-filled-green' }   // Z-Shape
+            shapes: [ 
+                { m: [[1,1],[1,1]], c: 'bp-filled-green' }, 
+                { m: [[1,1,1,1]], c: 'bp-filled-beige' }, 
+                { m: [[1,1,1],[0,1,0]], c: 'bp-filled-beige' }, 
+                { m: [[1,0],[1,0],[1,1]], c: 'bp-filled-green' }, 
+                { m: [[1,1,0],[0,1,1]], c: 'bp-filled-beige' } 
             ],
             
             init() {
@@ -804,185 +865,201 @@
                 this.score = 0; 
                 document.getElementById('over-bp').style.display = 'none';
                 
-                const g = document.getElementById('bp-grid'); 
-                g.innerHTML = '';
+                const gridContainer = document.getElementById('bp-grid'); 
+                gridContainer.innerHTML = '';
                 
-                for(let i=0; i<64; i++) { 
-                    const s = document.createElement('div'); 
-                    s.className = 'bp-slot'; 
-                    s.id = `bp-c-${i}`; 
-                    g.appendChild(s); 
+                // Build the 8x8 Grid HTML
+                for (let i = 0; i < 64; i++) { 
+                    const slot = document.createElement('div'); 
+                    slot.className = 'bp-slot'; 
+                    slot.id = `bp-c-${i}`; 
+                    gridContainer.appendChild(slot); 
                 }
                 
                 this.spawn();
             },
             
             spawn() {
-                const t = document.getElementById('tray'); 
-                t.innerHTML = '';
+                const tray = document.getElementById('tray'); 
+                tray.innerHTML = '';
                 
-                for(let i=0; i<3; i++) {
-                    const s = this.shapes[Math.floor(Math.random() * this.shapes.length)];
-                    const d = document.createElement('div');
+                for (let i = 0; i < 3; i++) {
+                    const shapeData = this.shapes[Math.floor(Math.random() * this.shapes.length)];
+                    const shapeDiv = document.createElement('div');
                     
-                    d.style.display = 'grid'; 
-                    d.style.gridTemplateColumns = `repeat(${s.m[0].length}, 20px)`; 
-                    d.style.gap = '2px';
+                    shapeDiv.style.display = 'grid'; 
+                    shapeDiv.style.gridTemplateColumns = `repeat(${shapeData.m[0].length}, 20px)`; 
+                    shapeDiv.style.gap = '2px';
                     
-                    s.m.flat().forEach(v => { 
-                        const b = document.createElement('div'); 
-                        b.style.width = '20px'; 
-                        b.style.height = '20px'; 
-                        b.style.borderRadius = '2px'; 
-                        if(v) b.className = s.c; 
-                        d.appendChild(b); 
+                    // Render mini-blocks inside the tray
+                    shapeData.m.flat().forEach(val => { 
+                        const block = document.createElement('div'); 
+                        block.style.width = '20px'; 
+                        block.style.height = '20px'; 
+                        block.style.borderRadius = '2px'; 
+                        if (val) block.className = shapeData.c; 
+                        shapeDiv.appendChild(block); 
                     });
                     
-                    const startDrag = (e) => this.drag(e.touches ? e.touches[0] : e, d, s.m, s.c);
-                    d.onmousedown = startDrag; 
-                    d.ontouchstart = startDrag;
+                    const startDrag = (e) => this.drag(e.touches ? e.touches[0] : e, shapeDiv, shapeData.m, shapeData.c);
+                    shapeDiv.onmousedown = startDrag; 
+                    shapeDiv.ontouchstart = startDrag; 
                     
-                    t.appendChild(d);
+                    tray.appendChild(shapeDiv);
                 }
             },
             
-            drag(pt, el, m, cls) {
-                const clone = el.cloneNode(true); 
+            drag(pointer, element, matrix, colorClass) {
+                const clone = element.cloneNode(true); 
                 clone.className = 'dragging'; 
                 
-                // Scale the blocks up to 40px to match the board exactly
-                clone.style.gridTemplateColumns = `repeat(${m[0].length}, 40px)`;
-                Array.from(clone.children).forEach(c => { 
-                    c.style.width = '40px'; 
-                    c.style.height = '40px'; 
+                // Scale blocks up to match the 40px grid perfectly
+                clone.style.gridTemplateColumns = `repeat(${matrix[0].length}, 40px)`;
+                Array.from(clone.children).forEach(child => { 
+                    child.style.width = '40px'; 
+                    child.style.height = '40px'; 
                 });
                 
                 document.body.appendChild(clone);
                 
-                const move = (e) => {
+                const handleMove = (e) => {
                     const p = e.touches ? e.touches[0] : e;
                     
-                    // Offset by half the shape's width to center on cursor/finger
-                    clone.style.left = p.clientX - (m[0].length * 20) + 'px'; 
-                    clone.style.top = p.clientY - (m.length * 60) + 'px';
+                    // Center the dragging clone on the pointer
+                    clone.style.left = p.clientX - (matrix[0].length * 20) + 'px'; 
+                    clone.style.top = p.clientY - (matrix.length * 60) + 'px';
                     
                     document.querySelectorAll('.bp-ghost').forEach(g => g.classList.remove('bp-ghost'));
                     
-                    const r = document.getElementById('bp-grid').getBoundingClientRect();
-                    const c = Math.round((p.clientX - r.left - (m[0].length * 20)) / 43);
-                    const rw = Math.round((p.clientY - r.top - (m.length * 60)) / 43);
+                    const rect = document.getElementById('bp-grid').getBoundingClientRect();
+                    const targetCol = Math.round((p.clientX - rect.left - (matrix[0].length * 20)) / 42);
+                    const targetRow = Math.round((p.clientY - rect.top - (matrix.length * 60)) / 42);
                     
-                    if(this.canPlace(m, rw, c)) {
-                        for(let i=0; i<m.length; i++) {
-                            for(let j=0; j<m[0].length; j++) {
-                                if(m[i][j]) document.getElementById(`bp-c-${(rw+i)*8+(c+j)}`).classList.add('bp-ghost');
+                    // Draw Ghost Preview
+                    if (this.canPlace(matrix, targetRow, targetCol)) {
+                        for (let i = 0; i < matrix.length; i++) {
+                            for (let j = 0; j < matrix[0].length; j++) {
+                                if (matrix[i][j]) {
+                                    document.getElementById(`bp-c-${(targetRow+i)*8+(targetCol+j)}`).classList.add('bp-ghost');
+                                }
                             }
                         }
                     }
                 };
                 
-                const end = (e) => {
+                const handleEnd = (e) => {
                     const p = e.changedTouches ? e.changedTouches[0] : e;
-                    const r = document.getElementById('bp-grid').getBoundingClientRect();
+                    const rect = document.getElementById('bp-grid').getBoundingClientRect();
                     
-                    const col = Math.round((p.clientX - r.left - (m[0].length * 20)) / 43);
-                    const row = Math.round((p.clientY - r.top - (m.length * 60)) / 43);
+                    const finalCol = Math.round((p.clientX - rect.left - (matrix[0].length * 20)) / 42);
+                    const finalRow = Math.round((p.clientY - rect.top - (matrix.length * 60)) / 42);
                     
-                    if(this.canPlace(m, row, col)) {
-                        // Lock the blocks into the grid
-                        for(let i=0; i<m.length; i++) {
-                            for(let j=0; j<m[0].length; j++) {
-                                if(m[i][j]) { 
-                                    this.board[(row+i)*8+(col+j)] = 1; 
-                                    document.getElementById(`bp-c-${(row+i)*8+(col+j)}`).className = `bp-slot ${cls}`; 
+                    if (this.canPlace(matrix, finalRow, finalCol)) {
+                        // Lock piece into the board array and HTML
+                        for (let i = 0; i < matrix.length; i++) {
+                            for (let j = 0; j < matrix[0].length; j++) {
+                                if (matrix[i][j]) { 
+                                    this.board[(finalRow+i)*8+(finalCol+j)] = 1; 
+                                    document.getElementById(`bp-c-${(finalRow+i)*8+(finalCol+j)}`).className = `bp-slot ${colorClass}`; 
                                 }
                             }
                         }
                         
                         sfx.wood(); 
-                        el.style.visibility = 'hidden'; 
-                        
-                        // Add Base Points
-                        this.score += (m.flat().filter(v => v).length * 10);
+                        element.style.visibility = 'hidden'; 
+                        this.score += (matrix.flat().filter(v => v).length * 10);
                         
                         this.clearLines(); 
                         document.getElementById('score-bp').innerText = this.score;
                         
-                        // Respawn pieces if the tray is empty
-                        if(Array.from(el.parentNode.children).every(c => c.style.visibility === 'hidden')) {
+                        // Refill tray if empty
+                        if (Array.from(element.parentNode.children).every(c => c.style.visibility === 'hidden')) {
                             this.spawn();
                         }
                     }
                     
-                    // Clean up ghosts and clones
                     clone.remove(); 
                     document.querySelectorAll('.bp-ghost').forEach(g => g.classList.remove('bp-ghost'));
                     
-                    window.removeEventListener('mousemove', move); 
-                    window.removeEventListener('mouseup', end);
-                    window.removeEventListener('touchmove', move); 
-                    window.removeEventListener('touchend', end);
+                    window.removeEventListener('mousemove', handleMove); 
+                    window.removeEventListener('mouseup', handleEnd);
+                    window.removeEventListener('touchmove', handleMove); 
+                    window.removeEventListener('touchend', handleEnd);
                 };
                 
-                window.addEventListener('mousemove', move); 
-                window.addEventListener('mouseup', end);
-                window.addEventListener('touchmove', move, {passive: false}); 
-                window.addEventListener('touchend', end);
+                window.addEventListener('mousemove', handleMove); 
+                window.addEventListener('mouseup', handleEnd);
+                window.addEventListener('touchmove', handleMove, { passive: false }); 
+                window.addEventListener('touchend', handleEnd);
             },
             
-            canPlace(m, r, c) {
-                // Check Boundaries
-                if(r < 0 || c < 0 || r + m.length > 8 || c + m[0].length > 8) return false;
+            canPlace(matrix, row, col) {
+                // Out of Bounds check
+                if (row < 0 || col < 0 || row + matrix.length > 8 || col + matrix[0].length > 8) {
+                    return false;
+                }
                 
-                // Check Collisions
-                for(let i=0; i<m.length; i++) {
-                    for(let j=0; j<m[0].length; j++) {
-                        if(m[i][j] && this.board[(r+i)*8+(c+j)]) return false;
+                // Overlap check
+                for (let i = 0; i < matrix.length; i++) {
+                    for (let j = 0; j < matrix[0].length; j++) {
+                        if (matrix[i][j] && this.board[(row+i)*8+(col+j)]) {
+                            return false;
+                        }
                     }
                 }
+                
                 return true;
             },
             
             clearLines() {
-                let rows = [], cols = [];
+                let rowsToClear = [];
+                let colsToClear = [];
                 
-                // Scan for complete rows and columns
-                for(let i=0; i<8; i++) {
-                    if(this.board.slice(i*8, i*8+8).every(v => v)) rows.push(i);
+                // Identify Full Rows and Columns
+                for (let i = 0; i < 8; i++) {
+                    if (this.board.slice(i*8, i*8+8).every(v => v)) {
+                        rowsToClear.push(i);
+                    }
                     
-                    let c = []; 
-                    for(let j=0; j<8; j++) c.push(this.board[j*8+i]);
-                    if(c.every(v => v)) cols.push(i);
+                    let currentCol = []; 
+                    for (let j = 0; j < 8; j++) {
+                        currentCol.push(this.board[j*8+i]);
+                    }
+                    
+                    if (currentCol.every(v => v)) {
+                        colsToClear.push(i);
+                    }
                 }
                 
-                // Visually clear the arrays and HTML elements
-                rows.forEach(r => { 
-                    for(let i=0; i<8; i++) { 
+                // Clear Rows
+                rowsToClear.forEach(r => { 
+                    for (let i = 0; i < 8; i++) { 
                         this.board[r*8+i] = 0; 
                         document.getElementById(`bp-c-${r*8+i}`).className = 'bp-slot'; 
                     } 
                 });
                 
-                cols.forEach(c => { 
-                    for(let i=0; i<8; i++) { 
+                // Clear Columns
+                colsToClear.forEach(c => { 
+                    for (let i = 0; i < 8; i++) { 
                         this.board[i*8+c] = 0; 
                         document.getElementById(`bp-c-${i*8+c}`).className = 'bp-slot'; 
                     } 
                 });
                 
-                // Score Combos and Achievements
-                if(rows.length || cols.length) { 
-                    this.score += (rows.length + cols.length) * 100; 
+                // Handle Scoring and Sound
+                if (rowsToClear.length > 0 || colsToClear.length > 0) { 
+                    this.score += (rowsToClear.length + colsToClear.length) * 100; 
                     sfx.win(); 
                     
-                    if(rows.length + cols.length >= 3) {
-                        sys.checkAchievement("Tetris Master"); 
+                    if (rowsToClear.length + colsToClear.length >= 3) {
+                        sys.checkAchievement("Combo Master"); 
                     }
                 }
             }
         };
 
-        // Initialize the System on Load
+        // Bootstrap the application
         window.onload = () => sys.init();
         
     </script>
