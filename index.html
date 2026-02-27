@@ -11,296 +11,144 @@
             --bp-bg: #a0745b; --bp-board: #674332; --bp-cell: #573727; 
             --bp-green: #71b965; --bp-beige: #dac6a3;
         }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; user-select: none; }
+        body { margin: 0; padding: 0; height: 100vh; width: 100vw; overflow: hidden; font-family: "Clear Sans", Arial, sans-serif; background: var(--bg-2048); color: var(--text-2048); transition: background 0.3s; }
         
-        * { 
-            box-sizing: border-box; 
-            -webkit-tap-highlight-color: transparent; 
-            outline: none; 
-            user-select: none; 
-        }
+        .view { display: none; position: absolute; top:0; left:0; width:100%; height:100%; flex-direction:column; align-items:center; background:inherit; z-index:10; overflow-y:auto; padding:20px 0; }
+        .active-view { display: flex; animation: fadeIn 0.3s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         
-        body { 
-            margin: 0; 
-            padding: 0; 
-            height: 100vh; 
-            width: 100vw; 
-            overflow: hidden; 
-            font-family: "Clear Sans", Arial, sans-serif; 
-            background: var(--bg-2048); 
-            color: var(--text-2048); 
-            transition: background 0.3s; 
-        }
+        .btn { background:#8f7a66; color:#f9f6f2; border:none; padding:12px 24px; border-radius:3px; font-weight:bold; font-size:16px; cursor:pointer; text-transform:uppercase; margin:5px; box-shadow:0 4px 0 rgba(0,0,0,0.1); }
+        .btn:active { transform:translateY(2px); box-shadow:none; }
+        .btn:disabled { background: #ccc !important; color: #999 !important; cursor: not-allowed; box-shadow: none; pointer-events: none; }
         
-        .view { 
-            display: none; 
-            position: absolute; 
-            top: 0; 
-            left: 0; 
-            width: 100%; 
-            height: 100%; 
-            flex-direction: column; 
-            align-items: center; 
-            background: inherit; 
-            z-index: 10; 
-            overflow-y: auto; 
-            padding: 20px 0; 
-        }
+        .input-field { padding:14px; border-radius:5px; border:2px solid #bbada0; width:280px; font-size:16px; margin-bottom:12px; }
         
-        .active-view { 
-            display: flex; 
-            animation: fadeIn 0.3s ease-out; 
-        }
+        .top-header { width:340px; display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; }
+        .score-container { display:flex; gap:8px; }
+        .score-box { background:#bbada0; padding:5px 15px; border-radius:3px; color:white; text-align:center; min-width:60px; position:relative; }
+        .score-label { display:block; font-size:11px; font-weight:bold; color:#eee4da; margin-bottom:-2px; }
+        .score-val { font-size:20px; font-weight:bold; }
         
-        @keyframes fadeIn { 
-            from { opacity: 0; } 
-            to { opacity: 1; } 
-        }
+        .game-wrapper { position:relative; width:340px; height:340px; background:var(--board-2048); border-radius:6px; padding:10px; touch-action:none; }
+        .grid-bg { display:grid; grid-template-columns:repeat(4, 1fr); gap:10px; width:100%; height:100%; }
+        .grid-cell { background:var(--cell-2048); border-radius:3px; }
+        .tile-layer { position:absolute; top:10px; left:10px; pointer-events:none; width:320px; height:320px; }
         
-        .btn { 
-            background: #8f7a66; 
-            color: #f9f6f2; 
-            border: none; 
-            padding: 12px 24px; 
-            border-radius: 3px; 
-            font-weight: bold; 
-            font-size: 16px; 
-            cursor: pointer; 
-            text-transform: uppercase; 
-            margin: 5px; 
-            box-shadow: 0 4px 0 rgba(0,0,0,0.1); 
-            width: 280px; 
-        }
-        
-        .btn:active { 
-            transform: translateY(2px); 
-            box-shadow: none; 
-        }
-        
-        .btn:disabled { 
-            background: #ccc !important; 
-            color: #999 !important; 
-            cursor: not-allowed; 
-            box-shadow: none; 
-            pointer-events: none; 
-        }
-        
-        .input-field { 
-            padding: 14px; 
-            border-radius: 5px; 
-            border: 2px solid #bbada0; 
-            width: 280px; 
-            font-size: 16px; 
-            margin-bottom: 12px; 
-        }
-        
-        .top-header { 
-            width: 340px; 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            margin-bottom: 20px; 
-        }
-        
-        .score-container { 
-            display: flex; 
-            gap: 8px; 
-        }
-        
-        .score-box { 
-            background: #bbada0; 
-            padding: 5px 15px; 
-            border-radius: 3px; 
-            color: white; 
-            text-align: center; 
-            min-width: 60px; 
-            position: relative; 
-        }
-        
-        .score-label { 
-            display: block; 
-            font-size: 11px; 
-            font-weight: bold; 
-            color: #eee4da; 
-            margin-bottom: -2px; 
-        }
-        
-        .score-val { 
-            font-size: 20px; 
-            font-weight: bold; 
-        }
-        
-        .game-wrapper { 
-            position: relative; 
-            width: 340px; 
-            height: 340px; 
-            background: var(--board-2048); 
-            border-radius: 6px; 
-            padding: 10px; 
-            touch-action: none; 
-        }
-        
-        .grid-bg { 
-            display: grid; 
-            grid-template-columns: repeat(4, 1fr); 
-            gap: 10px; 
-            width: 100%; 
-            height: 100%; 
-        }
-        
-        .grid-cell { 
-            background: var(--cell-2048); 
-            border-radius: 3px; 
-        }
-        
-        .tile-layer { 
-            position: absolute; 
-            top: 10px; 
-            left: 10px; 
-            pointer-events: none; 
-            width: 320px; 
-            height: 320px; 
-        }
-        
-        .tile { 
-            position: absolute; 
-            width: 72.5px; 
-            height: 72.5px; 
-            border-radius: 3px; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            font-weight: bold; 
-            font-size: 32px; 
-            transition: transform 100ms ease-in-out; 
-            z-index: 10; 
-            pointer-events: auto; 
-        }
-        
+        .tile { position:absolute; width:72.5px; height:72.5px; border-radius:3px; display:flex; justify-content:center; align-items:center; font-weight:bold; font-size:32px; transition:transform 100ms ease-in-out; z-index:10; pointer-events:auto; }
         .t-new { animation: appear 150ms ease-out forwards; }
-        .t-merged { z-index: 20; animation: pop 180ms ease-in-out forwards; }
+        .t-merged { z-index:20; animation: pop 180ms ease-in-out forwards; }
+        @keyframes appear { 0% { opacity:0; scale:0; } 100% { opacity:1; scale:1; } }
+        @keyframes pop { 0% { scale:1; } 50% { scale:1.15; } 100% { scale:1; } }
         
-        @keyframes appear { 
-            0% { opacity: 0; transform: scale(0); } 
-            100% { opacity: 1; transform: scale(1); } 
-        }
-        
-        @keyframes pop { 
-            0% { transform: scale(1); } 
-            50% { transform: scale(1.15); } 
-            100% { transform: scale(1); } 
-        }
-        
-        /* FULL TILESET CSS */
-        .t2 { background: #eee4da; color: #776e65; } 
-        .t4 { background: #ede0c8; color: #776e65; } 
-        .t8 { background: #f2b179; color: #f9f6f2; } 
-        .t16 { background: #f59563; color: #f9f6f2; } 
-        .t32 { background: #f67c5f; color: #f9f6f2; } 
-        .t64 { background: #f65e3b; color: #f9f6f2; } 
-        .t128 { background: #edcf72; color: #f9f6f2; font-size: 28px; } 
-        .t256 { background: #edcc61; color: #f9f6f2; font-size: 28px; } 
-        .t512 { background: #edc850; color: #f9f6f2; font-size: 28px; } 
-        .t1024 { background: #edc53f; color: #f9f6f2; font-size: 24px; } 
-        .t2048 { background: #edc22e; color: #f9f6f2; font-size: 24px; } 
-        .t4096 { background: #3c3a32; color: #f9f6f2; } 
-        .t8192 { background: #3c3a32; color: #f9f6f2; } 
-        .t16384 { background: #3c3a32; color: #f9f6f2; } 
-        .t32768 { background: #3c3a32; color: #f9f6f2; } 
-        .t65536 { background: #3c3a32; color: #f9f6f2; } 
-        .t131072 { background: #000; color: #00f2ff; text-shadow: 0 0 8px #00f2ff; box-shadow: 0 0 15px #00f2ff; }
+        .t2{background:#eee4da;color:#776e65} .t4{background:#ede0c8;color:#776e65} .t8{background:#f2b179;color:#f9f6f2} .t16{background:#f59563;color:#f9f6f2} .t32{background:#f67c5f;color:#f9f6f2} .t64{background:#f65e3b;color:#f9f6f2} .t128{background:#edcf72;color:#f9f6f2;font-size:28px} .t256{background:#edcc61;color:#f9f6f2;font-size:28px} .t512{background:#edc850;color:#f9f6f2;font-size:28px} .t1024{background:#edc53f;color:#f9f6f2;font-size:24px} .t2048{background:#edc22e;color:#f9f6f2;font-size:24px} .t4096{background:#3c3a32;color:#f9f6f2} .t131072{background:#000;color:#00f2ff;text-shadow:0 0 8px #00f2ff;}
+        .t1{background:#ff4b2b; color:white; text-shadow: 0 0 5px red;}
 
-        .bp-score-large { font-size: 70px; font-weight: bold; color: white; margin-top: 10px; letter-spacing: -2px; }
-        .bp-grid-wrapper { background: var(--bp-board); padding: 8px; border-radius: 4px; box-shadow: 0 10px 20px rgba(0,0,0,0.3); touch-action: none; }
-        .bp-grid { display: grid; grid-template-columns: repeat(8, 40px); gap: 2px; }
-        .bp-slot { width: 40px; height: 40px; background: var(--bp-cell); border-radius: 2px; }
-        .bp-filled-green { background: var(--bp-green); box-shadow: inset 3px 3px 0 rgba(255,255,255,0.3), inset -3px -3px 0 rgba(0,0,0,0.2); }
-        .bp-filled-beige { background: var(--bp-beige); box-shadow: inset 3px 3px 0 rgba(255,255,255,0.4), inset -3px -3px 0 rgba(0,0,0,0.1); }
-        .bp-ghost { background: rgba(255,255,255,0.2); }
+        .bp-score-large { font-size:70px; font-weight:bold; color:white; margin-top:10px; letter-spacing:-2px; }
+        .bp-grid-wrapper { background:var(--bp-board); padding:8px; border-radius:4px; box-shadow:0 10px 20px rgba(0,0,0,0.3); touch-action:none; }
+        .bp-grid { display:grid; grid-template-columns:repeat(8, 40px); gap:2px; }
+        .bp-slot { width:40px; height:40px; background:var(--bp-cell); border-radius:2px; }
+        .bp-filled-green { background:var(--bp-green); box-shadow:inset 3px 3px 0 rgba(255,255,255,0.3), inset -3px -3px 0 rgba(0,0,0,0.2); }
+        .bp-filled-beige { background:var(--bp-beige); box-shadow:inset 3px 3px 0 rgba(255,255,255,0.4), inset -3px -3px 0 rgba(0,0,0,0.1); }
+        .bp-ghost { background:rgba(255,255,255,0.2); }
+        .tray { display:flex; justify-content:space-around; width:360px; height:120px; margin-top:30px; }
+        .shape { display:grid; gap:2px; cursor:grab; padding:10px; }
+        .mini-block { width:20px; height:20px; border-radius:2px; }
+        .dragging { position:fixed; z-index:1000; pointer-events:none; }
         
-        .tray { display: flex; justify-content: space-around; width: 360px; height: 120px; margin-top: 30px; }
-        .shape { display: grid; gap: 2px; cursor: grab; padding: 10px; }
-        .mini-block { width: 20px; height: 20px; border-radius: 2px; }
-        .dragging { position: fixed; z-index: 1000; pointer-events: none; }
-        
-        .overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(250,248,239,0.95); z-index: 100; display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px; }
-        #toast { position: fixed; top: -100px; left: 50%; transform: translateX(-50%); background: #333; color: white; padding: 12px 24px; border-radius: 30px; transition: 0.4s; z-index: 9999; font-weight: bold; }
-        #global-announcement { position: fixed; top: 0; left: 0; width: 100%; background: #ffcc00; color: #333; padding: 10px; font-weight: bold; text-align: center; z-index: 5000; display: none; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        .overlay { position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(250,248,239,0.95); z-index:100; display:none; flex-direction:column; align-items:center; justify-content:center; text-align: center; padding: 20px; }
+        .tutorial-box { background:#5a524b; color:white; padding:15px; border-radius:8px; width:340px; margin-top:15px; font-size:14px; position:relative; }
+        .particle { position:fixed; width:8px; height:8px; pointer-events:none; z-index:2000; border-radius:50%; }
+        #toast { position:fixed; top:-100px; left:50%; transform:translateX(-50%); background:#333; color:white; padding:12px 24px; border-radius:30px; transition:0.4s; z-index:9999; font-weight:bold; }
+        .achievement-badge { background:#edc22e; color:white; padding:6px 12px; border-radius:20px; font-weight:bold; font-size:12px; box-shadow:0 2px 5px rgba(0,0,0,0.2); }
+
+        /* Global Announcement */
+        #global-announcement { position: fixed; top: 0; left: 0; width: 100%; background: #ffcc00; color: #333; padding: 8px; font-weight: bold; text-align: center; z-index: 5000; display: none; font-size: 14px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
     </style>
 </head>
 <body>
     <div id="toast">Notification</div>
     <div id="global-announcement"></div>
 
-    <div style="position:fixed; top:40px; right:10px; z-index:2000; display:flex; flex-direction:column; gap:5px;">
-        <button id="owner-login-btn" class="btn" style="width:115px; font-size:10px; padding:6px; opacity:0.6;" onclick="owner.promptLogin()">Owner Login</button>
-        <button id="admin-login-btn" class="btn" style="width:115px; font-size:10px; padding:6px; opacity:0.6; background:#444;" onclick="adminS.promptLogin()">Admin Login</button>
-    </div>
+    <button id="owner-login-btn" class="btn" style="position:fixed; top:40px; right:10px; z-index:2000; font-size:10px; padding:5px 10px; opacity:0.6;" onclick="owner.promptLogin()">Login as Owner</button>
+    <button id="admin-login-btn" class="btn" style="position:fixed; top:75px; right:10px; z-index:2000; font-size:10px; padding:5px 10px; opacity:0.6; background:#444;" onclick="adminS.prompt()">Login as Admin</button>
 
     <div id="stop-overlay" class="overlay" style="z-index: 10000; background: #faf8ef;">
-        <h1 style="font-size: 60px;">🛑</h1>
-        <h2 style="color:#776e65;">e2048: Maintenance</h2>
-        <p id="stop-timer-display" style="font-weight: bold; color: #d33; font-size: 18px;"></p>
+        <h1 style="font-size: 50px;">🛑</h1>
+        <h2 style="color:#776e65;">e2048 was stopped by the owner, please wait until e2048 starts again.</h2>
+        <p id="stop-timer-display" style="font-weight: bold; color: #d33;"></p>
+        <button class="btn" onclick="document.getElementById('stop-overlay').style.display='none'">I understand</button>
     </div>
 
     <div id="view-auth" class="view active-view" style="justify-content:center;">
-        <h1 style="font-size:80px; margin:0 0 40px 0; color:#776e65;">e2048</h1>
-        <input type="text" id="auth-u" placeholder="Username" class="input-field">
-        <input type="password" id="auth-p" placeholder="Password" class="input-field">
-        <button class="btn" onclick="authS.login()">Login</button>
-        <button class="btn" style="background:#71b965" onclick="authS.register()">Register</button>
-        <button class="btn" style="background:transparent; color:#776e65; box-shadow:none;" onclick="authS.guest()">Play as Guest</button>
+        <h1 style="font-size:80px; margin:0 0 40px 0;">e2048</h1>
+        <div style="background:rgba(0,0,0,0.05); padding:30px; border-radius:12px; display:flex; flex-direction:column; align-items:center;">
+            <input type="text" id="reg-u" placeholder="Username" class="input-field" autocomplete="off">
+            <input type="password" id="reg-p" placeholder="Password" class="input-field">
+            <div style="display:flex; flex-direction:column; width:100%;">
+                <button class="btn" onclick="auth.login()">Login</button>
+                <button class="btn" style="background:#71b965" onclick="auth.register()">Create Account</button>
+            </div>
+            <button class="btn" style="background:transparent; color:#776e65; box-shadow:none; margin-top:10px;" onclick="auth.guest()">Play as Guest</button>
+        </div>
     </div>
 
     <div id="view-home" class="view">
-        <h1 style="font-size:40px; margin-bottom:10px;">e2048</h1>
-        <h2 id="welcome-msg" style="margin-bottom:30px; font-size:18px;">Welcome</h2>
+        <h2 id="welcome-msg" style="font-size:32px; margin-bottom:40px;">Welcome back</h2>
 
-        <div id="admin-panel" style="display:none; background:white; padding:15px; border-radius:8px; width:300px; box-shadow:0 4px 10px rgba(0,0,0,0.1); margin-bottom: 20px; border: 2px solid #444;">
-            <p style="margin:0 0 10px 0; font-weight:bold;">DISCORD ANNOUNCEMENT</p>
-            <input type="text" id="admin-msg" placeholder="Broadcast to players..." class="input-field" style="width:100%; margin-bottom:10px;">
-            <div style="display:flex; gap:5px;">
-                <button class="btn" style="width:100%; padding:10px; font-size:12px;" onclick="adminS.send()">Send</button>
-                <button class="btn" style="width:100%; padding:10px; font-size:12px; background:#777;" onclick="adminS.clear()">Clear</button>
+        <div id="admin-panel" style="display:none; background:white; padding:15px; border-radius:8px; width:280px; box-shadow:0 4px 6px rgba(0,0,0,0.1); flex-direction:column; gap:10px; margin-bottom: 20px;">
+            <p style="margin:0; font-weight:bold; color:#444; font-size: 14px;">ADMIN: Global Announcement</p>
+            <input type="text" id="admin-announce-input" placeholder="Type message..." class="input-field" style="width:100%; margin:0; padding:10px;">
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:5px;">
+                <button class="btn" style="width: 100%; padding:10px; font-size:12px;" onclick="adminS.updateAnnouncement()">Send</button>
+                <button class="btn" style="width: 100%; padding:10px; font-size:12px; background:#777;" onclick="adminS.clear()">Clear</button>
             </div>
         </div>
 
-        <button id="owner-link" class="btn" style="display:none; background:#ffcc00; color:black;" onclick="sys.nav('view-owner')">Owner Control Panel</button>
-        <button class="btn" onclick="sys.nav('view-modes')">Play 2048</button>
-        <button class="btn" style="background:#674332" onclick="sys.nav('view-bp')">Block Puzzle</button>
-        <button class="btn" style="background:#d33; margin-top:30px;" onclick="authS.logout()">Logout</button>
+        <button id="owner-panel-btn" class="btn" style="display:none; width:260px; background:#ffcc00; color:black;" onclick="sys.nav('view-owner')">Owner Control Panel</button>
+        <button class="btn" style="width:260px;" onclick="sys.nav('view-modes')">2048 Standard</button>
+        <button class="btn" style="width:260px; background:#674332" onclick="sys.nav('view-bp')">Block Puzzle</button>
+        <button class="btn" style="width:260px; background:#555" onclick="sys.nav('view-stats')">Player Profile</button>
+        <button class="btn" style="width:260px; background:#d33; margin-top:40px;" onclick="auth.logout()">Logout</button>
     </div>
 
     <div id="view-owner" class="view">
         <h1>Owner Settings</h1>
-        <div style="background:white; padding:15px; border-radius:8px; width:340px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); display:flex; flex-direction:column; gap:10px;">
-            <p style="font-weight:bold; margin:0;">1. Maintenance Toggle</p>
-            <button id="maint-btn" class="btn" style="width:100%;" onclick="owner.toggleMaint()">ENABLE MAINTENANCE</button>
-            <hr style="width:100%;">
-            <p style="font-weight:bold; margin:0;">2. Stop Timer</p>
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:5px;">
-                <input type="number" id="stop-val" placeholder="Value" style="padding:8px;">
-                <select id="stop-unit" style="padding:8px;">
-                    <option value="60000">Minutes</option>
-                    <option value="3600000">Hours</option>
-                </select>
+        <div style="background:white; padding:15px; border-radius:8px; width:340px; box-shadow:0 4px 6px rgba(0,0,0,0.1); display:flex; flex-direction:column; gap:10px; margin-bottom: 50px;">
+            <div style="border: 1px solid #ddd; padding: 10px; border-radius: 5px;">
+                <p style="margin:0 0 5px 0; font-weight:bold;">1. Stop System</p>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:5px;">
+                    <input type="number" id="stop-val" placeholder="Qty" style="width:100%; padding:5px;">
+                    <select id="stop-unit" style="width:100%; padding:5px;">
+                        <option value="1000">Seconds</option>
+                        <option value="60000">Minutes</option>
+                        <option value="3600000">Hours</option>
+                        <option value="86400000">Days</option>
+                        <option value="604800000">Weeks</option>
+                        <option value="2592000000">Months</option>
+                        <option value="31536000000">Years</option>
+                    </select>
+                </div>
+                <button id="owner-stop-btn" class="btn" style="width:100%; margin: 10px 0 0 0;" onclick="owner.toggleSystem()">Stop System</button>
             </div>
-            <button id="stop-btn" class="btn" style="width:100%; margin-top:10px;" onclick="owner.toggleStop()">Apply Stop</button>
-            <hr style="width:100%;">
-            <button class="btn" style="background:#8f7a66; width:100%;" onclick="owner.cycleDiff()">Difficulty: <span id="owner-diff-text">Normal</span></button>
+
+            <div style="border: 1px solid #ddd; padding: 10px; border-radius: 5px;">
+                <p style="margin:0 0 5px 0; font-weight:bold;">2. Global Announcement</p>
+                <input type="text" id="owner-announce-input" placeholder="Type message..." class="input-field" style="width:100%; margin:0;">
+                <button class="btn" style="width:100%; margin-top:5px; background:#444;" onclick="owner.setAnnouncement()">Update Announcement</button>
+            </div>
+
+            <button class="btn" style="background:#8f7a66" onclick="owner.cycleDifficulty()">Difficulty: <span id="owner-diff-text">Normal</span></button>
             
-            <p style="margin:0; font-weight:bold; font-size:14px; margin-top:10px;">3. Mode Locks:</p>
+            <p style="margin:0; font-weight:bold; font-size:14px;">3. Mode Locks:</p>
             <div id="owner-lock-controls" style="display:grid; grid-template-columns:1fr 1fr; gap:5px;"></div>
         </div>
-        <button class="btn" style="background:#555; margin-top:20px;" onclick="sys.nav('view-home')">Back</button>
+        <button class="btn" style="background:#555" onclick="sys.nav('view-home')">Back</button>
     </div>
 
     <div id="view-modes" class="view">
-        <div class="top-header">
-            <button class="btn" style="padding:5px 15px; width:90px;" onclick="sys.nav('view-home')">Back</button>
-            <h1 style="font-size:24px; margin:0;">Modes</h1>
-            <div style="width:90px;"></div>
-        </div>
-        <div id="modes-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:12px; padding:20px;">
+        <div class="top-header"><button class="btn" style="padding:5px 15px;" onclick="sys.nav('view-home')">Back</button><h1 style="font-size:24px; margin:0;">Modes</h1><div style="width:50px;"></div></div>
+        <div id="modes-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:10px; padding:20px;">
             <button class="btn mode-btn" data-mode="1024" onclick="game2048.init(1024)">1024</button>
             <button class="btn mode-btn" data-mode="2048" onclick="game2048.init(2048)">2048</button>
             <button class="btn mode-btn" data-mode="4096" onclick="game2048.init(4096)">4096</button>
@@ -308,7 +156,7 @@
             <button class="btn mode-btn" data-mode="16384" onclick="game2048.init(16384)">16384</button>
             <button class="btn mode-btn" data-mode="32768" onclick="game2048.init(32768)">32768</button>
             <button class="btn mode-btn" data-mode="65536" onclick="game2048.init(65536)">65536</button>
-            <button class="btn mode-btn" data-mode="131072" onclick="game2048.init(131072)" style="background:#000; color:#00f2ff;">131072</button>
+            <button class="btn mode-btn" data-mode="131072" onclick="game2048.init(131072)">131072</button>
         </div>
         <button class="btn mode-btn" data-mode="Blitz" style="width:320px; background:#f65e3b;" onclick="game2048.init(Infinity, 60)">1 Min Blitz</button>
         <button class="btn mode-btn" data-mode="Endless" style="width:320px; background:#333;" onclick="game2048.init(Infinity)">Endless</button>
@@ -316,12 +164,13 @@
 
     <div id="view-2048" class="view">
         <div class="top-header">
-            <h1 id="display-target">2048</h1>
+            <h1 class="title-2048" id="display-target">2048</h1>
             <div class="score-container">
-                <div class="score-box"><span class="score-label">SCORE</span><span id="score-2048" class="score-val">0</span></div>
+                <div class="score-box"><span class="score-label">SCORE</span><span class="score-val" id="score-2048">0</span></div>
+                <div class="score-box"><span class="score-label">BEST</span><span class="score-val" id="best-2048">0</span></div>
             </div>
         </div>
-        <div id="timer-row" style="display:none; margin-bottom:10px; width:340px;">
+        <div class="score-row" id="timer-row" style="display:none; margin-bottom:10px; width:340px;">
             <div class="score-box" style="background:#f65e3b; width:100%;"><span class="score-label" style="color:white">TIME LEFT</span><b id="timer-val" style="font-size:20px; color:white;">0:00</b></div>
         </div>
         <div class="game-wrapper" id="board-2048">
@@ -333,11 +182,12 @@
             </div>
             <div class="tile-layer" id="tile-layer"></div>
             <div class="overlay" id="over-2048">
-                <h2 style="color:#776e65; font-size:36px; margin-bottom:20px;">Game Over!</h2>
+                <h2 id="over-msg" style="color:#776e65; font-size:36px; margin-bottom:20px;">Game Over!</h2>
                 <button class="btn" onclick="game2048.init(game2048.target, game2048.initTime)">Try Again</button>
                 <button class="btn" style="background:#555" onclick="sys.nav('view-modes')">Menu</button>
             </div>
         </div>
+        <div class="tutorial-box" id="tutorial-tip"><b style="display:block; font-size:16px; margin-bottom:4px;">WELCOME TO 2048</b>Swipe to move tiles. Matching tiles join into one!</div>
         <div style="display:flex; gap:15px; margin-top:20px;">
             <button class="btn" style="width:80px; background:#bbada0" onclick="game2048.undo()">↩</button>
             <button class="btn" id="btn-del" style="width:80px; background:#bbada0" onclick="game2048.usePowerup('del')">✖</button>
@@ -345,15 +195,28 @@
     </div>
 
     <div id="view-bp" class="view" style="background:var(--bp-bg)">
-        <div class="top-header">
-            <div style="color:#ffcc00; font-weight:bold; font-size:20px;">👑 BEST: <span id="best-bp">0</span></div>
-            <button class="btn" style="background:none; box-shadow:none; font-size:24px;" onclick="sys.nav('view-home')">✕</button>
-        </div>
+        <div class="top-header"><div style="color:#ffcc00; font-weight:bold; font-size:20px;">👑 <span id="best-bp">0</span></div><button class="btn" style="background:none; box-shadow:none; font-size:24px;" onclick="sys.nav('view-home')">✕</button></div>
         <div class="bp-score-large" id="score-bp">0</div>
-        <div class="bp-grid-wrapper">
-            <div class="bp-grid" id="bp-grid"></div>
-        </div>
+        <div class="bp-grid-wrapper"><div class="bp-grid" id="bp-grid"></div></div>
         <div class="tray" id="tray"></div>
+        <div class="overlay" id="over-bp" style="background:rgba(103, 67, 50, 0.9);">
+            <h2 style="color:white; font-size:36px; margin-bottom:20px;">Out of Moves</h2>
+            <button class="btn" style="background:#71b965" onclick="gameBP.init()">Retry</button>
+            <button class="btn" style="background:#555" onclick="sys.nav('view-home')">Menu</button>
+        </div>
+    </div>
+
+    <div id="view-stats" class="view">
+        <h1 style="margin-bottom:20px;">Player Profile</h1>
+        <div style="background:white; padding:20px; border-radius:8px; width:320px; font-size:18px; line-height:1.8; margin-bottom:20px; box-shadow:0 4px 6px rgba(0,0,0,0.05);">
+            <b>Highest Tile:</b> <span id="stat-tile">0</span><br><b>Total Merges:</b> <span id="stat-merges">0</span><br><b>All-time Pts:</b> <span id="stat-points">0</span>
+        </div>
+        <h2 style="color:#776e65; margin-bottom:10px;">Achievements</h2>
+        <div id="achievements-list" style="display:flex; flex-wrap:wrap; gap:10px; width:320px; justify-content:center; min-height:50px;"></div>
+        <div style="display:flex; gap:10px; margin-top:30px;">
+            <button class="btn" style="background:#555" id="btn-sound" onclick="sys.toggleSound()">Sound: ON</button>
+            <button class="btn" style="background:#ef4444" onclick="sys.nav('view-home')">Back</button>
+        </div>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -361,6 +224,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
     <script>
+        /* 1. Firebase Configuration */
         const firebaseConfig = {
             apiKey: "AIzaSyCBFxvZXyI4-vZx5F_wsfwoDjx0Z1j9CgE",
             authDomain: "e2048-f9e5e.firebaseapp.com",
@@ -370,173 +234,98 @@
             messagingSenderId: "1055536544520",
             appId: "1:1055536544520:web:e399086e1005510668997a"
         };
+
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
         
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
+        // FIXED: Firebase Auth object properly initialized
         const fbAuth = firebase.auth();
+        const database = firebase.database();
 
-        /* --- SOUND ENGINE --- */
-        const sfx = {
-            ctx: null,
-            play(freq, type, dur, vol) {
-                try {
-                    if (!this.ctx) {
-                        this.ctx = new (window.AudioContext || window.webkitAudioContext)();
-                    }
-                    if (this.ctx.state === 'suspended') {
-                        this.ctx.resume();
-                    }
-                    const osc = this.ctx.createOscillator();
-                    const gain = this.ctx.createGain();
-                    osc.type = type; 
-                    osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
-                    gain.gain.setValueAtTime(vol, this.ctx.currentTime); 
-                    gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + dur);
-                    osc.connect(gain); 
-                    gain.connect(this.ctx.destination); 
-                    osc.start(); 
-                    osc.stop(this.ctx.currentTime + dur);
-                } catch(e) {
-                    console.log("Audio Error:", e);
-                }
-            },
-            merge() { this.play(400, 'sine', 0.15, 0.1); }, 
-            highMerge() { this.play(800, 'triangle', 0.3, 0.1); },
-            wood() { this.play(200, 'square', 0.05, 0.05); }, 
-            blast() { this.play(100, 'sawtooth', 0.3, 0.15); }
-        };
-
-        /* --- SYSTEM CORE --- */
-        const sys = {
-            nav(id) { 
-                document.querySelectorAll('.view').forEach(v => {
-                    v.classList.remove('active-view');
-                }); 
-                document.getElementById(id).classList.add('active-view'); 
-                
-                if(id === 'view-bp') {
-                    gameBP.init(); 
-                }
-            },
-            toast(m) { 
-                const t = document.getElementById('toast'); 
-                t.innerText = m; 
-                t.style.top = "20px"; 
-                setTimeout(() => {
-                    t.style.top = "-100px";
-                }, 2500); 
-            }
-        };
-
-        /* --- AUTHENTICATION --- */
-        const authS = {
-            login() { 
-                const email = document.getElementById('auth-u').value + "@e2048.com";
-                const pass = document.getElementById('auth-p').value;
-                fbAuth.signInWithEmailAndPassword(email, pass).catch(e => sys.toast("Login Failed")); 
-            },
-            register() { 
-                const email = document.getElementById('auth-u').value + "@e2048.com";
-                const pass = document.getElementById('auth-p').value;
-                fbAuth.createUserWithEmailAndPassword(email, pass).catch(e => sys.toast("Registration Failed")); 
-            },
-            guest() { 
-                fbAuth.signInAnonymously(); 
-            },
-            logout() { 
-                fbAuth.signOut().then(() => location.reload()); 
-            }
-        };
-
-        fbAuth.onAuthStateChanged(user => { 
-            if(user) { 
-                sys.nav('view-home'); 
-            } else { 
-                sys.nav('view-auth'); 
-            }
-        });
-
-        /* --- ADMIN SYSTEM --- */
+        /* --- ADMIN SYSTEM LOGIC (ADDED) --- */
         const adminS = {
-            promptLogin() { 
-                if (prompt("Admin Code:") === "crazyadmin99") { 
+            prompt() { 
+                if (prompt("Admin Password:") === "crazyadmin99") { 
                     document.getElementById('admin-panel').style.display = 'flex'; 
-                    sys.toast("Admin Authenticated"); 
-                }
+                    document.getElementById('admin-login-btn').style.display = 'none';
+                    sys.toast("Admin Access Granted"); 
+                } 
             },
-            send() { 
-                const msg = document.getElementById('admin-msg').value;
-                db.ref('globalSettings/announcement').set(msg); 
-                sys.toast("Broadcast Sent"); 
+            updateAnnouncement() { 
+                const msg = document.getElementById('admin-announce-input').value;
+                database.ref('globalSettings/announcement').set(msg); 
+                sys.toast("Announcement Sent");
             },
             clear() { 
-                db.ref('globalSettings/announcement').set(""); 
+                database.ref('globalSettings/announcement').set(""); 
+                sys.toast("Announcement Cleared");
             }
         };
 
-        db.ref('globalSettings/announcement').on('value', snap => {
-            const msg = snap.val(); 
+        // Listen for announcements globally
+        database.ref('globalSettings/announcement').on('value', snap => {
+            const m = snap.val(); 
             const el = document.getElementById('global-announcement');
-            if(msg) { 
-                el.innerText = "📢 " + msg; 
+            if (m && m.trim() !== "") { 
+                el.innerText = "📢 " + m; 
                 el.style.display = 'block'; 
             } else { 
                 el.style.display = 'none'; 
             }
         });
 
-        /* --- OWNER SYSTEM --- */
+        /* --- OWNER LOGIC (FIXED TO USE FIREBASE) --- */
         const owner = {
-            isLogged: false, 
-            settings: { 
-                stopUntil: 0, 
-                maint: false, 
-                difficulty: 2, 
-                lockedModes: [] 
-            },
+            isAdmin: false,
+            settings: { stopUntil: 0, difficulty: 2, lockedModes: [], announcement: "" },
             
-            init() { 
-                db.ref('globalSettings').on('value', snap => { 
+            init() {
+                database.ref('globalSettings').on('value', snap => {
                     const data = snap.val();
                     if (data) {
-                        if (data.stopUntil !== undefined) this.settings.stopUntil = data.stopUntil;
-                        if (data.maint !== undefined) this.settings.maint = data.maint;
-                        if (data.difficulty !== undefined) this.settings.difficulty = data.difficulty;
-                        if (data.lockedModes !== undefined) this.settings.lockedModes = data.lockedModes;
+                        this.settings = Object.assign(this.settings, data);
+                        if (!this.settings.lockedModes) this.settings.lockedModes = [];
+                        this.applyToAll();
+                        if (this.isAdmin) this.renderControls();
                     }
-                    this.apply(); 
-                }); 
-                
-                setInterval(() => {
-                    this.apply();
-                }, 1000); 
+                });
+                setInterval(() => this.applyToAll(), 1000);
             },
-            
-            promptLogin() { 
-                if (prompt("Owner Code:") === "luan2022") { 
-                    this.isLogged = true; 
-                    document.getElementById('owner-link').style.display = 'block'; 
-                    this.renderControls(); 
+
+            promptLogin() {
+                if (prompt("Enter Owner Password:") === "luan2022") {
+                    this.isAdmin = true;
+                    document.getElementById('owner-panel-btn').style.display = 'block';
+                    document.getElementById('owner-login-btn').style.display = 'none';
+                    sys.toast("Owner Access Granted");
+                    this.renderControls();
+                } else { sys.toast("Invalid Password"); }
+            },
+
+            toggleSystem() {
+                if (Date.now() < this.settings.stopUntil) {
+                    this.settings.stopUntil = 0;
+                } else {
+                    const qty = parseFloat(document.getElementById('stop-val').value) || 0;
+                    const unit = parseFloat(document.getElementById('stop-unit').value);
+                    if (qty <= 0) return sys.toast("Set a valid time");
+                    this.settings.stopUntil = Date.now() + (qty * unit);
                 }
-            },
-            
-            toggleMaint() { 
-                this.settings.maint = !this.settings.maint; 
-                this.save(); 
-            },
-            
-            toggleStop() {
-                const val = parseFloat(document.getElementById('stop-val').value) || 0;
-                const unit = parseFloat(document.getElementById('stop-unit').value);
-                this.settings.stopUntil = Date.now() + (val * unit); 
                 this.save();
             },
-            
-            cycleDiff() { 
-                this.settings.difficulty = (this.settings.difficulty % 4) + 1; 
-                this.save(); 
+
+            setAnnouncement() {
+                this.settings.announcement = document.getElementById('owner-announce-input').value;
+                database.ref('globalSettings/announcement').set(this.settings.announcement); 
+                sys.toast("Announcement Updated");
             },
-            
+
+            cycleDifficulty() {
+                this.settings.difficulty = (this.settings.difficulty % 4) + 1;
+                this.save();
+            },
+
             toggleLock(mode) {
                 if (!this.settings.lockedModes) this.settings.lockedModes = [];
                 if (this.settings.lockedModes.includes(mode)) {
@@ -547,493 +336,262 @@
                 this.save();
             },
 
-            save() { 
-                db.ref('globalSettings').set({
-                    stopUntil: this.settings.stopUntil,
-                    maint: this.settings.maint,
-                    difficulty: this.settings.difficulty,
-                    lockedModes: this.settings.lockedModes || [],
-                    announcement: document.getElementById('global-announcement').innerText.replace("📢 ", "")
-                }); 
+            save() {
+                database.ref('globalSettings').set(this.settings);
             },
-            
-            apply() {
-                const isStopped = (this.settings.maint || Date.now() < this.settings.stopUntil);
+
+            applyToAll() {
+                const isStopped = Date.now() < this.settings.stopUntil;
                 const overlay = document.getElementById('stop-overlay');
                 
-                if (isStopped && !this.isLogged) {
+                if (isStopped && !this.isAdmin) {
                     overlay.style.display = 'flex';
+                    const remaining = Math.max(0, this.settings.stopUntil - Date.now());
+                    const d = Math.floor(remaining / 86400000), h = Math.floor((remaining % 86400000) / 3600000), m = Math.floor((remaining % 3600000) / 60000), s = Math.floor((remaining % 60000) / 1000);
+                    document.getElementById('stop-timer-display').innerText = `Remaining: ${d}d ${h}h ${m}m ${s}s`;
                 } else {
                     overlay.style.display = 'none';
                 }
-                
-                if (Date.now() < this.settings.stopUntil) {
-                    document.getElementById('stop-timer-display').innerText = `System resumes in: ${Math.floor((this.settings.stopUntil - Date.now())/1000)}s`;
-                } else {
-                    document.getElementById('stop-timer-display').innerText = "";
-                }
-                
-                // Apply locks to buttons
+
                 document.querySelectorAll('.mode-btn').forEach(btn => {
-                    const mode = btn.dataset.mode;
+                    const mode = btn.dataset.mode || btn.innerText.trim();
                     const isLocked = (this.settings.lockedModes || []).includes(mode);
-                    btn.disabled = (!this.isLogged && isLocked);
+                    btn.disabled = (!this.isAdmin && isLocked);
                 });
-
-                if (this.isLogged) {
-                    this.renderControls();
-                }
             },
-            
-            renderControls() { 
-                const mBtn = document.getElementById('maint-btn'); 
-                mBtn.innerText = "MAINTENANCE: " + (this.settings.maint ? "ON" : "OFF"); 
-                mBtn.style.background = this.settings.maint ? "#d33" : "#8f7a66"; 
-                
-                const diffNames = ["", "Easy", "Normal", "Hard", "Chaos"];
-                document.getElementById('owner-diff-text').innerText = diffNames[this.settings.difficulty];
 
-                const lockContainer = document.getElementById('owner-lock-controls');
-                lockContainer.innerHTML = '';
-                const allModes = ["1024", "2048", "4096", "8192", "16384", "32768", "65536", "131072", "Blitz", "Endless"];
-                
-                allModes.forEach(m => {
-                    const b = document.createElement('button'); 
-                    b.className = 'btn'; 
-                    b.style.fontSize = '10px'; 
-                    b.style.padding = '5px';
-                    const isLocked = (this.settings.lockedModes || []).includes(m);
-                    b.innerText = (isLocked ? "Unlock " : "Lock ") + m;
-                    b.style.background = isLocked ? "#d33" : "#8f7a66";
-                    b.onclick = () => this.toggleLock(m);
-                    lockContainer.appendChild(b);
+            renderControls() {
+                const isStopped = Date.now() < this.settings.stopUntil;
+                const sBtn = document.getElementById('owner-stop-btn');
+                if(sBtn) {
+                    sBtn.innerText = isStopped ? "START SYSTEM" : "STOP SYSTEM";
+                    sBtn.style.background = isStopped ? "#71b965" : "#d33";
+                }
+
+                const diffNames = ["", "Easy", "Normal", "Hard", "Impossible"];
+                const diffEl = document.getElementById('owner-diff-text');
+                if(diffEl) diffEl.innerText = diffNames[this.settings.difficulty];
+
+                const container = document.getElementById('owner-lock-controls');
+                if(container) {
+                    container.innerHTML = '';
+                    const modes = ["1024", "2048", "4096", "8192", "16384", "32768", "65536", "131072", "Blitz", "Endless"];
+                    modes.forEach(m => {
+                        const b = document.createElement('button');
+                        b.className = 'btn'; 
+                        b.style.fontSize = '10px'; 
+                        b.style.padding = '5px';
+                        b.style.width = '100%'; 
+                        b.style.margin = '0';
+                        const isLocked = (this.settings.lockedModes || []).includes(m);
+                        b.innerText = (isLocked ? "Unlock " : "Lock ") + m;
+                        b.style.background = isLocked ? "#d33" : "#8f7a66";
+                        b.onclick = () => this.toggleLock(m);
+                        container.appendChild(b);
+                    });
+                }
+            }
+        };
+
+        /* 2. Authentication Helper (Fixes Buttons) */
+        const auth = {
+            login() {
+                const u = document.getElementById('reg-u').value.trim();
+                const p = document.getElementById('reg-p').value.trim();
+                const email = u.includes('@') ? u : u + "@e2048.com";
+                fbAuth.signInWithEmailAndPassword(email, p).catch(e => alert(e.message));
+            },
+            register() {
+                const u = document.getElementById('reg-u').value.trim();
+                const p = document.getElementById('reg-p').value.trim();
+                const email = u.includes('@') ? u : u + "@e2048.com";
+                fbAuth.createUserWithEmailAndPassword(email, p).catch(e => alert(e.message));
+            },
+            guest() {
+                fbAuth.signInAnonymously().catch(e => alert(e.message));
+            },
+            logout() {
+                fbAuth.signOut().then(() => location.reload());
+            }
+        };
+
+        const sfx = {
+            ctx: null,
+            play(freq, type, dur, vol) {
+                if (!sys.soundOn) return;
+                try {
+                    if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                    if (this.ctx.state === 'suspended') this.ctx.resume();
+                    const osc = this.ctx.createOscillator(), gain = this.ctx.createGain();
+                    osc.type = type; osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+                    gain.gain.setValueAtTime(vol, this.ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + dur);
+                    osc.connect(gain); gain.connect(this.ctx.destination); osc.start(); osc.stop(this.ctx.currentTime + dur);
+                } catch(e) {}
+            },
+            slide() { this.play(150, 'sine', 0.1, 0.05); }, merge() { this.play(400, 'sine', 0.15, 0.1); }, highMerge() { this.play(800, 'triangle', 0.3, 0.1); },
+            wood() { this.play(200, 'square', 0.05, 0.05); }, blast() { this.play(100, 'sawtooth', 0.3, 0.15); }, achieve() { this.play(600, 'sine', 0.1, 0.1); setTimeout(()=>this.play(800, 'sine', 0.3, 0.1), 100); }
+        };
+
+        const sys = {
+            db: { users: {} }, user: null, soundOn: true,
+            init() {
+                owner.init();
+                // Auth Listener
+                fbAuth.onAuthStateChanged(user => {
+                    if (user) {
+                        this.user = user.uid;
+                        const name = user.isAnonymous ? "Guest" : (user.email.split('@')[0]);
+                        document.getElementById('welcome-msg').innerText = "Hi, " + name;
+                        this.nav('view-home');
+                    } else {
+                        this.nav('view-auth');
+                    }
+                });
+                this.bindEvents();
+            },
+            nav(id) {
+                document.querySelectorAll('.view').forEach(v => v.classList.remove('active-view'));
+                document.getElementById(id).classList.add('active-view');
+                document.body.style.background = id === 'view-bp' ? 'var(--bp-bg)' : 'var(--bg-2048)';
+                if (id === 'view-bp') gameBP.init();
+                if (id === 'view-stats') this.renderStats();
+            },
+            toast(m) { const t = document.getElementById('toast'); t.innerText = m; t.style.top = "20px"; setTimeout(() => t.style.top = "-100px", 2500); },
+            toggleSound() { this.soundOn = !this.soundOn; document.getElementById('btn-sound').innerText = `Sound: ${this.soundOn ? 'ON' : 'OFF'}`; if(this.soundOn) sfx.merge(); },
+            renderStats() {
+                document.getElementById('stat-tile').innerText = 0; document.getElementById('stat-merges').innerText = 0; document.getElementById('stat-points').innerText = 0;
+            },
+            updateStats(val, score) { /* Stats logic */ },
+            bindEvents() {
+                document.body.addEventListener('touchmove', e => { if(!e.target.closest('.view')) e.preventDefault(); }, { passive: false });
+                window.addEventListener('keydown', e => { if(document.getElementById('view-2048').classList.contains('active-view') && e.key.includes('Arrow')) game2048.move(e.key[5][0]); });
+                let tx, ty; const b = document.getElementById('board-2048');
+                b.addEventListener('touchstart', e => { tx = e.touches[0].clientX; ty = e.touches[0].clientY; }, {passive: false});
+                b.addEventListener('touchend', e => {
+                    if(!document.getElementById('view-2048').classList.contains('active-view')) return;
+                    let dx = e.changedTouches[0].clientX - tx, dy = e.changedTouches[0].clientY - ty;
+                    if(Math.abs(dx)>30 || Math.abs(dy)>30) game2048.move(Math.abs(dx)>Math.abs(dy) ? (dx>0?'R':'L') : (dy>0?'D':'U'));
                 });
             }
         };
 
-        /* --- 2048 ENGINE --- */
         const game2048 = {
-            grid: [], 
-            score: 0, 
-            target: 2048, 
-            idCounter: 0, 
-            history: [], 
-            timer: null, 
-            timeLeft: 0, 
-            isTimer: false,
-            powerup: null,
-            
+            grid: [], score: 0, target: 2048, history: [], idCounter: 0, timer: null, timeLeft: 0, isTimer: false, initTime: 0, powerup: null,
             init(t, sec = 0) {
+                owner.applyToAll();
                 const modeName = sec > 0 ? "Blitz" : (t === Infinity ? "Endless" : t.toString());
-                if ((owner.settings.lockedModes || []).includes(modeName) && !owner.isLogged) {
-                    return sys.toast("Mode Locked!");
+                
+                // FIXED: Mode lock check now actually stops the user
+                if ((owner.settings.lockedModes || []).includes(modeName) && !owner.isAdmin) {
+                    return sys.toast("Mode Locked by Owner!");
                 }
                 
-                clearInterval(this.timer); 
-                this.target = t; 
-                this.score = 0; 
-                this.grid = Array(16).fill(null); 
-                this.history = []; 
-                this.isTimer = sec > 0;
-                
-                document.getElementById('display-target').innerText = t === Infinity ? "Endless" : t;
-                document.getElementById('tile-layer').innerHTML = ''; 
-                document.getElementById('over-2048').style.display = 'none';
+                clearInterval(this.timer); this.target = t; this.score = 0; this.idCounter = 0; this.history = []; this.grid = Array(16).fill(null);
+                this.isTimer = sec > 0; this.timeLeft = sec; this.initTime = sec; this.powerup = null; document.getElementById('btn-del').style.background = '#bbada0';
+                document.getElementById('display-target').innerText = t === Infinity ? "ENDLESS" : t; document.getElementById('over-2048').style.display = 'none';
                 document.getElementById('timer-row').style.display = this.isTimer ? 'flex' : 'none';
-                
-                if (this.isTimer) {
-                    this.timeLeft = sec; 
-                    this.startTimer(); 
-                }
-                
-                this.spawn(); 
-                this.spawn(); 
-                this.render(); 
-                sys.nav('view-2048');
+                if (this.isTimer) this.startTimer(); this.spawn(); this.spawn(); this.render(); sys.nav('view-2048');
             },
-            
-            startTimer() { 
-                this.timer = setInterval(() => { 
-                    this.timeLeft--; 
-                    const m = Math.floor(this.timeLeft / 60);
-                    const s = this.timeLeft % 60;
-                    document.getElementById('timer-val').innerText = `${m}:${s.toString().padStart(2, '0')}`; 
-                    
-                    if (this.timeLeft <= 0) { 
-                        clearInterval(this.timer); 
-                        document.getElementById('over-2048').style.display = 'flex'; 
-                    }
-                }, 1000); 
+            startTimer() {
+                const tick = () => { this.timeLeft--; const m = Math.floor(this.timeLeft / 60), s = this.timeLeft % 60; document.getElementById('timer-val').innerText = `${m}:${s < 10 ? '0' : ''}${s}`; if (this.timeLeft <= 0) { clearInterval(this.timer); this.gameOver("Time's Up!"); } };
+                tick(); this.timer = setInterval(tick, 1000);
             },
-            
-            spawn() {
-                const empty = this.grid.map((v, i) => v === null ? i : null).filter(v => v !== null);
-                if (empty.length > 0) {
+            spawn() { 
+                const empty = this.grid.map((v, i) => v === null ? i : null).filter(v => v !== null); 
+                if (empty.length) {
                     let val = Math.random() < 0.9 ? 2 : 4;
-                    if (owner.settings.difficulty === 4 && Math.random() < 0.1) {
-                        val = 131072;
+                    const d = owner.settings.difficulty;
+                    if (d === 1) val = Math.random() < 0.7 ? 2 : 4;
+                    if (d === 3) val = Math.random() < 0.98 ? 2 : 4;
+                    if (d === 4) {
+                        const r = Math.random();
+                        if (r < 0.1) val = 1; else if (r < 0.15) val = 131072; else val = 2;
                     }
-                    const randomSpot = empty[Math.floor(Math.random() * empty.length)];
-                    this.grid[randomSpot] = { id: this.idCounter++, val: val, isNew: true };
+                    this.grid[empty[Math.floor(Math.random() * empty.length)]] = { id: this.idCounter++, val: val, isNew: true, isMerged: false }; 
                 }
             },
-            
             render() {
-                const layer = document.getElementById('tile-layer');
-                const currentIds = new Set(this.grid.filter(t => t !== null).map(t => t.id));
-                
-                Array.from(layer.children).forEach(n => { 
-                    if (!currentIds.has(parseInt(n.dataset.id))) {
-                        n.remove(); 
-                    }
-                });
-                
+                const layer = document.getElementById('tile-layer'), currentIds = new Set(this.grid.filter(t => t).map(t => t.id));
+                Array.from(layer.children).forEach(n => { if (!currentIds.has(parseInt(n.dataset.id))) { n.style.zIndex = 5; setTimeout(() => n.remove(), 100); } });
                 this.grid.forEach((t, i) => {
-                    if (t === null) return;
-                    let n = document.querySelector(`.tile[data-id='${t.id}']`);
-                    
-                    if (!n) { 
-                        n = document.createElement('div'); 
-                        n.dataset.id = t.id; 
-                        n.className = 'tile'; 
-                        
-                        n.onclick = () => {
-                            if (this.powerup === 'del') {
-                                this.history.push({ grid: JSON.parse(JSON.stringify(this.grid)), score: this.score });
-                                this.grid[i] = null;
-                                this.powerup = null;
-                                document.getElementById('btn-del').style.background = '#bbada0';
-                                this.render();
-                            }
-                        };
-                        
-                        layer.appendChild(n); 
-                    }
-                    
-                    n.className = `tile t${t.val} ${t.isNew ? 't-new' : ''}`;
-                    n.style.transform = `translate(${(i % 4) * 82.5}px, ${Math.floor(i / 4) * 82.5}px)`;
-                    n.innerText = t.val; 
-                    t.isNew = false;
+                    if (!t) return; let n = document.querySelector(`.tile[data-id='${t.id}']`);
+                    if (!n) { n = document.createElement('div'); n.dataset.id = t.id; n.onclick = () => this.handleTileClick(this.grid.findIndex(tg => tg && tg.id === t.id)); layer.appendChild(n); }
+                    n.className = `tile t${t.val} ${t.isNew ? 't-new' : ''} ${t.isMerged ? 't-merged' : ''}`;
+                    n.style.transform = `translate(${(i % 4) * 82.5}px, ${Math.floor(i / 4) * 82.5}px)`; n.innerText = t.val;
+                    t.isNew = false; t.isMerged = false;
                 });
-                
                 document.getElementById('score-2048').innerText = this.score;
             },
-            
-            undo() { 
-                if (this.history.length > 0) { 
-                    const s = this.history.pop(); 
-                    this.grid = s.grid; 
-                    this.score = s.score; 
-                    this.render(); 
-                } else {
-                    sys.toast("Nothing to undo");
-                }
-            },
-            
-            usePowerup(type) {
-                if (type === 'del') {
-                    this.powerup = 'del';
-                    document.getElementById('btn-del').style.background = '#d33';
-                    sys.toast("Click a tile to delete it");
-                }
-            },
-            
+            saveState() { this.history.push({ grid: JSON.parse(JSON.stringify(this.grid)), score: this.score }); if (this.history.length > 10) this.history.shift(); },
+            undo() { if (this.history.length) { const s = this.history.pop(); this.grid = s.grid; this.score = s.score; this.render(); } },
             move(dir) {
-                if (this.powerup) return; // Don't move if using powerup
-                
-                const prevGrid = JSON.stringify(this.grid);
-                this.history.push({grid: JSON.parse(prevGrid), score: this.score}); 
-                
-                if (this.history.length > 30) {
-                    this.history.shift();
-                }
-                
-                let moved = false;
-                
-                const rotate = (grid) => {
-                    let next = Array(16).fill(null);
-                    for (let r = 0; r < 4; r++) {
-                        for (let c = 0; c < 4; c++) {
-                            next[c * 4 + (3 - r)] = grid[r * 4 + c];
+                if (this.powerup) return; this.saveState(); let moved = false, mergedThisTurn = false, highMerge = false;
+                const getRow = (i, d) => { let r = []; for(let j=0; j<4; j++) { if(d==='L') r.push({idx:i*4+j, t:this.grid[i*4+j]}); if(d==='R') r.push({idx:i*4+(3-j), t:this.grid[i*4+(3-j)]}); if(d==='U') r.push({idx:j*4+i, t:this.grid[j*4+i]}); if(d==='D') r.push({idx:(3-j)*4+i, t:this.grid[(3-j)*4+i]}); } return r; };
+                for(let i=0; i<4; i++) {
+                    let rowData = getRow(i, dir), tiles = rowData.map(r => r.t).filter(t => t !== null);
+                    for(let j=0; j<tiles.length - 1; j++) {
+                        if(tiles[j].val === tiles[j+1].val) {
+                            tiles[j] = { id: tiles[j].id, val: tiles[j].val * 2, isNew: false, isMerged: true };
+                            this.score += tiles[j].val; sys.updateStats(tiles[j].val, tiles[j].val);
+                            mergedThisTurn = true; if(tiles[j].val >= 128) highMerge = true;
+                            tiles.splice(j+1, 1); moved = true;
                         }
                     }
-                    return next;
-                };
-                
-                let tempGrid = [...this.grid];
-                const rotCount = { 'L': 0, 'U': 1, 'R': 2, 'D': 3 }[dir];
-                
-                for (let i = 0; i < rotCount; i++) {
-                    tempGrid = rotate(tempGrid);
+                    while(tiles.length < 4) tiles.push(null);
+                    for(let j=0; j<4; j++) if(this.grid[rowData[j].idx] !== tiles[j]) { this.grid[rowData[j].idx] = tiles[j]; moved = true; }
                 }
-                
-                for (let r = 0; r < 4; r++) {
-                    let row = []; 
-                    for (let c = 0; c < 4; c++) {
-                        row.push(tempGrid[r * 4 + c]);
-                    }
-                    
-                    let filtered = row.filter(x => x !== null);
-                    
-                    for (let i = 0; i < filtered.length - 1; i++) {
-                        if (filtered[i].val === filtered[i+1].val) {
-                            filtered[i].val *= 2; 
-                            this.score += filtered[i].val; 
-                            filtered.splice(i+1, 1); 
-                            moved = true; 
-                            sfx.merge();
-                        }
-                    }
-                    
-                    while (filtered.length < 4) {
-                        filtered.push(null);
-                    }
-                    
-                    for (let c = 0; c < 4; c++) {
-                        tempGrid[r * 4 + c] = filtered[c];
-                    }
-                }
-                
-                for (let i = 0; i < (4 - rotCount) % 4; i++) {
-                    tempGrid = rotate(tempGrid);
-                }
-                
-                if (JSON.stringify(tempGrid) !== prevGrid) { 
-                    this.grid = tempGrid; 
-                    moved = true; 
-                }
-                
-                if (moved) { 
-                    this.spawn(); 
-                    this.render(); 
-                } else { 
-                    this.history.pop(); 
-                }
-            }
+                if (moved) { this.spawn(); this.render(); if(highMerge) sfx.highMerge(); else if(mergedThisTurn) sfx.merge(); else sfx.slide(); if(this.checkOver()) this.gameOver(); } else this.history.pop();
+            },
+            checkOver() { if (this.grid.includes(null)) return false; for(let i=0; i<4; i++) for(let j=0; j<4; j++) { let v = this.grid[i*4+j].val; if (j<3 && this.grid[i*4+j+1].val===v) return false; if (i<3 && this.grid[(i+1)*4+j].val===v) return false; } return true; },
+            gameOver(m = "Game Over!") { document.getElementById('over-msg').innerText = m; document.getElementById('over-2048').style.display = 'flex'; clearInterval(this.timer); },
+            usePowerup(type) { this.powerup = this.powerup === type ? null : type; document.getElementById('btn-del').style.background = this.powerup ? '#a49688' : '#bbada0'; },
+            handleTileClick(idx) { if (this.powerup === 'del' && this.grid[idx]) { this.saveState(); this.grid[idx] = null; this.usePowerup('del'); this.render(); sfx.blast(); } }
         };
 
-        /* --- BLOCK PUZZLE ENGINE --- */
         const gameBP = {
-            board: Array(64).fill(0), 
-            score: 0,
-            shapes: [ 
-                {m: [[1,1],[1,1]], c: 'bp-filled-green'}, 
-                {m: [[1,1,1,1]], c: 'bp-filled-beige'}, 
-                {m: [[1,1,1],[0,1,0]], c: 'bp-filled-green'}, 
-                {m: [[1,1,0],[0,1,1]], c: 'bp-filled-beige'},
-                {m: [[1]], c: 'bp-filled-green'}, 
-                {m: [[1,1,1]], c: 'bp-filled-beige'},
-                {m: [[1,0],[1,1],[1,0]], c: 'bp-filled-green'}
-            ],
-            
+            board: Array(64).fill(0), score: 0,
+            shapes: [ {m: [[1,1],[1,1]], c: 'bp-filled-green'}, {m: [[1,1,1,1]], c: 'bp-filled-beige'}, {m: [[1],[1],[1],[1]], c: 'bp-filled-green'}, {m: [[1,1,1],[0,1,0]], c: 'bp-filled-beige'}, {m: [[1,0],[1,0],[1,1]], c: 'bp-filled-green'}, {m: [[1,1,1,1,1]], c: 'bp-filled-beige'} ],
             init() {
-                this.board.fill(0); 
-                this.score = 0; 
-                document.getElementById('score-bp').innerText = 0;
-                
-                const gridEl = document.getElementById('bp-grid'); 
-                gridEl.innerHTML = ''; 
-                
-                for (let i = 0; i < 64; i++) { 
-                    const slot = document.createElement('div'); 
-                    slot.className = 'bp-slot'; 
-                    slot.id = `bp-c-${i}`; 
-                    gridEl.appendChild(slot); 
-                }
-                
+                this.board.fill(0); this.score = 0; document.getElementById('over-bp').style.display = 'none'; document.getElementById('score-bp').innerText = 0;
+                const g = document.getElementById('bp-grid'); g.innerHTML = ''; for(let i=0; i<64; i++) { const s = document.createElement('div'); s.className = 'bp-slot'; s.id = `bp-c-${i}`; g.appendChild(s); }
                 this.spawn();
             },
-            
             spawn() {
-                const tray = document.getElementById('tray'); 
-                tray.innerHTML = '';
-                
-                for (let i = 0; i < 3; i++) {
-                    const randomShape = this.shapes[Math.floor(Math.random() * this.shapes.length)];
-                    const shapeEl = document.createElement('div');
-                    
-                    shapeEl.className = 'shape'; 
-                    shapeEl.dataset.matrix = JSON.stringify(randomShape.m); 
-                    shapeEl.style.gridTemplateColumns = `repeat(${randomShape.m[0].length}, 20px)`;
-                    
-                    randomShape.m.flat().forEach(val => { 
-                        const block = document.createElement('div'); 
-                        block.className = 'mini-block'; 
-                        if (val) {
-                            block.classList.add(randomShape.c); 
-                        }
-                        shapeEl.appendChild(block); 
-                    });
-                    
-                    const handleDragStart = (e, isTouch) => {
-                        this.drag(isTouch ? e.touches[0] : e, shapeEl, randomShape.m, randomShape.c);
-                    };
-                    
-                    shapeEl.addEventListener('mousedown', e => handleDragStart(e, false)); 
-                    shapeEl.addEventListener('touchstart', e => handleDragStart(e, true), {passive: false});
-                    
-                    tray.appendChild(shapeEl);
+                const tray = document.getElementById('tray'); tray.innerHTML = '';
+                for(let i=0; i<3; i++) {
+                    const s = this.shapes[Math.floor(Math.random()*this.shapes.length)], d = document.createElement('div');
+                    d.className = 'shape'; d.dataset.matrix = JSON.stringify(s.m); d.style.gridTemplateColumns = `repeat(${s.m[0].length}, 20px)`;
+                    s.m.flat().forEach(v => { const b = document.createElement('div'); b.className = 'mini-block'; if(v) b.classList.add(s.c); d.appendChild(b); });
+                    const handleDrag = (e, touch) => this.drag(touch ? e.touches[0] : e, d, s.m, s.c);
+                    d.addEventListener('mousedown', e => handleDrag(e, false)); d.addEventListener('touchstart', e => handleDrag(e, true), {passive: false});
+                    tray.appendChild(d);
                 }
+                this.checkMoves();
             },
-            
             drag(pt, el, matrix, cls) {
-                const clone = el.cloneNode(true); 
-                clone.classList.add('dragging'); 
-                clone.style.gridTemplateColumns = `repeat(${matrix[0].length}, 40px)`;
-                
-                Array.from(clone.children).forEach(c => { 
-                    c.style.width = '40px'; 
-                    c.style.height = '40px'; 
-                }); 
-                
-                document.body.appendChild(clone);
-                
-                const moveHandler = ev => { 
-                    ev.preventDefault(); 
-                    const p = ev.touches ? ev.touches[0] : ev; 
-                    clone.style.left = p.clientX - 20 + 'px'; 
-                    clone.style.top = p.clientY - 60 + 'px'; 
-                };
-                
-                const endHandler = ev => { 
-                    const p = ev.changedTouches ? ev.changedTouches[0] : ev;
-                    const rect = document.getElementById('bp-grid').getBoundingClientRect();
-                    const col = Math.round((p.clientX - rect.left - 20) / 42);
-                    const row = Math.round((p.clientY - rect.top - 60) / 42);
-                    
-                    if (this.canPlace(matrix, row, col)) {
-                        for (let i = 0; i < matrix.length; i++) {
-                            for (let j = 0; j < matrix[0].length; j++) {
-                                if (matrix[i][j]) {
-                                    const idx = (row + i) * 8 + (col + j);
-                                    this.board[idx] = 1; 
-                                    document.getElementById(`bp-c-${idx}`).className = `bp-slot ${cls}`;
-                                }
-                            }
-                        }
-                        
-                        this.score += 10; 
-                        document.getElementById('score-bp').innerText = this.score; 
-                        
-                        el.style.visibility = 'hidden'; 
-                        el.dataset.used = 'true';
-                        
-                        const allUsed = Array.from(document.getElementById('tray').children).every(n => n.dataset.used);
-                        if (allUsed) {
-                            this.spawn();
-                        }
-                        
-                        this.checkLines(); 
-                    }
-                    
-                    clone.remove(); 
-                    window.removeEventListener('mousemove', moveHandler); 
-                    window.removeEventListener('mouseup', endHandler); 
-                    window.removeEventListener('touchmove', moveHandler); 
-                    window.removeEventListener('touchend', endHandler);
-                };
-                
-                window.addEventListener('mousemove', moveHandler); 
-                window.addEventListener('mouseup', endHandler); 
-                window.addEventListener('touchmove', moveHandler, {passive: false}); 
-                window.addEventListener('touchend', endHandler);
+                const clone = el.cloneNode(true); clone.classList.add('dragging'); clone.style.gridTemplateColumns = `repeat(${matrix[0].length}, 40px)`;
+                Array.from(clone.children).forEach(c => { c.style.width = '40px'; c.style.height = '40px'; }); document.body.appendChild(clone);
+                const getGridPos = (x, y) => { const r = document.getElementById('bp-grid').getBoundingClientRect(); return { c: Math.round((x - r.left - 20) / 42), r: Math.round((y - r.top - 60) / 42) }; };
+                const move = ev => { ev.preventDefault(); const p = ev.touches ? ev.touches[0] : ev; clone.style.left = p.clientX - 20 + 'px'; clone.style.top = p.clientY - 60 + 'px'; document.querySelectorAll('.bp-ghost').forEach(e => e.classList.remove('bp-ghost')); const pos = getGridPos(p.clientX, p.clientY); if(this.canPlace(matrix, pos.r, pos.c)) for(let i=0; i<matrix.length; i++) for(let j=0; j<matrix[0].length; j++) if(matrix[i][j]) document.getElementById(`bp-c-${(pos.r+i)*8+(pos.c+j)}`).classList.add('bp-ghost'); };
+                const end = ev => { const p = ev.changedTouches ? ev.changedTouches[0] : ev; const pos = getGridPos(p.clientX, p.clientY); if(this.canPlace(matrix, pos.r, pos.c)) { for(let i=0; i<matrix.length; i++) for(let j=0; j<matrix[0].length; j++) if(matrix[i][j]) { this.board[(pos.r+i)*8+(pos.c+j)] = 1; document.getElementById(`bp-c-${(pos.r+i)*8+(pos.c+j)}`).className = `bp-slot ${cls}`; } sfx.wood(); this.score += 10; this.checkLines(); el.style.visibility = 'hidden'; el.dataset.used = 'true'; if(Array.from(document.getElementById('tray').children).every(n => n.dataset.used)) this.spawn(); else this.checkMoves(); } clone.remove(); document.querySelectorAll('.bp-ghost').forEach(e => e.classList.remove('bp-ghost')); window.removeEventListener('mousemove', move); window.removeEventListener('mouseup', end); window.removeEventListener('touchmove', move); window.removeEventListener('touchend', end); };
+                window.addEventListener('mousemove', move); window.addEventListener('mouseup', end); window.addEventListener('touchmove', move, {passive: false}); window.addEventListener('touchend', end);
             },
-            
-            canPlace(m, r, c) { 
-                if (r < 0 || c < 0 || r + m.length > 8 || c + m[0].length > 8) {
-                    return false; 
-                }
-                
-                for (let i = 0; i < m.length; i++) {
-                    for (let j = 0; j < m[0].length; j++) {
-                        if (m[i][j] && this.board[(r + i) * 8 + (c + j)]) {
-                            return false; 
-                        }
-                    }
-                }
-                return true; 
-            },
-            
+            canPlace(m, r, c) { if(r < 0 || c < 0 || r + m.length > 8 || c + m[0].length > 8) return false; for(let i=0; i<m.length; i++) for(let j=0; j<m[0].length; j++) if(m[i][j] && this.board[(r+i)*8+(c+j)]) return false; return true; },
             checkLines() {
-                let rowsToClear = [];
-                let colsToClear = [];
-                
-                for (let i = 0; i < 8; i++) { 
-                    // Check rows
-                    let rowFull = true;
-                    for (let j = 0; j < 8; j++) {
-                        if (this.board[i * 8 + j] === 0) rowFull = false;
-                    }
-                    if (rowFull) rowsToClear.push(i); 
-                    
-                    // Check cols
-                    let colFull = true;
-                    for (let j = 0; j < 8; j++) {
-                        if (this.board[j * 8 + i] === 0) colFull = false;
-                    }
-                    if (colFull) colsToClear.push(i);
+                let rows = [], cols = [];
+                for(let i=0; i<8; i++) { if (this.board.slice(i*8, i*8+8).every(v => v)) rows.push(i); let col = []; for(let j=0; j<8; j++) col.push(this.board[j*8+i]); if (col.every(v => v)) cols.push(i); }
+                if (rows.length || cols.length) {
+                    sfx.blast(); const clears = new Set();
+                    rows.forEach(r => { for(let c=0; c<8; c++) clears.add(r*8+c); }); cols.forEach(c => { for(let r=0; r<8; r++) clears.add(r*8+c); });
+                    this.score += (rows.length + cols.length) * 100; 
+                    clears.forEach(idx => { this.board[idx] = 0; const cell = document.getElementById(`bp-c-${idx}`); cell.className = 'bp-slot'; });
                 }
-                
-                // Clear the identified rows
-                rowsToClear.forEach(r => { 
-                    for (let c = 0; c < 8; c++) { 
-                        this.board[r * 8 + c] = 0; 
-                        document.getElementById(`bp-c-${r * 8 + c}`).className = 'bp-slot'; 
-                    } 
-                });
-                
-                // Clear the identified columns
-                colsToClear.forEach(c => { 
-                    for (let r = 0; r < 8; r++) { 
-                        this.board[r * 8 + c] = 0; 
-                        document.getElementById(`bp-c-${r * 8 + c}`).className = 'bp-slot'; 
-                    } 
-                });
-                
-                if (rowsToClear.length > 0 || colsToClear.length > 0) { 
-                    this.score += (rowsToClear.length + colsToClear.length) * 100; 
-                    document.getElementById('score-bp').innerText = this.score;
-                    sfx.blast();
-                }
-            }
+                document.getElementById('score-bp').innerText = this.score;
+            },
+            checkMoves() { const rem = Array.from(document.getElementById('tray').children).filter(n => !n.dataset.used); let possible = false; rem.forEach(n => { const m = JSON.parse(n.dataset.matrix); for(let r=0; r<8; r++) for(let c=0; c<8; c++) if(this.canPlace(m, r, c)) possible = true; }); if(!possible && rem.length > 0) document.getElementById('over-bp').style.display = 'flex'; }
         };
 
-        /* --- INITIALIZATION & EVENTS --- */
-        window.onload = () => { 
-            owner.init(); 
-        };
-        
-        window.addEventListener('keydown', e => { 
-            if (document.getElementById('view-2048').classList.contains('active-view')) {
-                if (e.key === 'ArrowUp') game2048.move('U');
-                if (e.key === 'ArrowDown') game2048.move('D');
-                if (e.key === 'ArrowLeft') game2048.move('L');
-                if (e.key === 'ArrowRight') game2048.move('R');
-            }
-        });
-        
-        const boardEl = document.getElementById('board-2048'); 
-        let touchStartX, touchStartY;
-        
-        boardEl.addEventListener('touchstart', e => { 
-            touchStartX = e.touches[0].clientX; 
-            touchStartY = e.touches[0].clientY; 
-        }, {passive: false});
-        
-        boardEl.addEventListener('touchend', e => {
-            if (!document.getElementById('view-2048').classList.contains('active-view')) return;
-            
-            let dx = e.changedTouches[0].clientX - touchStartX;
-            let dy = e.changedTouches[0].clientY - touchStartY;
-            
-            if (Math.abs(dx) > 30 || Math.abs(dy) > 30) {
-                if (Math.abs(dx) > Math.abs(dy)) {
-                    game2048.move(dx > 0 ? 'R' : 'L');
-                } else {
-                    game2048.move(dy > 0 ? 'D' : 'U');
-                }
-            }
-        });
+        window.onload = () => sys.init();
     </script>
 </body>
 </html>
