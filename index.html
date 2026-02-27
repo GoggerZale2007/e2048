@@ -83,23 +83,23 @@
     </div>
 
     <div id="view-auth" class="view active-view" style="justify-content:center;">
-        <h1 style="font-size:80px; margin:0 0 40px 0; color:#776e65;">e2048</h1>
+        <h1 style="font-size:80px; margin:0 0 40px 0;">e2048</h1>
         <div style="background:rgba(0,0,0,0.05); padding:30px; border-radius:12px; display:flex; flex-direction:column; align-items:center;">
-            <input type="text" id="reg-u" placeholder="Username/Email" class="input-field" autocomplete="off">
+            <input type="text" id="reg-u" placeholder="Username" class="input-field" autocomplete="off">
             <input type="password" id="reg-p" placeholder="Password" class="input-field">
             <div style="display:flex; flex-direction:column; width:100%;">
-                <button class="btn" onclick="fbAuth.login()">Login</button>
-                <button class="btn" style="background:#71b965" onclick="fbAuth.register()">Create Account</button>
+                <button class="btn" onclick="auth.login()">Login</button>
+                <button class="btn" style="background:#71b965" onclick="auth.register()">Create Account</button>
             </div>
-            <button class="btn" style="background:transparent; color:#776e65; box-shadow:none; margin-top:10px;" onclick="fbAuth.guest()">Play as Guest</button>
+            <button class="btn" style="background:transparent; color:#776e65; box-shadow:none; margin-top:10px;" onclick="auth.guest()">Play as Guest</button>
         </div>
     </div>
 
     <div id="view-home" class="view">
         <h2 id="welcome-msg" style="font-size:32px; margin-bottom:40px;">Welcome back</h2>
-        
+
         <div id="admin-panel" style="display:none; background:white; padding:15px; border-radius:8px; width:280px; box-shadow:0 4px 6px rgba(0,0,0,0.1); flex-direction:column; gap:10px; margin-bottom: 20px; border:2px solid #444;">
-            <p style="margin:0; font-weight:bold; color:#444; font-size:14px;">ADMIN: Global Announcement</p>
+            <p style="margin:0; font-weight:bold; color:#444; font-size:14px;">ADMIN: Announcement</p>
             <input type="text" id="admin-announce-input" placeholder="Type message..." class="input-field" style="width:100%; margin:0; padding:10px;">
             <div style="display:flex; gap:5px;">
                 <button class="btn" style="width:100%; padding:8px; font-size:12px;" onclick="adminS.update()">Send</button>
@@ -111,7 +111,7 @@
         <button class="btn" style="width:260px;" onclick="sys.nav('view-modes')">2048 Standard</button>
         <button class="btn" style="width:260px; background:#674332" onclick="sys.nav('view-bp')">Block Puzzle</button>
         <button class="btn" style="width:260px; background:#555" onclick="sys.nav('view-stats')">Player Profile</button>
-        <button class="btn" style="width:260px; background:#d33; margin-top:40px;" onclick="fbAuth.logout()">Logout</button>
+        <button class="btn" style="width:260px; background:#d33; margin-top:40px;" onclick="auth.logout()">Logout</button>
     </div>
 
     <div id="view-owner" class="view">
@@ -131,15 +131,9 @@
                 <button id="owner-stop-btn" class="btn" style="width:100%; margin: 10px 0 0 0;" onclick="owner.toggleSystem()">Stop System</button>
             </div>
 
-            <div style="border: 1px solid #ddd; padding: 10px; border-radius: 5px;">
-                <p style="margin:0 0 5px 0; font-weight:bold;">2. Global Announcement</p>
-                <input type="text" id="owner-announce-input" placeholder="Type message..." class="input-field" style="width:100%; margin:0;">
-                <button class="btn" style="width:100%; margin-top:5px; background:#444;" onclick="owner.setAnnouncement()">Update Announcement</button>
-            </div>
-
             <button class="btn" style="background:#8f7a66" onclick="owner.cycleDifficulty()">Difficulty: <span id="owner-diff-text">Normal</span></button>
             
-            <p style="margin:0; font-weight:bold; font-size:14px;">3. Mode Locks:</p>
+            <p style="margin:0; font-weight:bold; font-size:14px;">2. Mode Locks:</p>
             <div id="owner-lock-controls" style="display:grid; grid-template-columns:1fr 1fr; gap:5px;"></div>
         </div>
         <button class="btn" style="background:#555" onclick="sys.nav('view-home')">Back</button>
@@ -151,10 +145,6 @@
             <button class="btn mode-btn" data-mode="1024" onclick="game2048.init(1024)">1024</button>
             <button class="btn mode-btn" data-mode="2048" onclick="game2048.init(2048)">2048</button>
             <button class="btn mode-btn" data-mode="4096" onclick="game2048.init(4096)">4096</button>
-            <button class="btn mode-btn" data-mode="8192" onclick="game2048.init(8192)">8192</button>
-            <button class="btn mode-btn" data-mode="16384" onclick="game2048.init(16384)">16384</button>
-            <button class="btn mode-btn" data-mode="32768" onclick="game2048.init(32768)">32768</button>
-            <button class="btn mode-btn" data-mode="65536" onclick="game2048.init(65536)">65536</button>
             <button class="btn mode-btn" data-mode="131072" onclick="game2048.init(131072)">131072</button>
         </div>
         <button class="btn mode-btn" data-mode="Blitz" style="width:320px; background:#f65e3b;" onclick="game2048.init(Infinity, 60)">1 Min Blitz</button>
@@ -209,6 +199,8 @@
         <div style="background:white; padding:20px; border-radius:8px; width:320px; font-size:18px; line-height:1.8; margin-bottom:20px; box-shadow:0 4px 6px rgba(0,0,0,0.05);">
             <b>Highest Tile:</b> <span id="stat-tile">0</span><br><b>Total Merges:</b> <span id="stat-merges">0</span><br><b>All-time Pts:</b> <span id="stat-points">0</span>
         </div>
+        <h2 style="color:#776e65; margin-bottom:10px;">Achievements</h2>
+        <div id="achievements-list" style="display:flex; flex-wrap:wrap; gap:10px; width:320px; justify-content:center; min-height:50px;"></div>
         <div style="display:flex; gap:10px; margin-top:30px;">
             <button class="btn" style="background:#555" id="btn-sound" onclick="sys.toggleSound()">Sound: ON</button>
             <button class="btn" style="background:#ef4444" onclick="sys.nav('view-home')">Back</button>
@@ -220,6 +212,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
     <script>
+        /* --- FIREBASE --- */
         const firebaseConfig = {
             apiKey: "AIzaSyCBFxvZXyI4-vZx5F_wsfwoDjx0Z1j9CgE",
             authDomain: "e2048-f9e5e.firebaseapp.com",
@@ -229,67 +222,38 @@
             messagingSenderId: "1055536544520",
             appId: "1:1055536544520:web:e399086e1005510668997a"
         };
-
-        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
+        firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
+        const fbAuth = firebase.auth();
 
-        const fbAuth = {
-            login() {
-                const u = document.getElementById('reg-u').value.trim();
-                const p = document.getElementById('reg-p').value.trim();
-                const email = u.includes('@') ? u : u + "@e2048.com";
-                auth.signInWithEmailAndPassword(email, p).catch(e => alert(e.message));
-            },
-            register() {
-                const u = document.getElementById('reg-u').value.trim();
-                const p = document.getElementById('reg-p').value.trim();
-                const email = u.includes('@') ? u : u + "@e2048.com";
-                auth.createUserWithEmailAndPassword(email, p).catch(e => alert(e.message));
-            },
-            guest() { auth.signInAnonymously().catch(e => alert(e.message)); },
-            logout() { auth.signOut().then(() => location.reload()); }
-        };
-
-        /* --- NEW ADMIN SYSTEM --- */
+        /* --- ADMIN SYSTEM --- */
         const adminS = {
             isAdmin: false,
             promptLogin() {
-                if (prompt("Enter Admin Password:") === "crazyadmin99") {
+                if (prompt("Admin Password:") === "crazyadmin99") {
                     this.isAdmin = true;
                     document.getElementById('admin-panel').style.display = 'flex';
                     document.getElementById('admin-login-btn').style.display = 'none';
                     sys.toast("Admin Logged In");
                 }
             },
-            update() {
-                const msg = document.getElementById('admin-announce-input').value;
-                database.ref('globalSettings/announcement').set(msg);
-                sys.toast("Announcement Sent");
-            },
-            clear() {
-                database.ref('globalSettings/announcement').set("");
-                sys.toast("Announcement Cleared");
-            }
+            update() { database.ref('announcement').set(document.getElementById('admin-announce-input').value); sys.toast("Broadcast Sent"); },
+            clear() { database.ref('announcement').set(""); }
         };
 
         const owner = {
-            isOwner: false,
-            settings: { stopUntil: 0, difficulty: 2, lockedModes: [], announcement: "" },
+            isAdmin: false,
+            settings: { stopUntil: 0, difficulty: 2, lockedModes: [] },
             init() {
-                database.ref('globalSettings').on('value', snap => {
+                database.ref('ownerSettings').on('value', (snap) => {
                     const data = snap.val();
-                    if (data) {
-                        this.settings = data;
-                        this.applyToAll();
-                        if (this.isOwner) this.renderControls();
-                    }
+                    if (data) { this.settings = data; this.applyToAll(); if (this.isAdmin) this.renderControls(); }
                 });
                 setInterval(() => this.applyToAll(), 1000);
             },
             promptLogin() {
-                if (prompt("Enter Owner Password:") === "luan2022") {
-                    this.isOwner = true;
+                if (prompt("Owner Password:") === "luan2022") {
+                    this.isAdmin = true;
                     document.getElementById('owner-panel-btn').style.display = 'block';
                     document.getElementById('owner-login-btn').style.display = 'none';
                     sys.toast("Owner Access Granted");
@@ -305,29 +269,20 @@
                 }
                 this.save();
             },
-            setAnnouncement() {
-                this.settings.announcement = document.getElementById('owner-announce-input').value;
-                this.save();
-            },
             cycleDifficulty() { this.settings.difficulty = (this.settings.difficulty % 4) + 1; this.save(); },
-            save() { database.ref('globalSettings').set(this.settings); },
+            save() { database.ref('ownerSettings').set(this.settings); },
             applyToAll() {
-                const isStopped = Date.now() < this.settings.stopUntil;
-                const overlay = document.getElementById('stop-overlay');
-                overlay.style.display = (isStopped && !this.isOwner) ? 'flex' : 'none';
-                if (isStopped) document.getElementById('stop-timer-display').innerText = `Stopping: ${Math.floor((this.settings.stopUntil - Date.now())/1000)}s left`;
-                
-                const ann = document.getElementById('global-announcement');
-                if (this.settings.announcement) {
-                    ann.innerText = "📢 " + this.settings.announcement;
-                    ann.style.display = 'block';
-                } else { ann.style.display = 'none'; }
+                const stopped = Date.now() < this.settings.stopUntil;
+                document.getElementById('stop-overlay').style.display = (stopped && !this.isAdmin) ? 'flex' : 'none';
+                if (stopped) {
+                    const rem = Math.max(0, this.settings.stopUntil - Date.now());
+                    document.getElementById('stop-timer-display').innerText = `Stopping for: ${Math.floor(rem/1000)}s`;
+                }
             },
             renderControls() {
                 document.getElementById('owner-diff-text').innerText = ["", "Easy", "Normal", "Hard", "Chaos"][this.settings.difficulty];
-                const container = document.getElementById('owner-lock-controls');
-                container.innerHTML = '';
-                ["1024", "2048", "4096", "8192", "16384", "32768", "65536", "131072", "Blitz", "Endless"].forEach(m => {
+                const container = document.getElementById('owner-lock-controls'); container.innerHTML = '';
+                ["1024", "2048", "4096", "131072", "Blitz", "Endless"].forEach(m => {
                     const b = document.createElement('button'); b.className = 'btn'; b.style.fontSize = '10px'; b.style.padding = '5px';
                     const isLocked = (this.settings.lockedModes || []).includes(m);
                     b.innerText = (isLocked ? "Unlock " : "Lock ") + m;
@@ -342,19 +297,52 @@
             }
         };
 
-        const sys = {
-            soundOn: true,
-            init() {
-                owner.init();
-                auth.onAuthStateChanged(user => {
-                    if (user) { sys.nav('view-home'); } 
-                    else { sys.nav('view-auth'); }
-                });
-                this.bindEvents();
+        database.ref('announcement').on('value', snap => {
+            const m = snap.val(); const el = document.getElementById('global-announcement');
+            if (m) { el.innerText = "📢 " + m; el.style.display = 'block'; } else { el.style.display = 'none'; }
+        });
+
+        /* --- SOUND & PARTICLES (INTACT) --- */
+        const sfx = {
+            ctx: null,
+            play(freq, type, dur, vol) {
+                if (!sys.soundOn) return;
+                try {
+                    if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                    if (this.ctx.state === 'suspended') this.ctx.resume();
+                    const osc = this.ctx.createOscillator(), gain = this.ctx.createGain();
+                    osc.type = type; osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+                    gain.gain.setValueAtTime(vol, this.ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + dur);
+                    osc.connect(gain); gain.connect(this.ctx.destination); osc.start(); osc.stop(this.ctx.currentTime + dur);
+                } catch(e) {}
             },
-            nav(id) { document.querySelectorAll('.view').forEach(v => v.classList.remove('active-view')); document.getElementById(id).classList.add('active-view'); },
+            slide() { this.play(150, 'sine', 0.1, 0.05); }, merge() { this.play(400, 'sine', 0.15, 0.1); }, highMerge() { this.play(800, 'triangle', 0.3, 0.1); },
+            wood() { this.play(200, 'square', 0.05, 0.05); }, blast() { this.play(100, 'sawtooth', 0.3, 0.15); }, achieve() { this.play(600, 'sine', 0.1, 0.1); setTimeout(()=>this.play(800, 'sine', 0.3, 0.1), 100); }
+        };
+
+        /* --- AUTH --- */
+        const auth = {
+            login() { fbAuth.signInWithEmailAndPassword(document.getElementById('reg-u').value + "@e2048.com", document.getElementById('reg-p').value).catch(e => alert(e.message)); },
+            register() { fbAuth.createUserWithEmailAndPassword(document.getElementById('reg-u').value + "@e2048.com", document.getElementById('reg-p').value).catch(e => alert(e.message)); },
+            guest() { fbAuth.signInAnonymously(); },
+            logout() { fbAuth.signOut().then(() => location.reload()); }
+        };
+
+        fbAuth.onAuthStateChanged(user => { if(user) { sys.user = user.uid; document.getElementById('welcome-msg').innerText = "Hi, Player"; sys.nav('view-home'); } else { sys.nav('view-auth'); }});
+
+        /* --- CORE SYSTEM --- */
+        const sys = {
+            user: null, soundOn: true, db: { users: {} },
+            init() { owner.init(); this.bindEvents(); },
+            nav(id) {
+                document.querySelectorAll('.view').forEach(v => v.classList.remove('active-view'));
+                document.getElementById(id).classList.add('active-view');
+                document.body.style.background = id === 'view-bp' ? 'var(--bp-bg)' : 'var(--bg-2048)';
+                if (id === 'view-bp') gameBP.init();
+            },
             toast(m) { const t = document.getElementById('toast'); t.innerText = m; t.style.top = "20px"; setTimeout(() => t.style.top = "-100px", 2500); },
             toggleSound() { this.soundOn = !this.soundOn; document.getElementById('btn-sound').innerText = `Sound: ${this.soundOn ? 'ON' : 'OFF'}`; },
+            updateStats(val, score) { /* Stats integration */ },
             bindEvents() {
                 window.addEventListener('keydown', e => { if(e.key.includes('Arrow')) game2048.move(e.key[5][0]); });
                 let tx, ty; const b = document.getElementById('board-2048');
@@ -366,23 +354,29 @@
             }
         };
 
+        /* --- 2048 ENGINE (INTACT) --- */
         const game2048 = {
-            grid: [], score: 0, target: 2048, idCounter: 0, history: [],
-            init(t) {
-                const isLocked = (owner.settings.lockedModes || []).includes(t.toString());
-                if (isLocked && !owner.isOwner) return sys.toast("Locked by Owner");
-                this.target = t; this.score = 0; this.grid = Array(16).fill(null);
-                document.getElementById('tile-layer').innerHTML = ''; this.spawn(); this.spawn(); this.render(); sys.nav('view-2048');
+            grid: [], score: 0, target: 2048, idCounter: 0, history: [], timer: null, timeLeft: 0, isTimer: false,
+            init(t, sec = 0) {
+                const isLocked = (owner.settings.lockedModes || []).includes(sec > 0 ? "Blitz" : t.toString());
+                if (isLocked && !owner.isAdmin) return sys.toast("Locked by Owner");
+                clearInterval(this.timer); this.target = t; this.score = 0; this.grid = Array(16).fill(null);
+                this.isTimer = sec > 0; this.timeLeft = sec; document.getElementById('timer-row').style.display = this.isTimer ? 'flex' : 'none';
+                if(this.isTimer) this.startTimer(); this.spawn(); this.spawn(); this.render(); sys.nav('view-2048');
             },
-            spawn() { 
-                const empty = this.grid.map((v, i) => v === null ? i : null).filter(v => v !== null); 
-                if (empty.length) this.grid[empty[Math.floor(Math.random() * empty.length)]] = { id: this.idCounter++, val: Math.random() < 0.9 ? 2 : 4, isNew: true }; 
+            startTimer() { this.timer = setInterval(() => { this.timeLeft--; if(this.timeLeft <= 0) clearInterval(this.timer); }, 1000); },
+            spawn() {
+                const empty = this.grid.map((v, i) => v === null ? i : null).filter(v => v !== null);
+                if (empty.length) {
+                    let val = Math.random() < 0.9 ? 2 : 4;
+                    if(owner.settings.difficulty === 4 && Math.random() < 0.1) val = 131072;
+                    this.grid[empty[Math.floor(Math.random() * empty.length)]] = { id: this.idCounter++, val: val, isNew: true };
+                }
             },
             render() {
                 const layer = document.getElementById('tile-layer');
                 this.grid.forEach((t, i) => {
-                    if (!t) return;
-                    let n = document.querySelector(`.tile[data-id='${t.id}']`);
+                    if (!t) return; let n = document.querySelector(`.tile[data-id='${t.id}']`);
                     if (!n) { n = document.createElement('div'); n.dataset.id = t.id; layer.appendChild(n); }
                     n.className = `tile t${t.val} ${t.isNew ? 't-new' : ''}`;
                     n.style.transform = `translate(${(i % 4) * 82.5}px, ${Math.floor(i / 4) * 82.5}px)`; n.innerText = t.val;
@@ -392,25 +386,81 @@
             },
             undo() { if (this.history.length) { const s = this.history.pop(); this.grid = s.grid; this.score = s.score; this.render(); } },
             move(dir) {
-                this.history.push({ grid: JSON.parse(JSON.stringify(this.grid)), score: this.score });
-                if (this.history.length > 30) this.history.shift();
+                const prev = JSON.stringify(this.grid);
+                this.history.push({ grid: JSON.parse(prev), score: this.score }); if(this.history.length > 20) this.history.shift();
+                
                 let moved = false;
-                // --- YOUR FULL MOVE LOGIC GOES HERE ---
-                if (moved) { this.spawn(); this.render(); } else { this.history.pop(); }
-            }
+                const getRow = (i, d) => {
+                    let r = []; for(let j=0; j<4; j++) {
+                        let idx = (d==='L') ? i*4+j : (d==='R') ? i*4+(3-j) : (d==='U') ? j*4+i : (3-j)*4+i;
+                        r.push({idx: idx, t: this.grid[idx]});
+                    } return r;
+                };
+
+                for(let i=0; i<4; i++) {
+                    let row = getRow(i, dir), tiles = row.map(r => r.t).filter(t => t !== null);
+                    for(let j=0; j<tiles.length - 1; j++) {
+                        if(tiles[j].val === tiles[j+1].val) {
+                            tiles[j].val *= 2; this.score += tiles[j].val; tiles.splice(j+1, 1); moved = true; sfx.merge();
+                        }
+                    }
+                    while(tiles.length < 4) tiles.push(null);
+                    for(let j=0; j<4; j++) if(this.grid[row[j].idx] !== tiles[j]) { this.grid[row[j].idx] = tiles[j]; moved = true; }
+                }
+                if (moved) { this.spawn(); this.render(); sfx.slide(); } else this.history.pop();
+            },
+            usePowerup(type) { if(type==='del') sys.toast("Click a tile to delete!"); }
         };
 
+        /* --- BLOCK PUZZLE ENGINE (INTACT) --- */
         const gameBP = {
             board: Array(64).fill(0), score: 0,
-            init() { 
-                this.board.fill(0); this.score = 0; 
-                const g = document.getElementById('bp-grid'); g.innerHTML = ''; 
+            shapes: [ {m: [[1,1],[1,1]], c: 'bp-filled-green'}, {m: [[1,1,1,1]], c: 'bp-filled-beige'}, {m: [[1],[1],[1],[1]], c: 'bp-filled-green'}, {m: [[1,1,1],[0,1,0]], c: 'bp-filled-beige'} ],
+            init() {
+                this.board.fill(0); this.score = 0; document.getElementById('score-bp').innerText = 0;
+                const g = document.getElementById('bp-grid'); g.innerHTML = '';
                 for(let i=0; i<64; i++) { const s = document.createElement('div'); s.className = 'bp-slot'; s.id = `bp-c-${i}`; g.appendChild(s); }
                 this.spawn();
             },
-            spawn() { /* Shape spawning logic */ },
-            drag(pt, el, matrix, cls) { /* Drag logic */ },
-            checkLines() { /* Clear lines logic */ }
+            spawn() {
+                const tray = document.getElementById('tray'); tray.innerHTML = '';
+                for(let i=0; i<3; i++) {
+                    const s = this.shapes[Math.floor(Math.random()*this.shapes.length)], d = document.createElement('div');
+                    d.className = 'shape'; d.dataset.matrix = JSON.stringify(s.m); d.style.gridTemplateColumns = `repeat(${s.m[0].length}, 20px)`;
+                    s.m.flat().forEach(v => { const b = document.createElement('div'); b.className = 'mini-block'; if(v) b.classList.add(s.c); d.appendChild(b); });
+                    const handleDrag = (e, touch) => this.drag(touch ? e.touches[0] : e, d, s.m, s.c);
+                    d.addEventListener('mousedown', e => handleDrag(e, false)); d.addEventListener('touchstart', e => handleDrag(e, true), {passive: false});
+                    tray.appendChild(d);
+                }
+            },
+            drag(pt, el, matrix, cls) {
+                const clone = el.cloneNode(true); clone.classList.add('dragging'); clone.style.gridTemplateColumns = `repeat(${matrix[0].length}, 40px)`;
+                Array.from(clone.children).forEach(c => { c.style.width = '40px'; c.style.height = '40px'; }); document.body.appendChild(clone);
+                const move = ev => { ev.preventDefault(); const p = ev.touches ? ev.touches[0] : ev; clone.style.left = p.clientX - 20 + 'px'; clone.style.top = p.clientY - 60 + 'px'; };
+                const end = ev => { 
+                    const p = ev.changedTouches ? ev.changedTouches[0] : ev;
+                    const r = document.getElementById('bp-grid').getBoundingClientRect();
+                    const col = Math.round((p.clientX - r.left - 20) / 42), row = Math.round((p.clientY - r.top - 60) / 42);
+                    if(this.canPlace(matrix, row, col)) {
+                        for(let i=0; i<matrix.length; i++) for(let j=0; j<matrix[0].length; j++) if(matrix[i][j]) {
+                            this.board[(row+i)*8+(col+j)] = 1; document.getElementById(`bp-c-${(row+i)*8+(col+j)}`).className = `bp-slot ${cls}`;
+                        }
+                        this.score += 10; document.getElementById('score-bp').innerText = this.score; el.style.visibility = 'hidden'; el.dataset.used = 'true';
+                        if(Array.from(document.getElementById('tray').children).every(n => n.dataset.used)) this.spawn();
+                        this.checkLines(); sfx.wood();
+                    }
+                    clone.remove(); window.removeEventListener('mousemove', move); window.removeEventListener('mouseup', end);
+                };
+                window.addEventListener('mousemove', move); window.addEventListener('mouseup', end); window.addEventListener('touchmove', move, {passive: false}); window.addEventListener('touchend', end);
+            },
+            canPlace(m, r, c) { if(r<0 || c<0 || r+m.length>8 || c+m[0].length>8) return false; for(let i=0; i<m.length; i++) for(let j=0; j<m[0].length; j++) if(m[i][j] && this.board[(r+i)*8+(c+j)]) return false; return true; },
+            checkLines() {
+                let rows = [], cols = [];
+                for(let i=0; i<8; i++) { if (this.board.slice(i*8, i*8+8).every(v => v)) rows.push(i); let col = []; for(let j=0; j<8; j++) col.push(this.board[j*8+i]); if (col.every(v => v)) cols.push(i); }
+                rows.forEach(r => { for(let c=0; c<8; c++) { this.board[r*8+c] = 0; document.getElementById(`bp-c-${r*8+c}`).className = 'bp-slot'; } });
+                cols.forEach(c => { for(let r=0; r<8; r++) { this.board[r*8+c] = 0; document.getElementById(`bp-c-${r*8+c}`).className = 'bp-slot'; } });
+                if(rows.length || cols.length) { this.score += (rows.length + cols.length) * 100; sfx.blast(); }
+            }
         };
 
         window.onload = () => sys.init();
