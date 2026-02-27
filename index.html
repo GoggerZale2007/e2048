@@ -12,8 +12,33 @@
             --bp-green: #71b965; --bp-beige: #dac6a3;
         }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; user-select: none; }
-        body { margin: 0; padding: 0; height: 100vh; width: 100vw; overflow: hidden; font-family: "Clear Sans", Arial, sans-serif; background: var(--bg-2048); color: var(--text-2048); transition: background 0.3s; }
+        body { margin: 0; padding: 0; height: 100vh; width: 100vw; overflow: hidden; font-family: "Clear Sans", Arial, sans-serif; background: var(--bg-2048); color: var(--text-2048); transition: background 0.3s; position: relative;}
         
+        /* --- SCREEN STATIC EFFECT --- */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAMAAAAAF4NtAAAAM1BMVEW0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLSk+34mAAAABnRSTlMA8PDw8PCf665uAAAALklEQVQ4y2NgGAX4ACMaDphw0f//Dww4ORiREv7/f4AmAnHhf6R8FCAK4IsYAAA12g4O3R+3XwAAAABJRU5ErkJggg==');
+            opacity: 0.04; /* Very subtle static */
+            z-index: 1000; /* Over everything */
+            pointer-events: none;
+            animation: static-flicker 0.2s infinite;
+        }
+
+        @keyframes static-flicker {
+            0% { transform: translate(0, 0); }
+            10% { transform: translate(-1px, -1px); }
+            20% { transform: translate(1px, 1px); }
+            30% { transform: translate(-1px, 1px); }
+            40% { transform: translate(1px, -1px); }
+            50% { transform: translate(-1px, 0); opacity: 0.06; }
+            60% { transform: translate(1px, 0); }
+            70% { transform: translate(0, -1px); }
+            80% { transform: translate(0, 1px); }
+            90% { transform: translate(-1px, -1px); opacity: 0.04; }
+        }
+
         .view { display: none; position: absolute; top:0; left:0; width:100%; height:100%; flex-direction:column; align-items:center; background:inherit; z-index:10; overflow-y:auto; padding:20px 0; }
         .active-view { display: flex; animation: fadeIn 0.3s ease-out; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
@@ -57,49 +82,69 @@
         .dragging { position:fixed; z-index:1000; pointer-events:none; }
         
         .overlay { position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(250,248,239,0.95); z-index:100; display:none; flex-direction:column; align-items:center; justify-content:center; text-align: center; padding: 20px; }
-        .tutorial-box { background:#5a524b; color:white; padding:15px; border-radius:8px; width:340px; margin-top:15px; font-size:14px; position:relative; }
+        tutorial-box { background:#5a524b; color:white; padding:15px; border-radius:8px; width:340px; margin-top:15px; font-size:14px; position:relative; }
         .particle { position:fixed; width:8px; height:8px; pointer-events:none; z-index:2000; border-radius:50%; }
         #toast { position:fixed; top:-100px; left:50%; transform:translateX(-50%); background:#333; color:white; padding:12px 24px; border-radius:30px; transition:0.4s; z-index:9999; font-weight:bold; }
         .achievement-badge { background:#edc22e; color:white; padding:6px 12px; border-radius:20px; font-weight:bold; font-size:12px; box-shadow:0 2px 5px rgba(0,0,0,0.2); }
 
         #global-announcement { position: fixed; top: 0; left: 0; width: 100%; background: #ffcc00; color: #333; padding: 8px; font-weight: bold; text-align: center; z-index: 5000; display: none; font-size: 14px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
 
-        /* --- ENHANCED GLITCH TITLE (Hover Only + Cleaner) --- */
+        /* --- FIXED CLEAN AUTO-GLITCH TITLE --- */
         .glitch-title { 
             display: flex; 
             justify-content: center; 
             gap: 2px; 
             font-weight: bold; 
-            cursor: pointer;
+            margin-bottom: 20px;
         }
 
-        /* Normal state: standard theme color */
+        /* Standard corrupted colored state by default */
         .glitch-title span { 
             display: inline-block; 
-            color: var(--text-2048); /* Use theme color by default */
-            transition: color 0.1s ease;
+            animation: glitch-flicker-clean 3s infinite; /* Automatic flicker every 3s */
+            text-shadow: 1px 0 #00f2ff, -1px 0 #ff003c; /* Tight default offset */
         }
 
-        /* Glitch trigger: ONLY on hover */
-        .glitch-title:hover span {
-            animation: glitch-flicker 0.2s infinite;
-        }
+        /* Randomize animation start so they don't sync */
+        .glitch-title span:nth-child(1) { animation-delay: 0.2s; }
+        .glitch-title span:nth-child(2) { animation-delay: 1.1s; }
+        .glitch-title span:nth-child(3) { animation-delay: 1.9s; }
+        .glitch-title span:nth-child(4) { animation-delay: 2.5s; }
+        .glitch-title span:nth-child(5) { animation-delay: 0.7s; }
 
-        /* Add random delays to span animation on hover so letters break independently */
-        .glitch-title:hover span:nth-child(1) { animation-delay: 0.05s; }
-        .glitch-title:hover span:nth-child(2) { animation-delay: 0.15s; }
-        .glitch-title:hover span:nth-child(3) { animation-delay: 0.10s; }
-        .glitch-title:hover span:nth-child(4) { animation-duration: 0.18s; } /* Vary speed too */
-        .glitch-title:hover span:nth-child(5) { animation-delay: 0.20s; }
-
-        /* New "Flicker" Animation: tighter offsets, random opacity drops for corruption look */
-        @keyframes glitch-flicker {
-            0%, 100% { transform: translate(0, 0); color: white; text-shadow: 1.5px 0 #00f2ff, -1.5px 0 #ff003c; opacity: 1; }
-            20% { transform: translate(-1.5px, 1.5px); color: black; opacity: 0.8; }
-            40% { transform: translate(1.5px, -1.5px); color: white; text-shadow: -1.5px 0 #00f2ff, 1.5px 0 #ff003c; opacity: 1; }
-            50% { opacity: 0.5; transform: skewX(10deg); } /* The hard flicker/dropout */
-            60% { transform: translate(-1.5px, -1.5px); color: black; text-shadow: none; opacity: 1;}
-            80% { transform: translate(1.5px, 1.5px); color: white; opacity: 0.9; }
+        @keyframes glitch-flicker-clean {
+            /* 0-90%: Normal corrupted colored state */
+            0%, 90%, 100% { 
+                transform: translate(0, 0) skewX(0deg); 
+                color: var(--text-2048); 
+                text-shadow: 1px 0 #00f2ff, -1px 0 #ff003c; 
+                opacity: 1; 
+            }
+            /* 90-95%: The intense corrupted "flicker" */
+            91% { 
+                transform: translate(1px, 1px) skewX(5deg); 
+                color: white; 
+                text-shadow: -1px 0 #00f2ff, 1px 0 #ff003c; 
+                opacity: 0.8; 
+            }
+            92% { 
+                transform: translate(-1px, -1px) skewX(-5deg); 
+                color: black; 
+                text-shadow: 1px 0 #00f2ff, -1px 0 #ff003c; 
+                opacity: 0.5; /* Hard dropout */
+            }
+            93% { 
+                transform: translate(1px, -1px) skewX(10deg); 
+                color: white; 
+                text-shadow: none; 
+                opacity: 1; 
+            }
+            94% { 
+                transform: translate(-1px, 1px) skewX(0deg); 
+                color: black; 
+                text-shadow: -1px 0 #00f2ff, 1px 0 #ff003c; 
+                opacity: 0.9; 
+            }
         }
     </style>
 </head>
@@ -467,13 +512,11 @@
             db: { users: {} }, user: null, soundOn: true,
             init() {
                 owner.init();
-                // FIXED: Auth initialization flow
                 fbAuth.onAuthStateChanged(user => {
                     if (user) {
                         this.user = user.uid;
                         const name = user.isAnonymous ? "Guest" : (user.email.split('@')[0]);
                         document.getElementById('welcome-msg').innerText = "Hi, " + name;
-                        // nav before potentially loading data
                         this.nav('view-home');
                     } else {
                         this.nav('view-auth');
@@ -491,7 +534,6 @@
             toast(m) { const t = document.getElementById('toast'); t.innerText = m; t.style.top = "20px"; setTimeout(() => t.style.top = "-100px", 2500); },
             toggleSound() { this.soundOn = !this.soundOn; document.getElementById('btn-sound').innerText = `Sound: ${this.soundOn ? 'ON' : 'OFF'}`; if(this.soundOn) sfx.merge(); },
             renderStats() {
-                // FIXED: Reset stats view before loading new data
                 document.getElementById('stat-tile').innerText = 0; document.getElementById('stat-merges').innerText = 0; document.getElementById('stat-points').innerText = 0;
             },
             updateStats(val, score) { /* Stats logic placeholder */ },
@@ -514,7 +556,6 @@
                 owner.applyToAll();
                 const modeName = sec > 0 ? "Blitz" : (t === Infinity ? "Endless" : t.toString());
                 
-                // Mode lock check now actually stops the user
                 if ((owner.settings.lockedModes || []).includes(modeName) && !owner.isAdmin) {
                     return sys.toast("Mode Locked by Owner!");
                 }
@@ -548,7 +589,6 @@
                 Array.from(layer.children).forEach(n => { if (!currentIds.has(parseInt(n.dataset.id))) { n.style.zIndex = 5; setTimeout(() => n.remove(), 100); } });
                 this.grid.forEach((t, i) => {
                     if (!t) return; let n = document.querySelector(`.tile[data-id='${t.id}']`);
-                    // FIXED: Properly handle tile deletion click logic
                     if (!n) { n = document.createElement('div'); n.dataset.id = t.id; n.onclick = () => this.handleTileClick(this.grid.findIndex(tg => tg && tg.id === t.id)); layer.appendChild(n); }
                     n.className = `tile t${t.val} ${t.isNew ? 't-new' : ''} ${t.isMerged ? 't-merged' : ''}`;
                     n.style.transform = `translate(${(i % 4) * 82.5}px, ${Math.floor(i / 4) * 82.5}px)`; n.innerText = t.val;
@@ -579,7 +619,6 @@
             checkOver() { if (this.grid.includes(null)) return false; for(let i=0; i<4; i++) for(let j=0; j<4; j++) { let v = this.grid[i*4+j].val; if (j<3 && this.grid[i*4+j+1].val===v) return false; if (i<3 && this.grid[(i+1)*4+j].val===v) return false; } return true; },
             gameOver(m = "Game Over!") { document.getElementById('over-msg').innerText = m; document.getElementById('over-2048').style.display = 'flex'; clearInterval(this.timer); },
             usePowerup(type) { this.powerup = this.powerup === type ? null : type; document.getElementById('btn-del').style.background = this.powerup ? '#a49688' : '#bbada0'; },
-            // FIXED: Ensure tile click logic correctly identifies the tile index
             handleTileClick(idx) { if (this.powerup === 'del' && idx !== -1 && this.grid[idx]) { this.saveState(); this.grid[idx] = null; this.usePowerup('del'); this.render(); sfx.blast(); } }
         };
 
@@ -618,7 +657,8 @@
                 if (rows.length || cols.length) {
                     sfx.blast(); const clears = new Set();
                     rows.forEach(r => { for(let c=0; c<8; c++) clears.add(r*8+c); }); cols.forEach(c => { for(let r=0; r<8; r++) clears.add(r*8+c); });
-                    this.score += (rows.length + cols.length) * 100; clears.forEach(idx => { this.board[idx] = 0; const cell = document.getElementById(`bp-c-${idx}`); if(cell) cell.className = 'bp-slot'; });
+                    this.score += (rows.length + cols.length) * 100; 
+                    clears.forEach(idx => { this.board[idx] = 0; const cell = document.getElementById(`bp-c-${idx}`); cell.className = 'bp-slot'; });
                 }
                 document.getElementById('score-bp').innerText = this.score;
             },
