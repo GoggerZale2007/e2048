@@ -20,8 +20,8 @@
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
             background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAMAAAAAF4NtAAAAM1BMVEW0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLSk+34mAAAABnRSTlMA8PDw8PCf665uAAAALklEQVQ4y2NgGAX4ACMaDphw0f//Dww4ORiREv7/f4AmAnHhf6R8FCAK4IsYAAA12g4O3R+3XwAAAABJRU5ErkJggg==');
-            opacity: 0.04; /* Very subtle static */
-            z-index: 1000; /* Over everything */
+            opacity: 0.04; 
+            z-index: 1000; 
             pointer-events: none;
             animation: static-flicker 0.2s infinite;
         }
@@ -89,7 +89,7 @@
 
         #global-announcement { position: fixed; top: 0; left: 0; width: 100%; background: #ffcc00; color: #333; padding: 8px; font-weight: bold; text-align: center; z-index: 5000; display: none; font-size: 14px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
 
-        /* --- FIXED CLEAN AUTO-GLITCH TITLE --- */
+        /* --- CONSTANT GLITCH SHAKE TITLE --- */
         .glitch-title { 
             display: flex; 
             justify-content: center; 
@@ -98,53 +98,25 @@
             margin-bottom: 20px;
         }
 
-        /* Standard corrupted colored state by default */
         .glitch-title span { 
             display: inline-block; 
-            animation: glitch-flicker-clean 3s infinite; /* Automatic flicker every 3s */
-            text-shadow: 1px 0 #00f2ff, -1px 0 #ff003c; /* Tight default offset */
+            animation: constant-shake 0.3s infinite; 
         }
 
-        /* Randomize animation start so they don't sync */
-        .glitch-title span:nth-child(1) { animation-delay: 0.2s; }
-        .glitch-title span:nth-child(2) { animation-delay: 1.1s; }
-        .glitch-title span:nth-child(3) { animation-delay: 1.9s; }
-        .glitch-title span:nth-child(4) { animation-delay: 2.5s; }
-        .glitch-title span:nth-child(5) { animation-delay: 0.7s; }
+        /* Vary speeds so they tear apart individually */
+        .glitch-title span:nth-child(1) { animation-duration: 0.18s; }
+        .glitch-title span:nth-child(2) { animation-duration: 0.25s; }
+        .glitch-title span:nth-child(3) { animation-duration: 0.20s; }
+        .glitch-title span:nth-child(4) { animation-duration: 0.30s; }
+        .glitch-title span:nth-child(5) { animation-duration: 0.15s; }
 
-        @keyframes glitch-flicker-clean {
-            /* 0-90%: Normal corrupted colored state */
-            0%, 90%, 100% { 
-                transform: translate(0, 0) skewX(0deg); 
-                color: var(--text-2048); 
-                text-shadow: 1px 0 #00f2ff, -1px 0 #ff003c; 
-                opacity: 1; 
-            }
-            /* 90-95%: The intense corrupted "flicker" */
-            91% { 
-                transform: translate(1px, 1px) skewX(5deg); 
-                color: white; 
-                text-shadow: -1px 0 #00f2ff, 1px 0 #ff003c; 
-                opacity: 0.8; 
-            }
-            92% { 
-                transform: translate(-1px, -1px) skewX(-5deg); 
-                color: black; 
-                text-shadow: 1px 0 #00f2ff, -1px 0 #ff003c; 
-                opacity: 0.5; /* Hard dropout */
-            }
-            93% { 
-                transform: translate(1px, -1px) skewX(10deg); 
-                color: white; 
-                text-shadow: none; 
-                opacity: 1; 
-            }
-            94% { 
-                transform: translate(-1px, 1px) skewX(0deg); 
-                color: black; 
-                text-shadow: -1px 0 #00f2ff, 1px 0 #ff003c; 
-                opacity: 0.9; 
-            }
+        @keyframes constant-shake {
+            0% { transform: translate(1px, 1px) skewX(-5deg); text-shadow: 1.5px 0 #00f2ff, -1.5px 0 #ff003c; color: white; }
+            20% { transform: translate(-1px, -1px) skewX(5deg); text-shadow: -1.5px 0 #00f2ff, 1.5px 0 #ff003c; color: #333; }
+            40% { transform: translate(1px, -1px) skewX(0deg); text-shadow: none; color: white; }
+            60% { transform: translate(-1px, 1px) skewX(5deg); text-shadow: 1.5px 1.5px #00f2ff, -1.5px -1.5px #ff003c; color: #444; }
+            80% { transform: translate(1px, -1px) skewX(-5deg); text-shadow: -1.5px -1.5px #00f2ff, 1.5px 1.5px #ff003c; color: white; }
+            100% { transform: translate(-1px, 1px) skewX(0deg); text-shadow: 1.5px 0 #00f2ff, -1.5px 0 #ff003c; color: #333; }
         }
     </style>
 </head>
@@ -307,7 +279,6 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
     <script>
-        /* 1. Firebase Configuration */
         const firebaseConfig = {
             apiKey: "AIzaSyCBFxvZXyI4-vZx5F_wsfwoDjx0Z1j9CgE",
             authDomain: "e2048-f9e5e.firebaseapp.com",
@@ -325,7 +296,6 @@
         const fbAuth = firebase.auth();
         const database = firebase.database();
 
-        /* --- ADMIN SYSTEM LOGIC --- */
         const adminS = {
             prompt() { 
                 if (prompt("Admin Password:") === "crazyadmin99") { 
@@ -345,7 +315,6 @@
             }
         };
 
-        // Listen for announcements globally
         database.ref('globalSettings/announcement').on('value', snap => {
             const m = snap.val(); 
             const el = document.getElementById('global-announcement');
@@ -357,7 +326,6 @@
             }
         });
 
-        /* --- OWNER LOGIC --- */
         const owner = {
             isAdmin: false,
             settings: { stopUntil: 0, difficulty: 2, lockedModes: [], announcement: "" },
@@ -395,6 +363,12 @@
                     this.settings.stopUntil = Date.now() + (qty * unit);
                 }
                 this.save();
+            },
+
+            setAnnouncement() {
+                this.settings.announcement = document.getElementById('owner-announce-input').value;
+                database.ref('globalSettings/announcement').set(this.settings.announcement); 
+                sys.toast("Announcement Updated");
             },
 
             cycleDifficulty() {
@@ -469,7 +443,6 @@
             }
         };
 
-        /* --- AUTHENTICATION --- */
         const auth = {
             login() {
                 const u = document.getElementById('reg-u').value.trim();
@@ -536,7 +509,7 @@
             renderStats() {
                 document.getElementById('stat-tile').innerText = 0; document.getElementById('stat-merges').innerText = 0; document.getElementById('stat-points').innerText = 0;
             },
-            updateStats(val, score) { /* Stats logic placeholder */ },
+            updateStats(val, score) { /* Stats logic */ },
             bindEvents() {
                 document.body.addEventListener('touchmove', e => { if(!e.target.closest('.view')) e.preventDefault(); }, { passive: false });
                 window.addEventListener('keydown', e => { if(document.getElementById('view-2048').classList.contains('active-view') && e.key.includes('Arrow')) game2048.move(e.key[5][0]); });
@@ -657,8 +630,7 @@
                 if (rows.length || cols.length) {
                     sfx.blast(); const clears = new Set();
                     rows.forEach(r => { for(let c=0; c<8; c++) clears.add(r*8+c); }); cols.forEach(c => { for(let r=0; r<8; r++) clears.add(r*8+c); });
-                    this.score += (rows.length + cols.length) * 100; 
-                    clears.forEach(idx => { this.board[idx] = 0; const cell = document.getElementById(`bp-c-${idx}`); cell.className = 'bp-slot'; });
+                    this.score += (rows.length + cols.length) * 100; clears.forEach(idx => { this.board[idx] = 0; const cell = document.getElementById(`bp-c-${idx}`); if(cell) cell.className = 'bp-slot'; });
                 }
                 document.getElementById('score-bp').innerText = this.score;
             },
