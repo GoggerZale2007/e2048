@@ -18,7 +18,7 @@
         .active-view { display: flex; animation: fadeIn 0.3s ease-out; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         
-        .btn { background:#8f7a66; color:#f9f6f2; border:none; padding:12px 24px; border-radius:3px; font-weight:bold; font-size:16px; cursor:pointer; text-transform:uppercase; margin:5px; box-shadow:0 4px 0 rgba(0,0,0,0.1); }
+        .btn { background:#8f7a66; color:#f9f6f2; border:none; padding:12px 24px; border-radius:3px; font-weight:bold; font-size:16px; cursor:pointer; text-transform:uppercase; margin:5px; box-shadow:0 4px 0 rgba(0,0,0,0.1); width: 280px; }
         .btn:active { transform:translateY(2px); box-shadow:none; }
         .btn:disabled { background: #ccc !important; color: #999 !important; cursor: not-allowed; box-shadow: none; pointer-events: none; }
         
@@ -38,11 +38,11 @@
         .tile { position:absolute; width:72.5px; height:72.5px; border-radius:3px; display:flex; justify-content:center; align-items:center; font-weight:bold; font-size:32px; transition:transform 100ms ease-in-out; z-index:10; pointer-events:auto; }
         .t-new { animation: appear 150ms ease-out forwards; }
         .t-merged { z-index:20; animation: pop 180ms ease-in-out forwards; }
-        @keyframes appear { 0% { opacity:0; scale:0; } 100% { opacity:1; scale:1; } }
-        @keyframes pop { 0% { scale:1; } 50% { scale:1.15; } 100% { scale:1; } }
+        @keyframes appear { 0% { opacity:0; transform:scale(0); } 100% { opacity:1; transform:scale(1); } }
+        @keyframes pop { 0% { transform:scale(1); } 50% { transform:scale(1.15); } 100% { transform:scale(1); } }
         
-        .t2{background:#eee4da;color:#776e65} .t4{background:#ede0c8;color:#776e65} .t8{background:#f2b179;color:#f9f6f2} .t16{background:#f59563;color:#f9f6f2} .t32{background:#f67c5f;color:#f9f6f2} .t64{background:#f65e3b;color:#f9f6f2} .t128{background:#edcf72;color:#f9f6f2;font-size:28px} .t256{background:#edcc61;color:#f9f6f2;font-size:28px} .t512{background:#edc850;color:#f9f6f2;font-size:28px} .t1024{background:#edc53f;color:#f9f6f2;font-size:24px} .t2048{background:#edc22e;color:#f9f6f2;font-size:24px} .t4096{background:#3c3a32;color:#f9f6f2} .t131072{background:#000;color:#00f2ff;text-shadow:0 0 8px #00f2ff;}
-        .t1{background:#ff4b2b; color:white; text-shadow: 0 0 5px red;}
+        /* THE TILE COLORS */
+        .t2{background:#eee4da;color:#776e65} .t4{background:#ede0c8;color:#776e65} .t8{background:#f2b179;color:#f9f6f2} .t16{background:#f59563;color:#f9f6f2} .t32{background:#f67c5f;color:#f9f6f2} .t64{background:#f65e3b;color:#f9f6f2} .t128{background:#edcf72;color:#f9f6f2;font-size:28px} .t256{background:#edcc61;color:#f9f6f2;font-size:28px} .t512{background:#edc850;color:#f9f6f2;font-size:28px} .t1024{background:#edc53f;color:#f9f6f2;font-size:24px} .t2048{background:#edc22e;color:#f9f6f2;font-size:24px} .t4096{background:#3c3a32;color:#f9f6f2} .t8192{background:#3c3a32;color:#f9f6f2} .t16384{background:#3c3a32;color:#f9f6f2} .t32768{background:#3c3a32;color:#f9f6f2} .t65536{background:#3c3a32;color:#f9f6f2} .t131072{background:#000;color:#00f2ff;text-shadow:0 0 8px #00f2ff;}
 
         .bp-score-large { font-size:70px; font-weight:bold; color:white; margin-top:10px; letter-spacing:-2px; }
         .bp-grid-wrapper { background:var(--bp-board); padding:8px; border-radius:4px; box-shadow:0 10px 20px rgba(0,0,0,0.3); touch-action:none; }
@@ -57,12 +57,7 @@
         .dragging { position:fixed; z-index:1000; pointer-events:none; }
         
         .overlay { position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(250,248,239,0.95); z-index:100; display:none; flex-direction:column; align-items:center; justify-content:center; text-align: center; padding: 20px; }
-        .tutorial-box { background:#5a524b; color:white; padding:15px; border-radius:8px; width:340px; margin-top:15px; font-size:14px; position:relative; }
-        .particle { position:fixed; width:8px; height:8px; pointer-events:none; z-index:2000; border-radius:50%; }
         #toast { position:fixed; top:-100px; left:50%; transform:translateX(-50%); background:#333; color:white; padding:12px 24px; border-radius:30px; transition:0.4s; z-index:9999; font-weight:bold; }
-        .achievement-badge { background:#edc22e; color:white; padding:6px 12px; border-radius:20px; font-weight:bold; font-size:12px; box-shadow:0 2px 5px rgba(0,0,0,0.2); }
-
-        /* Global Announcement */
         #global-announcement { position: fixed; top: 0; left: 0; width: 100%; background: #ffcc00; color: #333; padding: 8px; font-weight: bold; text-align: center; z-index: 5000; display: none; font-size: 14px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
     </style>
 </head>
@@ -71,36 +66,34 @@
     <div id="global-announcement"></div>
 
     <div style="position:fixed; top:40px; right:10px; z-index:2000; display:flex; flex-direction:column; gap:5px;">
-        <button id="owner-login-btn" class="btn" style="font-size:10px; padding:5px 10px; opacity:0.6;" onclick="owner.promptLogin()">Login as Owner</button>
-        <button id="admin-login-btn" class="btn" style="font-size:10px; padding:5px 10px; opacity:0.6; background:#444;" onclick="adminS.promptLogin()">Login as Admin</button>
+        <button id="owner-login-btn" class="btn" style="width:115px; font-size:10px; padding:6px; opacity:0.6;" onclick="owner.promptLogin()">Login as Owner</button>
+        <button id="admin-login-btn" class="btn" style="width:115px; font-size:10px; padding:6px; opacity:0.6; background:#444;" onclick="adminS.promptLogin()">Login as Admin</button>
     </div>
 
     <div id="stop-overlay" class="overlay" style="z-index: 10000; background: #faf8ef;">
         <h1 style="font-size: 50px;">🛑</h1>
-        <h2 style="color:#776e65;">e2048 was stopped by the owner, please wait until e2048 starts again.</h2>
+        <h2 style="color:#776e65;">e2048 is under Maintenance</h2>
         <p id="stop-timer-display" style="font-weight: bold; color: #d33;"></p>
-        <button class="btn" onclick="document.getElementById('stop-overlay').style.display='none'">I understand</button>
     </div>
 
     <div id="view-auth" class="view active-view" style="justify-content:center;">
-        <h1 style="font-size:80px; margin:0 0 40px 0;">e2048</h1>
+        <h1 style="font-size:80px; margin:0 0 40px 0; color:#776e65;">e2048</h1>
         <div style="background:rgba(0,0,0,0.05); padding:30px; border-radius:12px; display:flex; flex-direction:column; align-items:center;">
             <input type="text" id="reg-u" placeholder="Username" class="input-field" autocomplete="off">
             <input type="password" id="reg-p" placeholder="Password" class="input-field">
-            <div style="display:flex; flex-direction:column; width:100%;">
-                <button class="btn" onclick="auth.login()">Login</button>
-                <button class="btn" style="background:#71b965" onclick="auth.register()">Create Account</button>
-            </div>
-            <button class="btn" style="background:transparent; color:#776e65; box-shadow:none; margin-top:10px;" onclick="auth.guest()">Play as Guest</button>
+            <button class="btn" onclick="fbAuth.login()">Login</button>
+            <button class="btn" style="background:#71b965" onclick="fbAuth.register()">Create Account</button>
+            <button class="btn" style="background:transparent; color:#776e65; box-shadow:none; margin-top:10px;" onclick="fbAuth.guest()">Play as Guest</button>
         </div>
     </div>
 
     <div id="view-home" class="view">
-        <h2 id="welcome-msg" style="font-size:32px; margin-bottom:40px;">Welcome back</h2>
+        <h1 style="font-size:40px; margin-bottom:10px;">e2048</h1>
+        <h2 id="welcome-msg" style="font-size:32px; margin-bottom:40px;">Welcome</h2>
 
         <div id="admin-panel" style="display:none; background:white; padding:15px; border-radius:8px; width:280px; box-shadow:0 4px 6px rgba(0,0,0,0.1); flex-direction:column; gap:10px; margin-bottom: 20px; border:2px solid #444;">
             <p style="margin:0; font-weight:bold; color:#444; font-size:14px;">ADMIN: Announcement</p>
-            <input type="text" id="admin-announce-input" placeholder="Type message..." class="input-field" style="width:100%; margin:0; padding:10px;">
+            <input type="text" id="admin-announce-input" placeholder="Broadcast to all..." class="input-field" style="width:100%; margin:0; padding:10px;">
             <div style="display:flex; gap:5px;">
                 <button class="btn" style="width:100%; padding:8px; font-size:12px;" onclick="adminS.update()">Send</button>
                 <button class="btn" style="width:100%; padding:8px; font-size:12px; background:#777;" onclick="adminS.clear()">Clear</button>
@@ -108,55 +101,49 @@
         </div>
 
         <button id="owner-panel-btn" class="btn" style="display:none; width:260px; background:#ffcc00; color:black;" onclick="sys.nav('view-owner')">Owner Control Panel</button>
-        <button class="btn" style="width:260px;" onclick="sys.nav('view-modes')">2048 Standard</button>
+        <button class="btn" style="width:260px;" onclick="sys.nav('view-modes')">Select Game Mode</button>
         <button class="btn" style="width:260px; background:#674332" onclick="sys.nav('view-bp')">Block Puzzle</button>
-        <button class="btn" style="width:260px; background:#555" onclick="sys.nav('view-stats')">Player Profile</button>
-        <button class="btn" style="width:260px; background:#d33; margin-top:40px;" onclick="auth.logout()">Logout</button>
+        <button class="btn" style="width:260px; background:#d33; margin-top:40px;" onclick="fbAuth.logout()">Logout</button>
     </div>
 
     <div id="view-owner" class="view">
         <h1>Owner Settings</h1>
         <div style="background:white; padding:15px; border-radius:8px; width:340px; box-shadow:0 4px 6px rgba(0,0,0,0.1); display:flex; flex-direction:column; gap:10px; margin-bottom: 50px;">
-            <div style="border: 1px solid #ddd; padding: 10px; border-radius: 5px;">
-                <p style="margin:0 0 5px 0; font-weight:bold;">1. Stop System</p>
-                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:5px;">
-                    <input type="number" id="stop-val" placeholder="Qty" style="width:100%; padding:5px;">
-                    <select id="stop-unit" style="width:100%; padding:5px;">
-                        <option value="1000">Seconds</option>
-                        <option value="60000">Minutes</option>
-                        <option value="3600000">Hours</option>
-                        <option value="86400000">Days</option>
-                    </select>
-                </div>
-                <button id="owner-stop-btn" class="btn" style="width:100%; margin: 10px 0 0 0;" onclick="owner.toggleSystem()">Stop System</button>
+            <p style="margin:0; font-weight:bold;">1. Maintenance Switch</p>
+            <button id="maint-btn" class="btn" style="width:100%;" onclick="owner.toggleMaint()">ENABLE MAINTENANCE</button>
+            <hr>
+            <p style="margin:0; font-weight:bold;">2. Stop Timer</p>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:5px;">
+                <input type="number" id="stop-val" placeholder="Qty" style="width:100%; padding:5px;">
+                <select id="stop-unit" style="width:100%; padding:5px;"><option value="60000">Mins</option><option value="3600000">Hrs</option></select>
             </div>
-
-            <button class="btn" style="background:#8f7a66" onclick="owner.cycleDifficulty()">Difficulty: <span id="owner-diff-text">Normal</span></button>
-            
-            <p style="margin:0; font-weight:bold; font-size:14px;">2. Mode Locks:</p>
-            <div id="owner-lock-controls" style="display:grid; grid-template-columns:1fr 1fr; gap:5px;"></div>
+            <button id="owner-stop-btn" class="btn" style="width:100%; margin-top:10px;" onclick="owner.toggleSystem()">Set System Stop</button>
+            <button class="btn" style="background:#8f7a66; width:100%;" onclick="owner.cycleDifficulty()">Difficulty: <span id="owner-diff-text">Normal</span></button>
         </div>
         <button class="btn" style="background:#555" onclick="sys.nav('view-home')">Back</button>
     </div>
 
     <div id="view-modes" class="view">
-        <div class="top-header"><button class="btn" style="padding:5px 15px; width:80px;" onclick="sys.nav('view-home')">Back</button><h1 style="font-size:24px; margin:0;">Modes</h1><div style="width:50px;"></div></div>
+        <div class="top-header"><button class="btn" style="padding:5px 15px; width:80px;" onclick="sys.nav('view-home')">Back</button><h1 style="font-size:24px; margin:0;">e2048</h1><div style="width:50px;"></div></div>
         <div id="modes-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:10px; padding:20px;">
-            <button class="btn mode-btn" data-mode="1024" onclick="game2048.init(1024)">1024</button>
-            <button class="btn mode-btn" data-mode="2048" onclick="game2048.init(2048)">2048</button>
-            <button class="btn mode-btn" data-mode="4096" onclick="game2048.init(4096)">4096</button>
-            <button class="btn mode-btn" data-mode="131072" onclick="game2048.init(131072)">131072</button>
+            <button class="btn mode-btn" onclick="game2048.init(1024)">1024</button>
+            <button class="btn mode-btn" onclick="game2048.init(2048)">2048</button>
+            <button class="btn mode-btn" onclick="game2048.init(4096)">4096</button>
+            <button class="btn mode-btn" onclick="game2048.init(8192)">8192</button>
+            <button class="btn mode-btn" onclick="game2048.init(16384)">16384</button>
+            <button class="btn mode-btn" onclick="game2048.init(32768)">32768</button>
+            <button class="btn mode-btn" onclick="game2048.init(65536)">65536</button>
+            <button class="btn mode-btn" onclick="game2048.init(131072)" style="background:#000; color:#00f2ff;">131072</button>
         </div>
-        <button class="btn mode-btn" data-mode="Blitz" style="width:320px; background:#f65e3b;" onclick="game2048.init(Infinity, 60)">1 Min Blitz</button>
-        <button class="btn mode-btn" data-mode="Endless" style="width:320px; background:#333;" onclick="game2048.init(Infinity)">Endless</button>
+        <button class="btn mode-btn" style="width:320px; background:#f65e3b;" onclick="game2048.init(Infinity, 60)">1 Min Blitz</button>
+        <button class="btn mode-btn" style="width:320px; background:#333;" onclick="game2048.init(Infinity)">Endless</button>
     </div>
 
     <div id="view-2048" class="view">
         <div class="top-header">
-            <h1 class="title-2048" id="display-target">2048</h1>
+            <h1 id="display-target">2048</h1>
             <div class="score-container">
                 <div class="score-box"><span class="score-label">SCORE</span><span class="score-val" id="score-2048">0</span></div>
-                <div class="score-box"><span class="score-label">BEST</span><span class="score-val" id="best-2048">0</span></div>
             </div>
         </div>
         <div class="score-row" id="timer-row" style="display:none; margin-bottom:10px; width:340px;">
@@ -171,9 +158,9 @@
             </div>
             <div class="tile-layer" id="tile-layer"></div>
             <div class="overlay" id="over-2048">
-                <h2 id="over-msg" style="color:#776e65; font-size:36px; margin-bottom:20px;">Game Over!</h2>
-                <button class="btn" onclick="game2048.init(game2048.target, game2048.initTime)">Try Again</button>
-                <button class="btn" style="background:#555" onclick="sys.nav('view-modes')">Menu</button>
+                <h2 style="color:#776e65; font-size:36px; margin-bottom:20px;">Over!</h2>
+                <button class="btn" onclick="game2048.init(game2048.target, game2048.initTime)">Retry</button>
+                <button class="btn" style="background:#555" onclick="sys.nav('view-modes')">Back</button>
             </div>
         </div>
         <div style="display:flex; gap:15px; margin-top:20px;">
@@ -187,24 +174,6 @@
         <div class="bp-score-large" id="score-bp">0</div>
         <div class="bp-grid-wrapper"><div class="bp-grid" id="bp-grid"></div></div>
         <div class="tray" id="tray"></div>
-        <div class="overlay" id="over-bp" style="background:rgba(103, 67, 50, 0.9);">
-            <h2 style="color:white; font-size:36px; margin-bottom:20px;">Out of Moves</h2>
-            <button class="btn" style="background:#71b965" onclick="gameBP.init()">Retry</button>
-            <button class="btn" style="background:#555" onclick="sys.nav('view-home')">Menu</button>
-        </div>
-    </div>
-
-    <div id="view-stats" class="view">
-        <h1 style="margin-bottom:20px;">Player Profile</h1>
-        <div style="background:white; padding:20px; border-radius:8px; width:320px; font-size:18px; line-height:1.8; margin-bottom:20px; box-shadow:0 4px 6px rgba(0,0,0,0.05);">
-            <b>Highest Tile:</b> <span id="stat-tile">0</span><br><b>Total Merges:</b> <span id="stat-merges">0</span><br><b>All-time Pts:</b> <span id="stat-points">0</span>
-        </div>
-        <h2 style="color:#776e65; margin-bottom:10px;">Achievements</h2>
-        <div id="achievements-list" style="display:flex; flex-wrap:wrap; gap:10px; width:320px; justify-content:center; min-height:50px;"></div>
-        <div style="display:flex; gap:10px; margin-top:30px;">
-            <button class="btn" style="background:#555" id="btn-sound" onclick="sys.toggleSound()">Sound: ON</button>
-            <button class="btn" style="background:#ef4444" onclick="sys.nav('view-home')">Back</button>
-        </div>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -212,7 +181,6 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
     <script>
-        /* --- FIREBASE --- */
         const firebaseConfig = {
             apiKey: "AIzaSyCBFxvZXyI4-vZx5F_wsfwoDjx0Z1j9CgE",
             authDomain: "e2048-f9e5e.firebaseapp.com",
@@ -226,101 +194,6 @@
         const database = firebase.database();
         const fbAuth = firebase.auth();
 
-        /* --- ADMIN SYSTEM --- */
-        const adminS = {
-            isAdmin: false,
-            promptLogin() {
-                if (prompt("Admin Password:") === "crazyadmin99") {
-                    this.isAdmin = true;
-                    document.getElementById('admin-panel').style.display = 'flex';
-                    document.getElementById('admin-login-btn').style.display = 'none';
-                    sys.toast("Admin Logged In");
-                }
-            },
-            update() { database.ref('announcement').set(document.getElementById('admin-announce-input').value); sys.toast("Broadcast Sent"); },
-            clear() { database.ref('announcement').set(""); }
-        };
-
-        const owner = {
-            isAdmin: false,
-            settings: { stopUntil: 0, difficulty: 2, lockedModes: [] },
-            init() {
-                database.ref('ownerSettings').on('value', (snap) => {
-                    const data = snap.val();
-                    if (data) { this.settings = data; this.applyToAll(); if (this.isAdmin) this.renderControls(); }
-                });
-                setInterval(() => this.applyToAll(), 1000);
-            },
-            promptLogin() {
-                if (prompt("Owner Password:") === "luan2022") {
-                    this.isAdmin = true;
-                    document.getElementById('owner-panel-btn').style.display = 'block';
-                    document.getElementById('owner-login-btn').style.display = 'none';
-                    sys.toast("Owner Access Granted");
-                    this.renderControls();
-                }
-            },
-            toggleSystem() {
-                if (Date.now() < this.settings.stopUntil) this.settings.stopUntil = 0;
-                else {
-                    const qty = parseFloat(document.getElementById('stop-val').value) || 0;
-                    const unit = parseFloat(document.getElementById('stop-unit').value);
-                    this.settings.stopUntil = Date.now() + (qty * unit);
-                }
-                this.save();
-            },
-            cycleDifficulty() { this.settings.difficulty = (this.settings.difficulty % 4) + 1; this.save(); },
-            save() { database.ref('ownerSettings').set(this.settings); },
-            applyToAll() {
-                const stopped = Date.now() < this.settings.stopUntil;
-                document.getElementById('stop-overlay').style.display = (stopped && !this.isAdmin) ? 'flex' : 'none';
-                if (stopped) {
-                    const rem = Math.max(0, this.settings.stopUntil - Date.now());
-                    document.getElementById('stop-timer-display').innerText = `Stopping for: ${Math.floor(rem/1000)}s`;
-                }
-            },
-            renderControls() {
-                document.getElementById('owner-diff-text').innerText = ["", "Easy", "Normal", "Hard", "Chaos"][this.settings.difficulty];
-                const container = document.getElementById('owner-lock-controls'); container.innerHTML = '';
-                ["1024", "2048", "4096", "131072", "Blitz", "Endless"].forEach(m => {
-                    const b = document.createElement('button'); b.className = 'btn'; b.style.fontSize = '10px'; b.style.padding = '5px';
-                    const isLocked = (this.settings.lockedModes || []).includes(m);
-                    b.innerText = (isLocked ? "Unlock " : "Lock ") + m;
-                    b.onclick = () => {
-                        if (!this.settings.lockedModes) this.settings.lockedModes = [];
-                        if (isLocked) this.settings.lockedModes = this.settings.lockedModes.filter(x => x !== m);
-                        else this.settings.lockedModes.push(m);
-                        this.save();
-                    };
-                    container.appendChild(b);
-                });
-            }
-        };
-
-        database.ref('announcement').on('value', snap => {
-            const m = snap.val(); const el = document.getElementById('global-announcement');
-            if (m) { el.innerText = "📢 " + m; el.style.display = 'block'; } else { el.style.display = 'none'; }
-        });
-
-        /* --- SOUND & PARTICLES (INTACT) --- */
-        const sfx = {
-            ctx: null,
-            play(freq, type, dur, vol) {
-                if (!sys.soundOn) return;
-                try {
-                    if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)();
-                    if (this.ctx.state === 'suspended') this.ctx.resume();
-                    const osc = this.ctx.createOscillator(), gain = this.ctx.createGain();
-                    osc.type = type; osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
-                    gain.gain.setValueAtTime(vol, this.ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + dur);
-                    osc.connect(gain); gain.connect(this.ctx.destination); osc.start(); osc.stop(this.ctx.currentTime + dur);
-                } catch(e) {}
-            },
-            slide() { this.play(150, 'sine', 0.1, 0.05); }, merge() { this.play(400, 'sine', 0.15, 0.1); }, highMerge() { this.play(800, 'triangle', 0.3, 0.1); },
-            wood() { this.play(200, 'square', 0.05, 0.05); }, blast() { this.play(100, 'sawtooth', 0.3, 0.15); }, achieve() { this.play(600, 'sine', 0.1, 0.1); setTimeout(()=>this.play(800, 'sine', 0.3, 0.1), 100); }
-        };
-
-        /* --- AUTH --- */
         const auth = {
             login() { fbAuth.signInWithEmailAndPassword(document.getElementById('reg-u').value + "@e2048.com", document.getElementById('reg-p').value).catch(e => alert(e.message)); },
             register() { fbAuth.createUserWithEmailAndPassword(document.getElementById('reg-u').value + "@e2048.com", document.getElementById('reg-p').value).catch(e => alert(e.message)); },
@@ -328,21 +201,51 @@
             logout() { fbAuth.signOut().then(() => location.reload()); }
         };
 
-        fbAuth.onAuthStateChanged(user => { if(user) { sys.user = user.uid; document.getElementById('welcome-msg').innerText = "Hi, Player"; sys.nav('view-home'); } else { sys.nav('view-auth'); }});
+        const adminS = {
+            promptLogin() { if (prompt("Admin Password:") === "crazyadmin99") { document.getElementById('admin-panel').style.display = 'flex'; sys.toast("Admin Logged In"); }},
+            update() { database.ref('globalSettings/announcement').set(document.getElementById('admin-announce-input').value); },
+            clear() { database.ref('globalSettings/announcement').set(""); }
+        };
 
-        /* --- CORE SYSTEM --- */
-        const sys = {
-            user: null, soundOn: true, db: { users: {} },
-            init() { owner.init(); this.bindEvents(); },
-            nav(id) {
-                document.querySelectorAll('.view').forEach(v => v.classList.remove('active-view'));
-                document.getElementById(id).classList.add('active-view');
-                document.body.style.background = id === 'view-bp' ? 'var(--bp-bg)' : 'var(--bg-2048)';
-                if (id === 'view-bp') gameBP.init();
+        const owner = {
+            isOwner: false, settings: { maint: false, stopUntil: 0, announcement: "", difficulty: 2 },
+            init() {
+                database.ref('globalSettings').on('value', snap => {
+                    const data = snap.val(); if (data) { this.settings = data; this.apply(); }
+                });
+                setInterval(() => this.apply(), 1000);
             },
+            promptLogin() { if (prompt("Owner Password:") === "luan2022") { this.isOwner = true; document.getElementById('owner-panel-btn').style.display = 'block'; this.render(); }},
+            toggleMaint() { this.settings.maint = !this.settings.maint; this.save(); },
+            toggleSystem() {
+                const val = parseFloat(document.getElementById('stop-val').value) || 0;
+                const unit = parseFloat(document.getElementById('stop-unit').value);
+                this.settings.stopUntil = Date.now() + (val * unit); this.save();
+            },
+            cycleDifficulty() { this.settings.difficulty = (this.settings.difficulty % 4) + 1; this.save(); },
+            save() { database.ref('globalSettings').set(this.settings); },
+            apply() {
+                const stopped = (this.settings.maint || Date.now() < this.settings.stopUntil);
+                document.getElementById('stop-overlay').style.display = (stopped && !this.isOwner) ? 'flex' : 'none';
+                if (Date.now() < this.settings.stopUntil) document.getElementById('stop-timer-display').innerText = `Stopping: ${Math.floor((this.settings.stopUntil - Date.now())/1000)}s left`;
+                
+                const ann = document.getElementById('global-announcement');
+                if (this.settings.announcement) { ann.innerText = "📢 " + this.settings.announcement; ann.style.display = 'block'; }
+                else { ann.style.display = 'none'; }
+                if (this.isOwner) this.render();
+            },
+            render() {
+                const mBtn = document.getElementById('maint-btn');
+                mBtn.innerText = this.settings.maint ? "DISABLE MAINTENANCE" : "ENABLE MAINTENANCE";
+                mBtn.style.background = this.settings.maint ? "#d33" : "#8f7a66";
+                document.getElementById('owner-diff-text').innerText = ["", "Easy", "Normal", "Hard", "Chaos"][this.settings.difficulty];
+            }
+        };
+
+        const sys = {
+            init() { owner.init(); fbAuth.onAuthStateChanged(u => { if(u) this.nav('view-home'); else this.nav('view-auth'); }); this.bindEvents(); },
+            nav(id) { document.querySelectorAll('.view').forEach(v => v.classList.remove('active-view')); document.getElementById(id).classList.add('active-view'); if(id==='view-bp') gameBP.init(); },
             toast(m) { const t = document.getElementById('toast'); t.innerText = m; t.style.top = "20px"; setTimeout(() => t.style.top = "-100px", 2500); },
-            toggleSound() { this.soundOn = !this.soundOn; document.getElementById('btn-sound').innerText = `Sound: ${this.soundOn ? 'ON' : 'OFF'}`; },
-            updateStats(val, score) { /* Stats integration */ },
             bindEvents() {
                 window.addEventListener('keydown', e => { if(e.key.includes('Arrow')) game2048.move(e.key[5][0]); });
                 let tx, ty; const b = document.getElementById('board-2048');
@@ -354,29 +257,28 @@
             }
         };
 
-        /* --- 2048 ENGINE (INTACT) --- */
         const game2048 = {
             grid: [], score: 0, target: 2048, idCounter: 0, history: [], timer: null, timeLeft: 0, isTimer: false,
             init(t, sec = 0) {
-                const isLocked = (owner.settings.lockedModes || []).includes(sec > 0 ? "Blitz" : t.toString());
-                if (isLocked && !owner.isAdmin) return sys.toast("Locked by Owner");
+                if(owner.settings.maint && !owner.isOwner) return sys.toast("Maintenance!");
                 clearInterval(this.timer); this.target = t; this.score = 0; this.grid = Array(16).fill(null);
                 this.isTimer = sec > 0; this.timeLeft = sec; document.getElementById('timer-row').style.display = this.isTimer ? 'flex' : 'none';
                 if(this.isTimer) this.startTimer(); this.spawn(); this.spawn(); this.render(); sys.nav('view-2048');
             },
-            startTimer() { this.timer = setInterval(() => { this.timeLeft--; if(this.timeLeft <= 0) clearInterval(this.timer); }, 1000); },
+            startTimer() { this.timer = setInterval(() => { this.timeLeft--; const m = Math.floor(this.timeLeft / 60), s = this.timeLeft % 60; document.getElementById('timer-val').innerText = `${m}:${s < 10 ? '0' : ''}${s}`; if(this.timeLeft <= 0) { clearInterval(this.timer); game2048.gameOver(); } }, 1000); },
             spawn() {
                 const empty = this.grid.map((v, i) => v === null ? i : null).filter(v => v !== null);
                 if (empty.length) {
                     let val = Math.random() < 0.9 ? 2 : 4;
-                    if(owner.settings.difficulty === 4 && Math.random() < 0.1) val = 131072;
+                    if(owner.settings.difficulty === 4 && Math.random() < 0.08) val = 131072;
                     this.grid[empty[Math.floor(Math.random() * empty.length)]] = { id: this.idCounter++, val: val, isNew: true };
                 }
             },
             render() {
                 const layer = document.getElementById('tile-layer');
                 this.grid.forEach((t, i) => {
-                    if (!t) return; let n = document.querySelector(`.tile[data-id='${t.id}']`);
+                    if (!t) return;
+                    let n = document.querySelector(`.tile[data-id='${t.id}']`);
                     if (!n) { n = document.createElement('div'); n.dataset.id = t.id; layer.appendChild(n); }
                     n.className = `tile t${t.val} ${t.isNew ? 't-new' : ''}`;
                     n.style.transform = `translate(${(i % 4) * 82.5}px, ${Math.floor(i / 4) * 82.5}px)`; n.innerText = t.val;
@@ -390,35 +292,39 @@
                 this.history.push({ grid: JSON.parse(prev), score: this.score }); if(this.history.length > 20) this.history.shift();
                 
                 let moved = false;
-                const getRow = (i, d) => {
-                    let r = []; for(let j=0; j<4; j++) {
-                        let idx = (d==='L') ? i*4+j : (d==='R') ? i*4+(3-j) : (d==='U') ? j*4+i : (3-j)*4+i;
-                        r.push({idx: idx, t: this.grid[idx]});
-                    } return r;
+                const rotate = (grid) => {
+                    let next = Array(16).fill(null);
+                    for(let r=0; r<4; r++) for(let c=0; c<4; c++) next[c * 4 + (3 - r)] = grid[r * 4 + c];
+                    return next;
                 };
+                let tempGrid = [...this.grid];
+                const rotCount = { 'L': 0, 'U': 1, 'R': 2, 'D': 3 }[dir];
+                for(let i=0; i<rotCount; i++) tempGrid = rotate(tempGrid);
 
-                for(let i=0; i<4; i++) {
-                    let row = getRow(i, dir), tiles = row.map(r => r.t).filter(t => t !== null);
-                    for(let j=0; j<tiles.length - 1; j++) {
-                        if(tiles[j].val === tiles[j+1].val) {
-                            tiles[j].val *= 2; this.score += tiles[j].val; tiles.splice(j+1, 1); moved = true; sfx.merge();
+                for(let r=0; r<4; r++) {
+                    let row = []; for(let c=0; c<4; c++) row.push(tempGrid[r * 4 + c]);
+                    let filtered = row.filter(x => x !== null);
+                    for(let i=0; i<filtered.length-1; i++) {
+                        if(filtered[i].val === filtered[i+1].val) {
+                            filtered[i].val *= 2; this.score += filtered[i].val; filtered.splice(i+1, 1); moved = true;
                         }
                     }
-                    while(tiles.length < 4) tiles.push(null);
-                    for(let j=0; j<4; j++) if(this.grid[row[j].idx] !== tiles[j]) { this.grid[row[j].idx] = tiles[j]; moved = true; }
+                    while(filtered.length < 4) filtered.push(null);
+                    for(let c=0; c<4; c++) tempGrid[r * 4 + c] = filtered[c];
                 }
-                if (moved) { this.spawn(); this.render(); sfx.slide(); } else this.history.pop();
-            },
-            usePowerup(type) { if(type==='del') sys.toast("Click a tile to delete!"); }
+                for(let i=0; i<(4-rotCount)%4; i++) tempGrid = rotate(tempGrid);
+                if(JSON.stringify(tempGrid) !== prev) { this.grid = tempGrid; moved = true; }
+
+                if (moved) { this.spawn(); this.render(); } else { this.history.pop(); }
+            }
         };
 
-        /* --- BLOCK PUZZLE ENGINE (INTACT) --- */
         const gameBP = {
             board: Array(64).fill(0), score: 0,
-            shapes: [ {m: [[1,1],[1,1]], c: 'bp-filled-green'}, {m: [[1,1,1,1]], c: 'bp-filled-beige'}, {m: [[1],[1],[1],[1]], c: 'bp-filled-green'}, {m: [[1,1,1],[0,1,0]], c: 'bp-filled-beige'} ],
+            shapes: [ {m: [[1,1],[1,1]], c: 'bp-filled-green'}, {m: [[1,1,1,1]], c: 'bp-filled-beige'}, {m: [[1,1,1],[0,1,0]], c: 'bp-filled-green'} ],
             init() {
                 this.board.fill(0); this.score = 0; document.getElementById('score-bp').innerText = 0;
-                const g = document.getElementById('bp-grid'); g.innerHTML = '';
+                const g = document.getElementById('bp-grid'); g.innerHTML = ''; 
                 for(let i=0; i<64; i++) { const s = document.createElement('div'); s.className = 'bp-slot'; s.id = `bp-c-${i}`; g.appendChild(s); }
                 this.spawn();
             },
@@ -447,7 +353,7 @@
                         }
                         this.score += 10; document.getElementById('score-bp').innerText = this.score; el.style.visibility = 'hidden'; el.dataset.used = 'true';
                         if(Array.from(document.getElementById('tray').children).every(n => n.dataset.used)) this.spawn();
-                        this.checkLines(); sfx.wood();
+                        this.checkLines();
                     }
                     clone.remove(); window.removeEventListener('mousemove', move); window.removeEventListener('mouseup', end);
                 };
@@ -456,10 +362,14 @@
             canPlace(m, r, c) { if(r<0 || c<0 || r+m.length>8 || c+m[0].length>8) return false; for(let i=0; i<m.length; i++) for(let j=0; j<m[0].length; j++) if(m[i][j] && this.board[(r+i)*8+(c+j)]) return false; return true; },
             checkLines() {
                 let rows = [], cols = [];
-                for(let i=0; i<8; i++) { if (this.board.slice(i*8, i*8+8).every(v => v)) rows.push(i); let col = []; for(let j=0; j<8; j++) col.push(this.board[j*8+i]); if (col.every(v => v)) cols.push(i); }
+                for(let i=0; i<8; i++) { 
+                    if (this.board.slice(i*8, i*8+8).every(v => v)) rows.push(i); 
+                    let col = []; for(let j=0; j<8; j++) col.push(this.board[j*8+i]);
+                    if (col.every(v => v)) cols.push(i);
+                }
                 rows.forEach(r => { for(let c=0; c<8; c++) { this.board[r*8+c] = 0; document.getElementById(`bp-c-${r*8+c}`).className = 'bp-slot'; } });
                 cols.forEach(c => { for(let r=0; r<8; r++) { this.board[r*8+c] = 0; document.getElementById(`bp-c-${r*8+c}`).className = 'bp-slot'; } });
-                if(rows.length || cols.length) { this.score += (rows.length + cols.length) * 100; sfx.blast(); }
+                if(rows.length || cols.length) this.score += (rows.length + cols.length) * 100;
             }
         };
 
