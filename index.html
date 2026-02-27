@@ -62,8 +62,25 @@
         #toast { position:fixed; top:-100px; left:50%; transform:translateX(-50%); background:#333; color:white; padding:12px 24px; border-radius:30px; transition:0.4s; z-index:9999; font-weight:bold; }
         .achievement-badge { background:#edc22e; color:white; padding:6px 12px; border-radius:20px; font-weight:bold; font-size:12px; box-shadow:0 2px 5px rgba(0,0,0,0.2); }
 
-        /* Global Announcement */
         #global-announcement { position: fixed; top: 0; left: 0; width: 100%; background: #ffcc00; color: #333; padding: 8px; font-weight: bold; text-align: center; z-index: 5000; display: none; font-size: 14px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+
+        /* --- GLITCH TITLE EFFECT --- */
+        .glitch-title { display: flex; justify-content: center; gap: 2px; font-weight: bold; }
+        .glitch-title span { display: inline-block; animation: glitch-shake 0.2s infinite; }
+        .glitch-title span:nth-child(1) { animation-duration: 0.15s; }
+        .glitch-title span:nth-child(2) { animation-duration: 0.25s; }
+        .glitch-title span:nth-child(3) { animation-duration: 0.18s; }
+        .glitch-title span:nth-child(4) { animation-duration: 0.22s; }
+        .glitch-title span:nth-child(5) { animation-duration: 0.12s; }
+
+        @keyframes glitch-shake {
+            0% { transform: translate(2px, 1px) skewX(-10deg); color: white; text-shadow: 3px 0px #00f2ff, -3px 0px #ff003c; }
+            20% { transform: translate(-2px, -2px) skewX(10deg); color: black; text-shadow: -3px 0px #00f2ff, 3px 0px #ff003c; }
+            40% { transform: translate(2px, -1px) skewX(0deg); color: white; text-shadow: none; }
+            60% { transform: translate(-1px, 2px) skewX(5deg); color: black; text-shadow: 2px 2px #00f2ff, -2px -2px #ff003c; }
+            80% { transform: translate(1px, -2px) skewX(-5deg); color: white; text-shadow: -2px -2px #00f2ff, 2px 2px #ff003c; }
+            100% { transform: translate(-2px, 1px) skewX(0deg); color: black; text-shadow: 3px 0px #00f2ff, -3px 0px #ff003c; }
+        }
     </style>
 </head>
 <body>
@@ -81,7 +98,7 @@
     </div>
 
     <div id="view-auth" class="view active-view" style="justify-content:center;">
-        <h1 style="font-size:80px; margin:0 0 40px 0;">e2048</h1>
+        <div class="glitch-title" style="font-size:80px; margin:0 0 40px 0;"><span>e</span><span>2</span><span>0</span><span>4</span><span>8</span></div>
         <div style="background:rgba(0,0,0,0.05); padding:30px; border-radius:12px; display:flex; flex-direction:column; align-items:center;">
             <input type="text" id="reg-u" placeholder="Username" class="input-field" autocomplete="off">
             <input type="password" id="reg-p" placeholder="Password" class="input-field">
@@ -94,6 +111,7 @@
     </div>
 
     <div id="view-home" class="view">
+        <div class="glitch-title" style="font-size:40px; margin-bottom:10px;"><span>e</span><span>2</span><span>0</span><span>4</span><span>8</span></div>
         <h2 id="welcome-msg" style="font-size:32px; margin-bottom:40px;">Welcome back</h2>
 
         <div id="admin-panel" style="display:none; background:white; padding:15px; border-radius:8px; width:280px; box-shadow:0 4px 6px rgba(0,0,0,0.1); flex-direction:column; gap:10px; margin-bottom: 20px;">
@@ -239,11 +257,10 @@
             firebase.initializeApp(firebaseConfig);
         }
         
-        // FIXED: Firebase Auth object properly initialized
         const fbAuth = firebase.auth();
         const database = firebase.database();
 
-        /* --- ADMIN SYSTEM LOGIC (ADDED) --- */
+        /* --- ADMIN SYSTEM LOGIC --- */
         const adminS = {
             prompt() { 
                 if (prompt("Admin Password:") === "crazyadmin99") { 
@@ -275,7 +292,7 @@
             }
         });
 
-        /* --- OWNER LOGIC (FIXED TO USE FIREBASE) --- */
+        /* --- OWNER LOGIC --- */
         const owner = {
             isAdmin: false,
             settings: { stopUntil: 0, difficulty: 2, lockedModes: [], announcement: "" },
@@ -393,7 +410,7 @@
             }
         };
 
-        /* 2. Authentication Helper (Fixes Buttons) */
+        /* --- AUTHENTICATION --- */
         const auth = {
             login() {
                 const u = document.getElementById('reg-u').value.trim();
@@ -436,7 +453,6 @@
             db: { users: {} }, user: null, soundOn: true,
             init() {
                 owner.init();
-                // Auth Listener
                 fbAuth.onAuthStateChanged(user => {
                     if (user) {
                         this.user = user.uid;
@@ -481,7 +497,6 @@
                 owner.applyToAll();
                 const modeName = sec > 0 ? "Blitz" : (t === Infinity ? "Endless" : t.toString());
                 
-                // FIXED: Mode lock check now actually stops the user
                 if ((owner.settings.lockedModes || []).includes(modeName) && !owner.isAdmin) {
                     return sys.toast("Mode Locked by Owner!");
                 }
@@ -572,7 +587,7 @@
                 const clone = el.cloneNode(true); clone.classList.add('dragging'); clone.style.gridTemplateColumns = `repeat(${matrix[0].length}, 40px)`;
                 Array.from(clone.children).forEach(c => { c.style.width = '40px'; c.style.height = '40px'; }); document.body.appendChild(clone);
                 const getGridPos = (x, y) => { const r = document.getElementById('bp-grid').getBoundingClientRect(); return { c: Math.round((x - r.left - 20) / 42), r: Math.round((y - r.top - 60) / 42) }; };
-                const move = ev => { ev.preventDefault(); const p = ev.touches ? ev.touches[0] : ev; clone.style.left = p.clientX - 20 + 'px'; clone.style.top = p.clientY - 60 + 'px'; document.querySelectorAll('.bp-ghost').forEach(e => e.classList.remove('bp-ghost')); const pos = getGridPos(p.clientX, p.clientY); if(this.canPlace(matrix, pos.r, pos.c)) for(let i=0; i<matrix.length; i++) for(let j=0; j<matrix[0].length; j++) if(matrix[i][j]) document.getElementById(`bp-c-${(pos.r+i)*8+(pos.c+j)}`).classList.add('bp-ghost'); };
+                const move = ev => { ev.preventDefault(); const p = ev.touches ? ev.touches[0] : ev; clone.style.left = p.clientX - 20 + 'px'; clone.style.top = p.clientY - 60 + 'px'; document.querySelectorAll('.bp-ghost').forEach(e => e.classList.remove('bp-ghost')); const pos = getGridPos(p.clientX, p.clientY); if(this.canPlace(matrix, pos.r, pos.c)) for(let i=0; i<matrix.length; i++) for(let j=0; j<matrix[0].length; j++) if(matrix[i][j]) { const target = document.getElementById(`bp-c-${(pos.r+i)*8+(pos.c+j)}`); if(target) target.classList.add('bp-ghost'); } };
                 const end = ev => { const p = ev.changedTouches ? ev.changedTouches[0] : ev; const pos = getGridPos(p.clientX, p.clientY); if(this.canPlace(matrix, pos.r, pos.c)) { for(let i=0; i<matrix.length; i++) for(let j=0; j<matrix[0].length; j++) if(matrix[i][j]) { this.board[(pos.r+i)*8+(pos.c+j)] = 1; document.getElementById(`bp-c-${(pos.r+i)*8+(pos.c+j)}`).className = `bp-slot ${cls}`; } sfx.wood(); this.score += 10; this.checkLines(); el.style.visibility = 'hidden'; el.dataset.used = 'true'; if(Array.from(document.getElementById('tray').children).every(n => n.dataset.used)) this.spawn(); else this.checkMoves(); } clone.remove(); document.querySelectorAll('.bp-ghost').forEach(e => e.classList.remove('bp-ghost')); window.removeEventListener('mousemove', move); window.removeEventListener('mouseup', end); window.removeEventListener('touchmove', move); window.removeEventListener('touchend', end); };
                 window.addEventListener('mousemove', move); window.addEventListener('mouseup', end); window.addEventListener('touchmove', move, {passive: false}); window.addEventListener('touchend', end);
             },
@@ -583,8 +598,7 @@
                 if (rows.length || cols.length) {
                     sfx.blast(); const clears = new Set();
                     rows.forEach(r => { for(let c=0; c<8; c++) clears.add(r*8+c); }); cols.forEach(c => { for(let r=0; r<8; r++) clears.add(r*8+c); });
-                    this.score += (rows.length + cols.length) * 100; 
-                    clears.forEach(idx => { this.board[idx] = 0; const cell = document.getElementById(`bp-c-${idx}`); cell.className = 'bp-slot'; });
+                    this.score += (rows.length + cols.length) * 100; clears.forEach(idx => { this.board[idx] = 0; const cell = document.getElementById(`bp-c-${idx}`); if(cell) cell.className = 'bp-slot'; });
                 }
                 document.getElementById('score-bp').innerText = this.score;
             },
