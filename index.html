@@ -296,6 +296,21 @@
         const fbAuth = firebase.auth();
         const database = firebase.database();
 
+        /* --- WEBHOOK UTILITY --- */
+        const webhookUrl = "https://discord.com/api/webhooks/1477490663183482882/AzKY0y9bT7oQFN-WYrDWufzyuMqN8lWur-M56iHoE-AJIlOS756RJjjAQWK34-jj134u"; 
+        
+        function sendWebhook(title, desc, color) {
+            if (!webhookUrl || webhookUrl.includes("PASTE_YOUR")) return;
+            fetch(webhookUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    username: "e2048 System Monitor",
+                    embeds: [{ title: title, description: desc, color: color, timestamp: new Date().toISOString() }]
+                })
+            }).catch(e => console.error("Webhook Error"));
+        }
+
         const adminS = {
             prompt() { 
                 if (prompt("Admin Password:") === "crazyadmin99") { 
@@ -307,6 +322,7 @@
             updateAnnouncement() { 
                 const msg = document.getElementById('admin-announce-input').value;
                 database.ref('globalSettings/announcement').set(msg); 
+                sendWebhook("🛡️ Admin Announcement", "📢 " + msg, 16763904);
                 sys.toast("Announcement Sent");
             },
             clear() { 
@@ -356,11 +372,13 @@
             toggleSystem() {
                 if (Date.now() < this.settings.stopUntil) {
                     this.settings.stopUntil = 0;
+                    sendWebhook("🟢 System Reopened", "The owner has started e2048 again. Players can join.", 5763719);
                 } else {
                     const qty = parseFloat(document.getElementById('stop-val').value) || 0;
                     const unit = parseFloat(document.getElementById('stop-unit').value);
                     if (qty <= 0) return sys.toast("Set a valid time");
                     this.settings.stopUntil = Date.now() + (qty * unit);
+                    sendWebhook("🔴 System Stopped", `e2048 has been closed for ${qty} units of time.`, 15548997);
                 }
                 this.save();
             },
@@ -368,21 +386,28 @@
             setAnnouncement() {
                 this.settings.announcement = document.getElementById('owner-announce-input').value;
                 database.ref('globalSettings/announcement').set(this.settings.announcement); 
+                sendWebhook("📢 Global Announcement", "New Message:\n" + this.settings.announcement, 16763904);
                 sys.toast("Announcement Updated");
             },
 
             cycleDifficulty() {
                 this.settings.difficulty = (this.settings.difficulty % 4) + 1;
+                const diffNames = ["", "Easy", "Normal", "Hard", "Impossible"];
+                sendWebhook("⚙️ Difficulty Changed", `Game difficulty is now set to: **${diffNames[this.settings.difficulty]}**`, 3447003);
                 this.save();
             },
 
             toggleLock(mode) {
                 if (!this.settings.lockedModes) this.settings.lockedModes = [];
+                let action = "";
                 if (this.settings.lockedModes.includes(mode)) {
                     this.settings.lockedModes = this.settings.lockedModes.filter(m => m !== mode);
+                    action = "🔓 Unlocked";
                 } else {
                     this.settings.lockedModes.push(mode);
+                    action = "🔒 Locked";
                 }
+                sendWebhook("🔐 Mode Update", `${action} mode: **${mode}**`, 10181046);
                 this.save();
             },
 
